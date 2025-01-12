@@ -53,16 +53,18 @@ public class DopplerPropertySource {
             };
             
             String responseBody = httpclient.execute(httpget, responseHandler);
-            
+            System.out.println(responseBody);
             ObjectMapper objectMapper = CommonHelpers.objectMapper;
             JsonNode respNode = objectMapper.readTree(responseBody);
             JsonNode secretsNode = respNode.get("secrets");
             Iterator<Map.Entry<String, JsonNode>> fields = secretsNode.fields();
+            System.out.println("Test Proterties:");
             while (fields.hasNext()) {
                 Map.Entry<String, JsonNode> field = fields.next();
                 String key = field.getKey();
                 JsonNode rawValue = field.getValue().get("raw");
                 propertySource.put(key, rawValue.asText());
+                System.out.println(key+" : "+rawValue.asText());
             }
         }
 		return propertySource;

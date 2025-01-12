@@ -42,9 +42,13 @@ public class TestHooks {
 		
 		ChromeOptions chrome_options = new ChromeOptions();
 		chrome_options.setExperimentalOption("prefs", prefs);
+		chrome_options.addArguments("--no-sandbox");
+		chrome_options.addArguments("--disable-dev-shm-usage");
 		
         EdgeOptions edge_options = new EdgeOptions();
         edge_options.setExperimentalOption("prefs", prefs);
+        edge_options.addArguments("--no-sandbox");
+        edge_options.addArguments("--disable-dev-shm-usage");
 		
 		String browser = Configs.BROWSER;
 		WebDriver driver = switch (browser.toUpperCase()) {

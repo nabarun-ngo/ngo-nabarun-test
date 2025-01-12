@@ -39,7 +39,8 @@ public class TestHooks {
 		scenarioContext.reset();
 		Map<String, Object> prefs = new HashMap<>();
 		prefs.put("profile.default_content_setting_values.notifications", 1); // 1 = Allow, 2 = Block
-		
+		String headless=System.getProperty("headless","N");
+
 		ChromeOptions chrome_options = new ChromeOptions();
 		chrome_options.setExperimentalOption("prefs", prefs);
 		chrome_options.addArguments("--no-sandbox");
@@ -50,6 +51,10 @@ public class TestHooks {
         edge_options.addArguments("--no-sandbox");
         edge_options.addArguments("--disable-dev-shm-usage");
 		
+        if(headless.equals("Y")) {
+            chrome_options.addArguments("--headless");
+            edge_options.addArguments("--headless");
+        }
 		String browser = Configs.BROWSER;
 		WebDriver driver = switch (browser.toUpperCase()) {
 		case "CHROME" -> new ChromeDriver(chrome_options);

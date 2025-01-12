@@ -18,7 +18,7 @@ on:
        description: 'Test Cycle'
        required: true
        type: string
-       default: 'NAB-TR-3' 
+       default: 'NAB-TR-2' 
 
 jobs:
   run_automated_test:

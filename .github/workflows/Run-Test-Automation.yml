@@ -7,8 +7,8 @@ on:
        description: 'Env'
        type: choice
        options:
-         - STAGE
-         - PROD
+         - stage
+         - prod
      cucumber_tags:
        description: 'Cucumber Tags'
        required: true

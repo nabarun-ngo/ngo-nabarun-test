@@ -6,7 +6,7 @@ Feature: Donation
     And I click and hold on "More" button
     And I click on "Login" button
     Then I switch to the new tab
-    And I login with "CASHIER" role using Password option
+    And I login with "cashier@nabarun.com" user using Password option
     Then I must be landed to "WELCOME TO NABARUN'S SECURED DASHBOARD" screen
     When I click on "Donations" button
     And I wait for loading to complete

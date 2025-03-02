@@ -19,10 +19,10 @@ import ngo.nabarun.test.ngo_nabarun_test.models.User;
 
 public class TestDataHelper {
 
-	public List<User> getUsersByRole(String loginIdType) {
+	public List<User> getUsersByRole(String role) {
 		String rootUrl=Configs.ROOT_URL;
 		String apiKey=Configs.TEST_APIKEY;
-		String requestUrl=rootUrl+"/api/user/list?roles=CASHIER&userByRole=true";
+		String requestUrl=rootUrl+"/api/user/list?roles="+role+"&userByRole=true";
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 		HttpGet request = new HttpGet(requestUrl);
 		request.addHeader("X-Api-Key", apiKey);
@@ -31,7 +31,7 @@ public class TestDataHelper {
 			HttpEntity entity = response.getEntity();
 			if (entity != null) {
 				String result = EntityUtils.toString(entity);
-				//System.out.println(result);
+				System.out.println(result);
 				ObjectMapper mapper = CommonHelpers.objectMapper;
 				ApiResponse<Pagination<User>> apiResponse = mapper.readValue(result, new TypeReference<ApiResponse<Pagination<User>>>() {
 				});

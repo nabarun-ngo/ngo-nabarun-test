@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
 
 public class ConfigManager {
 	private static Map<String, Object> config;
@@ -20,13 +19,19 @@ public class ConfigManager {
 	static {
 		String config_source = System.getProperty(CONFIG_SOURCE);
 		String config_env = System.getProperty(ENVIRONMENT,"stage");
-		Assertions.assertNotNull(config_env, "ENVIRONMENT must be set as argument");
+		if(config_env == null) {
+			throw new RuntimeException("ENVIRONMENT must be set as argument");
+		}
 
 		if (config_source != null && config_source.equalsIgnoreCase("doppler")) {
 			String projectName=System.getenv(DOPPLER_PROJECT_NAME) == null ? System.getProperty(DOPPLER_PROJECT_NAME) : System.getenv(DOPPLER_PROJECT_NAME);
 			String token=System.getenv(DOPPLER_SERVICE_TOKEN) == null ? System.getProperty(DOPPLER_SERVICE_TOKEN) : System.getenv(DOPPLER_SERVICE_TOKEN);
-			Assertions.assertNotNull(projectName, "DOPPLER_PROJECT_NAME must be set as argument");
-			Assertions.assertNotNull(token, "DOPPLER_SERVICE_TOKEN must be set as argument");
+			if(projectName == null) {
+				throw new RuntimeException("DOPPLER_PROJECT_NAME must be set as argument");
+			}
+			if(token == null) {
+				throw new RuntimeException("DOPPLER_SERVICE_TOKEN must be set as argument");
+			}
 			try {
 				DopplerPropertySource source= new  DopplerPropertySource(projectName, config_env, token);
 				config=source.loadProperties();

@@ -69,8 +69,8 @@ public class CommonPage {
 		String email;
 		String password = Configs.TEST_DEFAULTPASSWORD;
 		if (loginIdType.equalsIgnoreCase("role")) {
-			List<User> users=dataHelper.getUsersByRole(loginIdType);
-			email = users.stream().findFirst().orElseThrow().getEmail();
+			List<User> users=dataHelper.getUsersByRole(loginId);
+			email = users.stream().findFirst().orElseThrow(()-> new RuntimeException("Unable to find users with role "+loginId)).getEmail();
 		} else {
 			email = loginId;
 		}

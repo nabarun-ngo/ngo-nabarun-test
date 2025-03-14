@@ -5,7 +5,7 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-public class Pagination<T> {
+public class ApiPagination<T> {
     private int pageIndex;
     private Integer pageSize;
     private int totalSize;

@@ -18,7 +18,7 @@ public class ConfigManager {
 
 	static {
 		String config_source = System.getProperty(CONFIG_SOURCE);
-		String config_env = System.getProperty(ENVIRONMENT,"stage");
+		String config_env = System.getProperty(ENVIRONMENT,"dev");
 		if(config_env == null) {
 			throw new RuntimeException("ENVIRONMENT must be set as argument");
 		}

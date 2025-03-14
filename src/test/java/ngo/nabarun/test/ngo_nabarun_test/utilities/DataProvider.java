@@ -1,4 +1,4 @@
-package ngo.nabarun.test.ngo_nabarun_test.helpers;
+package ngo.nabarun.test.ngo_nabarun_test.utilities;
 
 import java.io.IOException;
 import java.util.List;
@@ -13,11 +13,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ngo.nabarun.test.ngo_nabarun_test.config.Configs;
+import ngo.nabarun.test.ngo_nabarun_test.helpers.CommonHelpers;
 import ngo.nabarun.test.ngo_nabarun_test.models.ApiResponse;
-import ngo.nabarun.test.ngo_nabarun_test.models.Pagination;
+import ngo.nabarun.test.ngo_nabarun_test.models.ApiPagination;
 import ngo.nabarun.test.ngo_nabarun_test.models.User;
 
-public class TestDataHelper {
+public class DataProvider {
 
 	public List<User> getUsersByRole(String role) {
 		String rootUrl=Configs.ROOT_URL;
@@ -33,7 +34,7 @@ public class TestDataHelper {
 				String result = EntityUtils.toString(entity);
 				System.out.println(result);
 				ObjectMapper mapper = CommonHelpers.objectMapper;
-				ApiResponse<Pagination<User>> apiResponse = mapper.readValue(result, new TypeReference<ApiResponse<Pagination<User>>>() {
+				ApiResponse<ApiPagination<User>> apiResponse = mapper.readValue(result, new TypeReference<ApiResponse<ApiPagination<User>>>() {
 				});
 
 				//System.out.println(apiResponse);

@@ -1,4 +1,4 @@
-package ngo.nabarun.test.ngo_nabarun_test.step_definations;
+package ngo.nabarun.test.ngo_nabarun_test.hooks;
 
 import java.time.Duration;
 import java.util.HashMap;

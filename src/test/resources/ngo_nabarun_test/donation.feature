@@ -37,6 +37,7 @@ Feature: Donation
     Then I search the created donation
     And I wait for loading to complete
     Then I opened the accordion at index 1
+    And I wait for loading to complete
     # Updating Amount 
     Then I click on "Update" button at "Donation" page
     And I wait for loading to complete
@@ -110,6 +111,7 @@ Feature: Donation
     Then I search the created donation
     And I wait for loading to complete
     Then I opened the accordion at index 1
+    And I wait for loading to complete
     # Updating Amount 
     Then I click on "Update" button at "Donation" page
     And I wait for loading to complete

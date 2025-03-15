@@ -1,5 +1,8 @@
 package ngo.nabarun.test.ngo_nabarun_test.hooks;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -82,12 +85,12 @@ public class TestHooks {
 	}
 
 	@After
-	public void afterScenario(Scenario scenario) throws InterruptedException {
+	public void afterScenario(Scenario scenario) throws InterruptedException, IOException {
 		if(scenario.isFailed()) {
 			byte[] screenshot = ((TakesScreenshot) scenarioContext.getDriver()).getScreenshotAs(OutputType.BYTES);
 			scenario.attach(screenshot, "image/png", "error_screenshot");	
-			scenario.attach("logs/test.log", "text/plain", "error_log");	
-
+			byte[] logs=Files.readAllBytes(new File("logs/test.log").toPath());
+			scenario.attach(logs, "text/plain", "error_log");	
 		}
 		scenarioContext.getDriver().quit();
 	}

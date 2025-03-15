@@ -2,6 +2,7 @@ package ngo.nabarun.test.ngo_nabarun_test.step_definations;
 
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+
 import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -16,6 +17,8 @@ import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext.ContextKeys;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.CommonPageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ControlLookup;
+import ngo.nabarun.test.ngo_nabarun_test.utilities.DataProvider;
+import ngo.nabarun.test.ngo_nabarun_test.utilities.DevToolsUtility;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ElementHelper;
 
 public class CommonStepDefinitions {
@@ -25,16 +28,17 @@ public class CommonStepDefinitions {
 	private WebDriver driver;
 	private CommonPageObjects commonPageObjects;
 	private ElementHelper elementHelper;
+	private DataProvider dataProvider;
 	private static SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
-
 	public CommonStepDefinitions(ScenarioContext scenarioContext, ControlLookup controlLookup,
-			CommonPageObjects commonPageObjects, ElementHelper elementHelper) {
+			CommonPageObjects commonPageObjects, ElementHelper elementHelper,DataProvider dataProvider) {
 		this.controlLookup = controlLookup;
 		this.commonPageObjects = commonPageObjects;
 		this.scenarioContext = scenarioContext;
 		this.driver = scenarioContext.getDriver();
 		this.elementHelper = elementHelper;
+		this.dataProvider=dataProvider;
 	}
 
 	@Given("I have opened to Nabarun's web portal")
@@ -60,9 +64,10 @@ public class CommonStepDefinitions {
 	}
 
 	@Then("^I (enter|select|click|upload) \"([^\"]*)\" on \"([^\"]*)\" (textbox|dropdown|radio|datepicker|textarea|fileinput) at \"([^\"]*)\" (page|accordion)$")
-	public void iEnterOnTextboxAtAccordion(String actionName, String value, String elementName, String elementType,
+	public void iEnterOnTextboxAtAccordion(String actionName, String rawValue, String elementName, String elementType,
 			String pageName, String pageType) throws Throwable {
 		WebElement element = controlLookup.getLookupElement(elementName, elementType, pageName, pageType);
+		String value = dataProvider.replacePlaceholders(rawValue);
 		switch (actionName.toUpperCase()) {
 		case "ENTER" -> {
 			element.clear();
@@ -90,6 +95,9 @@ public class CommonStepDefinitions {
 					driver.switchTo().window(handle);
 					scenarioContext.set(ContextKeys.Last_Window_Handle, originalHandle);
 					scenarioContext.set(ContextKeys.Current_Window_Handle, handle);
+			        DevToolsUtility devToolsUtility = new DevToolsUtility(driver);
+			        devToolsUtility.enableNetworkLogging();
+			        devToolsUtility.enableConsoleLogging();
 					break;
 				}
 			}

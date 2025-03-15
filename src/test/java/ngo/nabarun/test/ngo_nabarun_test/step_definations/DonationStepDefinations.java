@@ -61,4 +61,8 @@ public class DonationStepDefinations {
 		donationPageObjects.ADVSearch_DonationId.get().sendKeys(donationId);
 		donationPageObjects.getButtonMapping("Search", null).click();
 	}
+
+	@Then("^I check if transaction is (created|reverted) for this donation$")
+	public void iCheckIfTransactionIsReverted(String type) throws Throwable {
+	}
 }

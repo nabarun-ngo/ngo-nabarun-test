@@ -15,19 +15,20 @@ Feature: Donation
   @Donation @Regression @smoke
   Scenario: Create and Update Guest Donation E2E
   	This scenario is covering creating and updating guest donation without attaching event
-  	Updating status to PAID >> 
+  	Updating status to PAID >> WRONG PAYMENT UPDATE >> RAISED >> CANCELLED
+  	Payment method - UPI
   
     When I click on "Guest Donations" text at "Donation" page
     And I wait for loading to complete
     Then the "Add Guest Donation" button should be displayed at "Donation" page
     Then I click on "Add Guest Donation" button at "Donation" page
     Then I map create donation accordion as "Create_Donation" accordion
-    Then I enter "Souvik" on "Name" textbox at "Create_Donation" accordion
-    Then I enter "Souvik@gmail.com" on "Email address" textbox at "Create_Donation" accordion
-    Then I enter "+91 9123899870" on "Contact number" textbox at "Create_Donation" accordion
+    Then I enter "{RandomName}" on "Name" textbox at "Create_Donation" accordion
+    Then I enter "{RandomEmail}" on "Email address" textbox at "Create_Donation" accordion
+    Then I enter "{RandomNumber:10}" on "Contact number" textbox at "Create_Donation" accordion
     Then I wait for 3 seconds
     Then I select "One Time" on "Donation type" dropdown at "Create_Donation" accordion
-    Then I enter "150" on "Donation amount" textbox at "Create_Donation" accordion
+    Then I enter "{RandomNumber:3}" on "Donation amount" textbox at "Create_Donation" accordion
     Then I click "No" on "Is this donation made for any events?" radio at "Create_Donation" accordion
     Then I click on "Create" button at "Create_Donation" accordion
     And I wait for loading to complete
@@ -39,7 +40,7 @@ Feature: Donation
     # Updating Amount 
     Then I click on "Update" button at "Donation" page
     And I wait for loading to complete
-    Then I enter "200" on "Donation amount" textbox at "Donation" page
+    Then I enter "{RandomNumber:3}" on "Donation amount" textbox at "Donation" page
     Then I click on "Confirm" button at "Donation" page
     And I wait for loading to complete
     # Updating Status to PAID
@@ -47,29 +48,110 @@ Feature: Donation
     And I wait for loading to complete
     Then I select "Paid" on "Donation status" dropdown at "Donation" page
     And I wait for loading to complete
-    Then I select "14/03/2025" on "Donation paid on" datepicker at "Donation" page 
+    Then I select "{SystemDate}" on "Donation paid on" datepicker at "Donation" page 
     Then I select "Cashier TestUser" on "Donation paid to" dropdown at "Donation" page
     Then I select "UPI" on "Payment method" dropdown at "Donation" page
     Then I select "Google Pay" on "UPI name" dropdown at "Donation" page
     Then I enter "Test Test" on "Remarks" textarea at "Donation" page
     Then I upload "file:///C:/Users/Souvik/Downloads/PS_PPBS_75.pdf" on "Upload document(s)" fileinput at "Donation" page
-    Then I wait for 5 seconds
+    Then I wait for 2 seconds
     Then I click on "Confirm" button at "Donation" page
     And I wait for loading to complete
-    
-    
-    
-    
-    
-   
-    
-    
-    
-    
-    
-    
-    
-    
-    Then I wait for 10 seconds
+    Then I check if transaction is created for this donation
+    # Updating Status to Wrong Payment Update
+    Then I click on "Update" button at "Donation" page
+    And I wait for loading to complete
+    Then I select "Wrong Payment Update" on "Donation status" dropdown at "Donation" page
+    Then I click on "Confirm" button at "Donation" page
+    And I wait for loading to complete
+    Then I check if transaction is reverted for this donation
+    # Updating Status to Raised
+    Then I click on "Update" button at "Donation" page
+    And I wait for loading to complete
+    Then I select "Raised" on "Donation status" dropdown at "Donation" page
+    Then I click on "Confirm" button at "Donation" page
+    And I wait for loading to complete
+    # Updating Status to Cancelled
+    Then I click on "Update" button at "Donation" page
+    And I wait for loading to complete
+    Then I select "Cancelled" on "Donation status" dropdown at "Donation" page
+    Then I enter "Test Test" on "Reason for cancel" textarea at "Donation" page
+    Then I click on "Confirm" button at "Donation" page
+    And I wait for loading to complete
+    Then I wait for 2 seconds
     Then I click on "Back to Dashboard" link at "Donation" page
     Then I logout from current session
+    
+    
+   @Donation @Regression 
+  Scenario: Create and Update Guest Donation for Event E2E
+  	This scenario is covering creating and updating guest donation attaching event
+  	Updating status to PAID >> WRONG PAYMENT UPDATE >> RAISED >> CANCELLED
+  	Payment method - Cash
+  
+    When I click on "Guest Donations" text at "Donation" page
+    And I wait for loading to complete
+    Then the "Add Guest Donation" button should be displayed at "Donation" page
+    Then I click on "Add Guest Donation" button at "Donation" page
+    Then I map create donation accordion as "Create_Donation" accordion
+    Then I enter "{RandomName}" on "Name" textbox at "Create_Donation" accordion
+    Then I enter "{RandomEmail}" on "Email address" textbox at "Create_Donation" accordion
+    Then I enter "{RandomNumber:10}" on "Contact number" textbox at "Create_Donation" accordion
+    Then I wait for 3 seconds
+    Then I select "One Time" on "Donation type" dropdown at "Create_Donation" accordion
+    Then I enter "{RandomNumber:3}" on "Donation amount" textbox at "Create_Donation" accordion
+    Then I click "Yes" on "Is this donation made for any events?" radio at "Create_Donation" accordion
+    And I wait for loading to complete
+    Then I select "Test Event" on "Select event" dropdown at "Create_Donation" accordion
+    Then I click on "Create" button at "Create_Donation" accordion
+    And I wait for loading to complete
+    Then I capture and store the donation id
+    Then I wait for 5 seconds
+    Then I search the created donation
+    And I wait for loading to complete
+    Then I opened the accordion at index 1
+    # Updating Amount 
+    Then I click on "Update" button at "Donation" page
+    And I wait for loading to complete
+    Then I enter "{RandomNumber:3}" on "Donation amount" textbox at "Donation" page
+    Then I click on "Confirm" button at "Donation" page
+    And I wait for loading to complete
+    # Updating Status to PAID
+    Then I click on "Update" button at "Donation" page
+    And I wait for loading to complete
+    Then I select "Paid" on "Donation status" dropdown at "Donation" page
+    And I wait for loading to complete
+    Then I select "{SystemDate}" on "Donation paid on" datepicker at "Donation" page 
+    Then I select "Cashier TestUser" on "Donation paid to" dropdown at "Donation" page
+    Then I select "Cash" on "Payment method" dropdown at "Donation" page
+    Then I enter "Test Test" on "Remarks" textarea at "Donation" page
+    Then I wait for 2 seconds
+    Then I click on "Confirm" button at "Donation" page
+    And I wait for loading to complete
+    Then I check if transaction is created for this donation
+    # Updating Status to Wrong Payment Update
+    Then I click on "Update" button at "Donation" page
+    And I wait for loading to complete
+    Then I select "Wrong Payment Update" on "Donation status" dropdown at "Donation" page
+    Then I click on "Confirm" button at "Donation" page
+    And I wait for loading to complete
+    Then I check if transaction is reverted for this donation
+    # Updating Status to Raised
+    Then I click on "Update" button at "Donation" page
+    And I wait for loading to complete
+    Then I select "Raised" on "Donation status" dropdown at "Donation" page
+    Then I click on "Confirm" button at "Donation" page
+    And I wait for loading to complete
+    # Updating Status to Cancelled
+    Then I click on "Update" button at "Donation" page
+    And I wait for loading to complete
+    Then I select "Cancelled" on "Donation status" dropdown at "Donation" page
+    Then I enter "Test Test" on "Reason for cancel" textarea at "Donation" page
+    Then I click on "Confirm" button at "Donation" page
+    And I wait for loading to complete
+    Then I wait for 2 seconds
+    Then I click on "Back to Dashboard" link at "Donation" page
+    Then I logout from current session
+    
+    
+    

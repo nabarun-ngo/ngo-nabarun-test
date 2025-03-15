@@ -1,5 +1,8 @@
 package ngo.nabarun.test.ngo_nabarun_test.hooks;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +24,7 @@ import io.cucumber.java.BeforeStep;
 import io.cucumber.java.Scenario;
 import ngo.nabarun.test.ngo_nabarun_test.config.Configs;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
+import ngo.nabarun.test.ngo_nabarun_test.utilities.DevToolsUtility;
 
 public class TestHooks {
 
@@ -65,25 +69,28 @@ public class TestHooks {
 				.implicitlyWait(Duration.ofSeconds(Configs.IMPLICIT_WAIT));
 		driver.manage().window().maximize();
 		scenarioContext.setDriver(driver);
+		
+        DevToolsUtility devToolsUtility = new DevToolsUtility(driver);
+        devToolsUtility.enableNetworkLogging();
+        devToolsUtility.enableConsoleLogging();
 	}
 
 	@BeforeStep
 	public void beforeStep(Scenario scenario) {
-
 	}
 
 	@AfterStep
 	public void afterStep(Scenario scenario) {
-		
-
 		// CommonHelpers.sanitizeFileName(step.getText())
 	}
 
 	@After
-	public void afterScenario(Scenario scenario) throws InterruptedException {
+	public void afterScenario(Scenario scenario) throws InterruptedException, IOException {
 		if(scenario.isFailed()) {
 			byte[] screenshot = ((TakesScreenshot) scenarioContext.getDriver()).getScreenshotAs(OutputType.BYTES);
-			scenario.attach(screenshot, "image/png", "error");	
+			scenario.attach(screenshot, "image/png", "error_screenshot");	
+			byte[] logs=Files.readAllBytes(new File("logs/test.log").toPath());
+			scenario.attach(logs, "text/plain", "error_log");	
 		}
 		scenarioContext.getDriver().quit();
 	}
@@ -91,4 +98,7 @@ public class TestHooks {
 	@AfterAll()
 	public static void afterTest() {
 	}
+	
+
+   
 }

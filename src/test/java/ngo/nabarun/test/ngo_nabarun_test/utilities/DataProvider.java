@@ -27,26 +27,27 @@ import ngo.nabarun.test.ngo_nabarun_test.models.User;
 
 public class DataProvider {
 	private static final Faker faker = new Faker();
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-    
+	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+
 	public List<User> getUsersByRole(String role) {
-		String rootUrl=Configs.ROOT_URL;
-		String apiKey=Configs.TEST_APIKEY;
-		String requestUrl=rootUrl+"/api/user/list?roles="+role+"&userByRole=true";
+		String rootUrl = Configs.ROOT_URL;
+		String apiKey = Configs.TEST_APIKEY;
+		String requestUrl = rootUrl + "/api/user/list?roles=" + role + "&userByRole=true";
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 		HttpGet request = new HttpGet(requestUrl);
 		request.addHeader("X-Api-Key", apiKey);
-		request.addHeader("accept","application/json");
+		request.addHeader("accept", "application/json");
 		try (CloseableHttpResponse response = httpClient.execute(request)) {
 			HttpEntity entity = response.getEntity();
 			if (entity != null) {
 				String result = EntityUtils.toString(entity);
 				System.out.println(result);
 				ObjectMapper mapper = CommonHelpers.objectMapper;
-				ApiResponse<ApiPagination<User>> apiResponse = mapper.readValue(result, new TypeReference<ApiResponse<ApiPagination<User>>>() {
-				});
+				ApiResponse<ApiPagination<User>> apiResponse = mapper.readValue(result,
+						new TypeReference<ApiResponse<ApiPagination<User>>>() {
+						});
 
-				//System.out.println(apiResponse);
+				// System.out.println(apiResponse);
 				return apiResponse.getResponsePayload().getContent();
 			}
 		} catch (IOException e) {
@@ -54,53 +55,86 @@ public class DataProvider {
 		}
 		return List.of();
 	}
-	
 
+	public String replacePlaceholders_old(String placeholder) {
+		switch (placeholder) {
+		case "{RandomName}":
+			return faker.name().fullName();
+		case "{RandomEmail}":
+			return faker.internet().emailAddress();
+		case "{SystemDate}":
+			return dateFormat.format(new Date());
+		default:
+			Pattern datePattern = Pattern.compile("\\{SystemDate([+-]\\d+)\\}");
+			Matcher dateMatcher = datePattern.matcher(placeholder);
+			if (dateMatcher.matches()) {
+				int offset = Integer.parseInt(dateMatcher.group(1));
+				return getDateWithOffset(offset);
+			}
 
-    public String replacePlaceholders(String placeholder) {
-        if (!placeholder.startsWith("{") || !placeholder.endsWith("}")) {
-            return placeholder; // Return the actual value if there's no placeholder
-        }
-        
-        switch (placeholder) {
-            case "{RandomName}":
-                return faker.name().fullName();
-            case "{RandomEmail}":
-                return faker.internet().emailAddress();
-            case "{SystemDate}":
-                return dateFormat.format(new Date());
-            default:
-                Pattern datePattern = Pattern.compile("\\{SystemDate([+-]\\d+)\\}");
-                Matcher dateMatcher = datePattern.matcher(placeholder);
-                if (dateMatcher.matches()) {
-                    int offset = Integer.parseInt(dateMatcher.group(1));
-                    return getDateWithOffset(offset);
-                }
-                
-                Pattern phonePattern = Pattern.compile("\\{RandomNumber:(\\d+)\\}");
-                Matcher phoneMatcher = phonePattern.matcher(placeholder);
-                if (phoneMatcher.matches()) {
-                    int digits = Integer.parseInt(phoneMatcher.group(1));
-                    return generateRandomPhoneNumber(digits);
-                }
-                
-                return placeholder; // Return as is if no match
-        }
-    }
+			Pattern phonePattern = Pattern.compile("\\{RandomNumber:(\\d+)\\}");
+			Matcher phoneMatcher = phonePattern.matcher(placeholder);
+			if (phoneMatcher.matches()) {
+				int digits = Integer.parseInt(phoneMatcher.group(1));
+				return generateRandomNumber(digits);
+			}
+			return placeholder; // Return as is if no match
+		}
+	}
 
-    private static String generateRandomPhoneNumber(int digits) {
-        StringBuilder phoneNumber = new StringBuilder();
-        for (int i = 0; i < digits; i++) {
-            phoneNumber.append(faker.number().randomDigit());
-        }
-        return phoneNumber.toString();
-    }
+	public String replacePlaceholders(String input) {
+		if (input == null || input.isEmpty()) {
+			return input;
+		}
+		if (!input.contains("{") || !input.contains("}")) {
+			return input;
+		}
 
-    private static String getDateWithOffset(int days) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_MONTH, days);
-        return dateFormat.format(calendar.getTime());
-    }
+		if (containsPlaceholder(input, "{RandomName}")) {
+			input = input.replace("{RandomName}", faker.name().fullName());
+		}
+		if (containsPlaceholder(input, "{RandomEmail}")) {
+			input = input.replace("{RandomEmail}", faker.internet().emailAddress());
+		}
+		if (containsPlaceholder(input, "{SystemDate}")) {
+			input = input.replace("{SystemDate}", dateFormat.format(new Date()));
+		}
 
+		// Replace SystemDate with offsets
+		Pattern datePattern = Pattern.compile("\\{SystemDate([+-]\\d+)\\}");
+		Matcher dateMatcher = datePattern.matcher(input);
+		while (dateMatcher.find()) {
+			int offset = Integer.parseInt(dateMatcher.group(1));
+			input = input.replace(dateMatcher.group(), getDateWithOffset(offset));
+		}
+
+		// Replace RandomPhoneNumber with specific digits
+		Pattern phonePattern = Pattern.compile("\\{RandomNumber:(\\d+)\\}");
+		Matcher phoneMatcher = phonePattern.matcher(input);
+		while (phoneMatcher.find()) {
+			int digits = Integer.parseInt(phoneMatcher.group(1));
+			input = input.replace(phoneMatcher.group(), generateRandomNumber(digits));
+		}
+
+		return input;
+	}
+
+	private static String generateRandomNumber(int digits) {
+		StringBuilder phoneNumber = new StringBuilder();
+		for (int i = 0; i < digits; i++) {
+			phoneNumber.append(faker.number().randomDigit());
+		}
+		return phoneNumber.toString();
+	}
+
+	private static String getDateWithOffset(int days) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.DAY_OF_MONTH, days);
+		return dateFormat.format(calendar.getTime());
+	}
+
+	private static boolean containsPlaceholder(String input, String placeholder) {
+		return input.contains(placeholder);
+	}
 
 }

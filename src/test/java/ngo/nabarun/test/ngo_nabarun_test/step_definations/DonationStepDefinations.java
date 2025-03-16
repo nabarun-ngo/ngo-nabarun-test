@@ -57,9 +57,10 @@ public class DonationStepDefinations {
 	public void iSearchTheCreatedDonation() throws Throwable {
 		String donationId=scenarioContext.get(ContextKeys.DonationId,String.class);
 		elementHelper.scrollToTop();
-		donationPageObjects.getButtonMapping("Advanced Search", null).click();
+		elementHelper.click(donationPageObjects.getButtonMapping("Advanced Search", null));
 		donationPageObjects.ADVSearch_DonationId.get().sendKeys(donationId);
-		donationPageObjects.getButtonMapping("Search", null).click();
+		elementHelper.click(donationPageObjects.getButtonMapping("Search", null));
+
 	}
 
 	@Then("^I check if transaction is (created|reverted) for this donation$")

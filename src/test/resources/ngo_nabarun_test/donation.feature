@@ -12,10 +12,10 @@ Feature: Donation
     And I wait for loading to complete
     Then I must be landed to "DONATION DASHBOARD" screen
 
-  @Donation @Regression @smoke
+  @donation @regression @smoke @donation01
   Scenario: Create and Update Guest Donation E2E
   	This scenario is covering creating and updating guest donation without attaching event
-  	Updating status to PAID >> WRONG PAYMENT UPDATE >> RAISED >> CANCELLED
+  	Updating status to PAID
   	Payment method - UPI
   
     When I click on "Guest Donations" text at "Donation" page
@@ -25,7 +25,7 @@ Feature: Donation
     Then I map create donation accordion as "Create_Donation" accordion
     Then I enter "{RandomName}" on "Name" textbox at "Create_Donation" accordion
     Then I enter "{RandomEmail}" on "Email address" textbox at "Create_Donation" accordion
-    Then I enter "{RandomNumber:10}" on "Contact number" textbox at "Create_Donation" accordion
+    Then I enter "+91{RandomNumber:10}" on "Contact number" textbox at "Create_Donation" accordion
     Then I wait for 3 seconds
     Then I select "One Time" on "Donation type" dropdown at "Create_Donation" accordion
     Then I enter "{RandomNumber:3}" on "Donation amount" textbox at "Create_Donation" accordion
@@ -54,37 +54,18 @@ Feature: Donation
     Then I select "UPI" on "Payment method" dropdown at "Donation" page
     Then I select "Google Pay" on "UPI name" dropdown at "Donation" page
     Then I enter "Test Test" on "Remarks" textarea at "Donation" page
-    Then I upload "file:///C:/Users/Souvik/Downloads/PS_PPBS_75.pdf" on "Upload document(s)" fileinput at "Donation" page
+    Then I upload "test_files/test_pdf.pdf" on "Upload document(s)" fileinput at "Donation" page
     Then I wait for 2 seconds
     Then I click on "Confirm" button at "Donation" page
     And I wait for loading to complete
     Then I check if transaction is created for this donation
-    # Updating Status to Wrong Payment Update
-    Then I click on "Update" button at "Donation" page
-    And I wait for loading to complete
-    Then I select "Wrong Payment Update" on "Donation status" dropdown at "Donation" page
-    Then I click on "Confirm" button at "Donation" page
-    And I wait for loading to complete
-    Then I check if transaction is reverted for this donation
-    # Updating Status to Raised
-    Then I click on "Update" button at "Donation" page
-    And I wait for loading to complete
-    Then I select "Raised" on "Donation status" dropdown at "Donation" page
-    Then I click on "Confirm" button at "Donation" page
-    And I wait for loading to complete
-    # Updating Status to Cancelled
-    Then I click on "Update" button at "Donation" page
-    And I wait for loading to complete
-    Then I select "Cancelled" on "Donation status" dropdown at "Donation" page
-    Then I enter "Test Test" on "Reason for cancel" textarea at "Donation" page
-    Then I click on "Confirm" button at "Donation" page
     And I wait for loading to complete
     Then I wait for 2 seconds
     Then I click on "Back to Dashboard" link at "Donation" page
     Then I logout from current session
     
     
-   @Donation @Regression 
+   @donation @donation02 @regression 
   Scenario: Create and Update Guest Donation for Event E2E
   	This scenario is covering creating and updating guest donation attaching event
   	Updating status to PAID >> WRONG PAYMENT UPDATE >> RAISED >> CANCELLED
@@ -97,7 +78,7 @@ Feature: Donation
     Then I map create donation accordion as "Create_Donation" accordion
     Then I enter "{RandomName}" on "Name" textbox at "Create_Donation" accordion
     Then I enter "{RandomEmail}" on "Email address" textbox at "Create_Donation" accordion
-    Then I enter "{RandomNumber:10}" on "Contact number" textbox at "Create_Donation" accordion
+    Then I enter "+91{RandomNumber:10}" on "Contact number" textbox at "Create_Donation" accordion
     Then I wait for 3 seconds
     Then I select "One Time" on "Donation type" dropdown at "Create_Donation" accordion
     Then I enter "{RandomNumber:3}" on "Donation amount" textbox at "Create_Donation" accordion

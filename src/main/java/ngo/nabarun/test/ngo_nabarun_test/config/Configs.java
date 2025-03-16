@@ -9,5 +9,6 @@ public class Configs {
 	public static final String TEST_DEFAULTPASSWORD = ConfigManager.get("TEST_DEFAULTPASSWORD");
 	public static final String TEST_APIKEY = ConfigManager.get("TEST_APIKEY");
 	public static final String TEST_QMETRY_APIKEY = ConfigManager.get("TEST_QMETRY_APIKEY");
+	public static final String MONGODB_CONNECTION_STRING= ConfigManager.get("MONGODB_CONNECTION_STRING");
 
 }

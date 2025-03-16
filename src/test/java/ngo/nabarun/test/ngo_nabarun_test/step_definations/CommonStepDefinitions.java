@@ -3,7 +3,9 @@ package ngo.nabarun.test.ngo_nabarun_test.step_definations;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import org.junit.jupiter.api.Assertions;
+import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -144,9 +146,19 @@ public class CommonStepDefinitions {
 		Thread.sleep(Duration.ofSeconds(wait));
 	}
 
-	@Then("^I opened the accordion at index (\\d+)$")
-	public void iOpenedTheAccordionAtIndex(int index) throws Throwable {
-		elementHelper.click(commonPageObjects.getAccordion(index,null));
+	@Then("^I opened the accordion of index (\\d+) at \"([^\"]*)\" (page|accordion)$")
+	public void iOpenedTheAccordionAtIndex(int index,String pageName,String pageType) throws Throwable {
+		SearchContext parent = null;
+		if(pageType.equalsIgnoreCase("accordion")) {
+			parent= controlLookup.getAccordionMapping(pageName);
+		}
+		elementHelper.click(commonPageObjects.getAccordion(index,parent));
+	}
+	
+	@Then("^I map \"([^\"]*)\" element as \"([^\"]*)\" accordion$")
+	public void iMapCreateDonationAccordionAsAccordion(String xpath, String accordionName) throws Throwable {
+		WebElement element = driver.findElement(By.xpath(xpath));
+		controlLookup.setAccordionMapping(accordionName, element);
 	}
 
 }

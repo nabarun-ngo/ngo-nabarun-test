@@ -154,5 +154,9 @@ public class ControlLookup {
 	public void setAccordionMapping(String accordionName, WebElement webElement) {
 		accordionMapping.put(accordionName, webElement);
 	}
+	
+	public WebElement getAccordionMapping(String accordionName) {
+		return accordionMapping.get(accordionName);
+	}
 
 }

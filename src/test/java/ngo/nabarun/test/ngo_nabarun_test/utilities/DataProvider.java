@@ -2,6 +2,9 @@ package ngo.nabarun.test.ngo_nabarun_test.utilities;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -28,6 +31,7 @@ import ngo.nabarun.test.ngo_nabarun_test.models.User;
 public class DataProvider {
 	private static final Faker faker = new Faker();
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+	private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
 	public List<User> getUsersByRole(String role) {
 		String rootUrl = Configs.ROOT_URL;
@@ -60,6 +64,10 @@ public class DataProvider {
 		switch (placeholder) {
 		case "{RandomName}":
 			return faker.name().fullName();
+		case "{FirstOfCurrentMonth}":
+			return firstDayOfCurrentMonth();
+		case "{LastOfCurrentMonth}":
+			return lastDayOfCurrentMonth();
 		case "{RandomEmail}":
 			return faker.internet().emailAddress();
 		case "{SystemDate}":
@@ -82,6 +90,16 @@ public class DataProvider {
 		}
 	}
 
+	public static String firstDayOfCurrentMonth() {
+		LocalDate firstDay = LocalDate.now().withDayOfMonth(1);
+		return firstDay.format(FORMATTER);
+	}
+
+	public static String lastDayOfCurrentMonth() {
+		LocalDate lastDay = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
+		return lastDay.format(FORMATTER);
+	}
+
 	public String replacePlaceholders(String input) {
 		if (input == null || input.isEmpty()) {
 			return input;
@@ -98,6 +116,12 @@ public class DataProvider {
 		}
 		if (containsPlaceholder(input, "{SystemDate}")) {
 			input = input.replace("{SystemDate}", dateFormat.format(new Date()));
+		}
+		if (containsPlaceholder(input, "{FirstOfCurrentMonth}")) {
+			input = input.replace("{FirstOfCurrentMonth}", firstDayOfCurrentMonth());
+		}
+		if (containsPlaceholder(input, "{LastOfCurrentMonth}")) {
+			input = input.replace("{LastOfCurrentMonth}", lastDayOfCurrentMonth());
 		}
 
 		// Replace SystemDate with offsets

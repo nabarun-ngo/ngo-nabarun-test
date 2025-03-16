@@ -146,7 +146,7 @@ public class CommonStepDefinitions {
 
 	@Then("^I opened the accordion at index (\\d+)$")
 	public void iOpenedTheAccordionAtIndex(int index) throws Throwable {
-		elementHelper.click(commonPageObjects.Accordion.apply(index));
+		elementHelper.click(commonPageObjects.getAccordion(index,null));
 	}
 
 }

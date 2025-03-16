@@ -17,15 +17,12 @@ public class DonationStepDefinations {
 	private ScenarioContext scenarioContext;
 	private ElementHelper elementHelper;
 
-	public DonationStepDefinations(
-			ControlLookup controlLookup, 
-			ScenarioContext scenarioContext,
-			ElementHelper elementHelper,
-			DonationPageObjects donationPageObjects) {
+	public DonationStepDefinations(ControlLookup controlLookup, ScenarioContext scenarioContext,
+			ElementHelper elementHelper, DonationPageObjects donationPageObjects) {
 		this.donationPageObjects = donationPageObjects;
 		this.controlLookup = controlLookup;
-		this.scenarioContext=scenarioContext;
-		this.elementHelper=elementHelper;
+		this.scenarioContext = scenarioContext;
+		this.elementHelper = elementHelper;
 	}
 
 	@Then("^I map (create|update) donation accordion as \"([^\"]*)\" accordion$")
@@ -40,7 +37,6 @@ public class DonationStepDefinations {
 	@Then("^I capture and store the donation id$")
 	public void iCaptureAndStoreTheDonationId() throws Throwable {
 		String message = donationPageObjects.DonationCreateAlert.get().getText();
-
 		Pattern pattern = Pattern.compile("NDON\\w+");
 		Matcher matcher = pattern.matcher(message);
 
@@ -51,11 +47,12 @@ public class DonationStepDefinations {
 		} else {
 			throw new RuntimeException("No donation ID found in message: " + message);
 		}
+
 	}
 
 	@Then("^I search the created donation$")
 	public void iSearchTheCreatedDonation() throws Throwable {
-		String donationId=scenarioContext.get(ContextKeys.DonationId,String.class);
+		String donationId = scenarioContext.get(ContextKeys.DonationId, String.class);
 		elementHelper.scrollToTop();
 		elementHelper.click(donationPageObjects.getButtonMapping("Advanced Search", null));
 		donationPageObjects.ADVSearch_DonationId.get().sendKeys(donationId);

@@ -12,6 +12,7 @@ import java.util.Optional;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -41,25 +42,39 @@ public class ElementHelper {
 	}
 
 	public void selectMatOption(WebElement selectEl, String value) throws Exception {
-		click(selectEl); // Ensure the dropdown opens
+		selectEl.click();
 
-		List<WebElement> options = elementWait()
-				.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath("//mat-option")));
-		Thread.sleep(2000);
-		Optional<WebElement> matchingOption = options.stream()
-				.filter(option -> option.getText().strip().equalsIgnoreCase(value.strip())).findFirst();
+		selectOpt(value, 0);
+	}
 
-		if (matchingOption.isPresent()) {
-			click(matchingOption.get());
-		} else {
-			List<String> availableOptions = options.stream().map(WebElement::getText).toList();
-			throw new RuntimeException("No option '" + value + "' found. Available options: " + availableOptions);
+	private void selectOpt(String value, int attempt) throws Exception {
+		try {
+			List<WebElement> options = elementWait()
+					.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath("//mat-option")));
+			Thread.sleep(2000);
+			Optional<WebElement> matchingOption = options.stream()
+					.filter(option -> option.getText().strip().equalsIgnoreCase(value.strip())).findFirst();
+
+			if (matchingOption.isPresent()) {
+				matchingOption.get().click();
+			} else {
+				List<String> availableOptions = options.stream().map(WebElement::getText).toList();
+				throw new RuntimeException("No option '" + value + "' found. Available options: " + availableOptions);
+			}
+
+		} catch (StaleElementReferenceException e) {
+			if (attempt > 5) {
+				throw new RuntimeException("Failed to select after 5 attempt.");
+			}
+			Thread.sleep(2000);
+			attempt++;
+			selectOpt(value, attempt);
 		}
 	}
 
 	public void clickRadioOption(WebElement element, String value) throws Exception {
 		WebElement radioOpt = element.findElement(By.xpath(".//*[normalize-space()=\"" + value + "\"]"));
-		click(radioOpt);
+		radioOpt.click();
 	}
 
 	public void scrollToTop() {
@@ -90,15 +105,20 @@ public class ElementHelper {
 		default -> "";
 		};
 		driver.findElement(By.cssSelector(".mat-calendar-period-button")).click();
-		driver.findElement(By.xpath("//button[contains(@class,'mat-calendar-body-cell') and normalize-space(string())='"+year+"']")).click();
-		driver.findElement(By.xpath("//button[contains(@class,'mat-calendar-body-cell') and normalize-space(string())='"+monthCode+"']")).click();
-		driver.findElement(By.xpath("//button[contains(@class,'mat-calendar-body-cell') and normalize-space(string())='"+day+"']")).click();
+		driver.findElement(By.xpath(
+				"//button[contains(@class,'mat-calendar-body-cell') and normalize-space(string())='" + year + "']"))
+				.click();
+		driver.findElement(By.xpath("//button[contains(@class,'mat-calendar-body-cell') and normalize-space(string())='"
+				+ monthCode + "']")).click();
+		driver.findElement(By.xpath(
+				"//button[contains(@class,'mat-calendar-body-cell') and normalize-space(string())='" + day + "']"))
+				.click();
 
 	}
 
 	public void uploadFile(WebElement element, String value) throws Exception {
-		click(element);
-		
+		element.click();
+
 		Thread.sleep(2000);
 		// Use Robot class to handle OS-level file upload
 		Robot robot = new Robot();
@@ -125,30 +145,30 @@ public class ElementHelper {
 		String filePath = CommonHelpers.getFileFromResources(value);
 		element.findElement(By.xpath(".//input[@type='file']")).sendKeys(filePath);
 	}
-	
-	public void click(WebElement element,int attempt) throws Exception {
+
+	public void click(WebElement element, int attempt) throws Exception {
 		try {
 			switch (attempt) {
-			case 0: 
+			case 0:
 			case 1:
 			case 2:
 				elementWait().until(ExpectedConditions.elementToBeClickable(element)).click();
 				break;
 			case 3:
 				JavascriptExecutor js = (JavascriptExecutor) driver;
-				js.executeScript("arguments[0].click();",element);
+				js.executeScript("arguments[0].click();", element);
 				break;
 			default:
-				throw new RuntimeException("Failed to click after "+(attempt-1)+" attempt.");
+				throw new RuntimeException("Failed to click after " + (attempt - 1) + " attempt.");
 			}
-		}catch (Exception e) {
+		} catch (Exception e) {
 			Thread.sleep(Duration.ofSeconds(2));
 			attempt++;
-			click(element,attempt);
+			click(element, attempt);
 		}
 	}
 
 	public void click(WebElement element) throws Exception {
-		click(element,0);
+		click(element, 0);
 	}
 }

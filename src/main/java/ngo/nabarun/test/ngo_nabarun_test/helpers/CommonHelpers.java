@@ -7,6 +7,7 @@ import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.text.Normalizer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -64,5 +65,13 @@ public class CommonHelpers {
 	            fileName = fileName.substring(0, 255);
 	        }
 	        return fileName;
+	    }
+	    
+	    public static String getFileFromResources(String fileName) {
+	        URL resource = CommonHelpers.class.getClassLoader().getResource(fileName);
+	        if (resource == null) {
+	            throw new IllegalArgumentException("File not found: " + fileName);
+	        }
+	        return new File(resource.getFile()).getAbsolutePath();
 	    }
 }

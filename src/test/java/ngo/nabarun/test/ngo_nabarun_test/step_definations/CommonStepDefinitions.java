@@ -2,7 +2,6 @@ package ngo.nabarun.test.ngo_nabarun_test.step_definations;
 
 import java.text.SimpleDateFormat;
 import java.time.Duration;
-
 import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -32,13 +31,13 @@ public class CommonStepDefinitions {
 	private static SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
 	public CommonStepDefinitions(ScenarioContext scenarioContext, ControlLookup controlLookup,
-			CommonPageObjects commonPageObjects, ElementHelper elementHelper,DataProvider dataProvider) {
+			CommonPageObjects commonPageObjects, ElementHelper elementHelper, DataProvider dataProvider) {
 		this.controlLookup = controlLookup;
 		this.commonPageObjects = commonPageObjects;
 		this.scenarioContext = scenarioContext;
 		this.driver = scenarioContext.getDriver();
 		this.elementHelper = elementHelper;
-		this.dataProvider=dataProvider;
+		this.dataProvider = dataProvider;
 	}
 
 	@Given("I have opened to Nabarun's web portal")
@@ -49,11 +48,11 @@ public class CommonStepDefinitions {
 
 	@Given("^I (click|click and hold) on \"(.+)\" (button|link|text) at \"(.+)\" (page|accordion)$")
 	public void i_clicked_on_button(String actionName, String elementName, String elementType, String pageName,
-			String pageType) {
+			String pageType) throws Exception {
 		WebElement element = controlLookup.getLookupElement(elementName, elementType, pageName, pageType);
 
 		switch (actionName.toUpperCase()) {
-		case "CLICK" -> element.click();
+		case "CLICK" -> elementHelper.click(element);
 		case "CLICK AND HOLD" -> {
 			Actions action = new Actions(driver);
 			action.moveToElement(element).clickAndHold().build().perform();
@@ -80,7 +79,7 @@ public class CommonStepDefinitions {
 			}
 		}
 		case "CLICK" -> elementHelper.clickRadioOption(element, value);
-		case "UPLOAD" -> elementHelper.uploadFile(element, value);
+		case "UPLOAD" -> elementHelper.uploadFileFromResource(element, value);
 		default -> throw new IllegalStateException("Invalid action : " + actionName);
 		}
 		;
@@ -95,9 +94,9 @@ public class CommonStepDefinitions {
 					driver.switchTo().window(handle);
 					scenarioContext.set(ContextKeys.Last_Window_Handle, originalHandle);
 					scenarioContext.set(ContextKeys.Current_Window_Handle, handle);
-			        DevToolsUtility devToolsUtility = new DevToolsUtility(driver);
-			        devToolsUtility.enableNetworkLogging();
-			        devToolsUtility.enableConsoleLogging();
+					DevToolsUtility devToolsUtility = new DevToolsUtility(driver);
+					devToolsUtility.enableNetworkLogging();
+					devToolsUtility.enableConsoleLogging();
 					break;
 				}
 			}
@@ -147,7 +146,7 @@ public class CommonStepDefinitions {
 
 	@Then("^I opened the accordion at index (\\d+)$")
 	public void iOpenedTheAccordionAtIndex(int index) throws Throwable {
-		commonPageObjects.Accordion.apply(index).click();
+		elementHelper.click(commonPageObjects.Accordion.apply(index));
 	}
 
 }

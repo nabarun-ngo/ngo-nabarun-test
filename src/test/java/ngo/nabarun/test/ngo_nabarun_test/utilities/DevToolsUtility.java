@@ -60,7 +60,9 @@ public class DevToolsUtility {
 		// Capture network responses
 		devTools.addListener(Network.responseReceived(), response -> {
 			ResourceType resourceType = response.getType();
-			if (resourceType == ResourceType.FETCH || resourceType == ResourceType.XHR) {
+			Response res = response.getResponse();
+
+			if (res.getStatus() >= 400 && (resourceType == ResourceType.FETCH || resourceType == ResourceType.XHR)) {
 
 				Request req = requestMap.get(response.getRequestId().toString());
 
@@ -76,7 +78,6 @@ public class DevToolsUtility {
 					}
 				}
 
-				Response res = response.getResponse();
 				String responseBody ="NA";
 				try {
 					GetResponseBodyResponse bodyResponse = devTools

@@ -40,7 +40,7 @@ public class ConfigManager {
 				e.printStackTrace();
 			}
 		} else {
-			String configFilePath = "test-config-"+config_env+".json";
+			String configFilePath = "test_config/test-config-"+config_env+".json";
 			try (InputStream inputStream = ConfigManager.class.getClassLoader().getResourceAsStream(configFilePath)) {
 				if (inputStream == null) {
 					throw new RuntimeException("Configuration file not found: " + configFilePath);

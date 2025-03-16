@@ -17,6 +17,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import ngo.nabarun.test.ngo_nabarun_test.helpers.CommonHelpers;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 
 public class ElementHelper {
@@ -40,7 +41,7 @@ public class ElementHelper {
 	}
 
 	public void selectMatOption(WebElement selectEl, String value) throws Exception {
-		selectEl.click(); // Ensure the dropdown opens
+		click(selectEl); // Ensure the dropdown opens
 
 		List<WebElement> options = elementWait()
 				.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath("//mat-option")));
@@ -49,16 +50,16 @@ public class ElementHelper {
 				.filter(option -> option.getText().strip().equalsIgnoreCase(value.strip())).findFirst();
 
 		if (matchingOption.isPresent()) {
-			matchingOption.get().click();
+			click(matchingOption.get());
 		} else {
 			List<String> availableOptions = options.stream().map(WebElement::getText).toList();
 			throw new RuntimeException("No option '" + value + "' found. Available options: " + availableOptions);
 		}
 	}
 
-	public void clickRadioOption(WebElement element, String value) {
+	public void clickRadioOption(WebElement element, String value) throws Exception {
 		WebElement radioOpt = element.findElement(By.xpath(".//*[normalize-space()=\"" + value + "\"]"));
-		radioOpt.click();
+		click(radioOpt);
 	}
 
 	public void scrollToTop() {
@@ -66,7 +67,7 @@ public class ElementHelper {
 		js.executeScript("window.scrollTo(0, 0);");
 	}
 
-	public void selectMatDate(WebElement element, Date value) {
+	public void selectMatDate(WebElement element, Date value) throws Exception {
 		element.findElement(By.xpath(".//mat-datepicker-toggle//button")).click();
 		elementWait().until(ExpectedConditions.presenceOfElementLocated(By.xpath("//mat-calendar")));
 		Calendar cal = Calendar.getInstance();
@@ -96,7 +97,7 @@ public class ElementHelper {
 	}
 
 	public void uploadFile(WebElement element, String value) throws Exception {
-		element.click();
+		click(element);
 		
 		Thread.sleep(2000);
 		// Use Robot class to handle OS-level file upload
@@ -120,4 +121,34 @@ public class ElementHelper {
 		Thread.sleep(2000);
 	}
 
+	public void uploadFileFromResource(WebElement element, String value) {
+		String filePath = CommonHelpers.getFileFromResources(value);
+		element.findElement(By.xpath(".//input[@type='file']")).sendKeys(filePath);
+	}
+	
+	public void click(WebElement element,int attempt) throws Exception {
+		try {
+			switch (attempt) {
+			case 0: 
+			case 1:
+			case 2:
+				elementWait().until(ExpectedConditions.elementToBeClickable(element)).click();
+				break;
+			case 3:
+				JavascriptExecutor js = (JavascriptExecutor) driver;
+				js.executeScript("arguments[0].click();",element);
+				break;
+			default:
+				throw new RuntimeException("Failed to click after "+(attempt-1)+" attempt.");
+			}
+		}catch (Exception e) {
+			Thread.sleep(Duration.ofSeconds(2));
+			attempt++;
+			click(element,attempt);
+		}
+	}
+
+	public void click(WebElement element) throws Exception {
+		click(element,0);
+	}
 }

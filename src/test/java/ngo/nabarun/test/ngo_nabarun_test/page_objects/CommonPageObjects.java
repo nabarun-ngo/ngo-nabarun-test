@@ -1,7 +1,6 @@
 package ngo.nabarun.test.ngo_nabarun_test.page_objects;
 
 import java.time.Duration;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.openqa.selenium.By;
@@ -24,8 +23,10 @@ public class CommonPageObjects {
 
 	public By PageLoaderLocator = By.xpath(".//*[normalize-space(text())='Please wait, Things are getting ready...']");
 	public Supplier<WebElement> PageHeader = () -> driver.findElement(By.xpath("//app-page-title//span"));
-	public Function<Integer, WebElement> Accordion = (i) -> driver
-			.findElement(By.xpath("(//mat-expansion-panel)[" + i + "]"));
+
+	public WebElement getAccordion(int i, SearchContext parentContext) {
+		return getSearchContext(parentContext).findElement(By.xpath("(//mat-expansion-panel)[" + i + "]"));
+	}
 
 	public WebElement getButtonMapping(String elementName, SearchContext parentContext) {
 		return switch (elementName) {
@@ -82,8 +83,8 @@ public class CommonPageObjects {
 
 	public WebElement getFileInputMapping(String elementName, SearchContext parentContext) {
 		return switch (elementName) {
-		default -> getSearchContext(parentContext)
-				.findElement(By.xpath(".//*[normalize-space(text())='" + elementName + "']/following-sibling::*//input[@type='file']"));
+		default -> getSearchContext(parentContext).findElement(By.xpath(
+				".//*[normalize-space(text())='" + elementName + "']/following-sibling::*//input[@type='file']"));
 		};
 	}
 }

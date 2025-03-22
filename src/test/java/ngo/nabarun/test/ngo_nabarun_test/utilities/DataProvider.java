@@ -60,36 +60,6 @@ public class DataProvider {
 		return List.of();
 	}
 
-	public String replacePlaceholders_old(String placeholder) {
-		switch (placeholder) {
-		case "{RandomName}":
-			return faker.name().fullName();
-		case "{FirstOfCurrentMonth}":
-			return firstDayOfCurrentMonth();
-		case "{LastOfCurrentMonth}":
-			return lastDayOfCurrentMonth();
-		case "{RandomEmail}":
-			return faker.internet().emailAddress();
-		case "{SystemDate}":
-			return dateFormat.format(new Date());
-		default:
-			Pattern datePattern = Pattern.compile("\\{SystemDate([+-]\\d+)\\}");
-			Matcher dateMatcher = datePattern.matcher(placeholder);
-			if (dateMatcher.matches()) {
-				int offset = Integer.parseInt(dateMatcher.group(1));
-				return getDateWithOffset(offset);
-			}
-
-			Pattern phonePattern = Pattern.compile("\\{RandomNumber:(\\d+)\\}");
-			Matcher phoneMatcher = phonePattern.matcher(placeholder);
-			if (phoneMatcher.matches()) {
-				int digits = Integer.parseInt(phoneMatcher.group(1));
-				return generateRandomNumber(digits);
-			}
-			return placeholder; // Return as is if no match
-		}
-	}
-
 	public static String firstDayOfCurrentMonth() {
 		LocalDate firstDay = LocalDate.now().withDayOfMonth(1);
 		return firstDay.format(FORMATTER);
@@ -122,6 +92,19 @@ public class DataProvider {
 		}
 		if (containsPlaceholder(input, "{LastOfCurrentMonth}")) {
 			input = input.replace("{LastOfCurrentMonth}", lastDayOfCurrentMonth());
+		}
+
+		if (containsPlaceholder(input, "{RandomFirstName}")) {
+			input = input.replace("{RandomFirstName}", faker.name().firstName());
+		}
+		if (containsPlaceholder(input, "{RandomLastName}")) {
+			input = input.replace("{RandomLastName}", faker.name().lastName());
+		}
+		if (containsPlaceholder(input, "{RandomText}")) {
+			input = input.replace("{RandomText}", faker.lorem().sentence());
+		}
+		if (containsPlaceholder(input, "{RandomLocation}")) {
+			input = input.replace("{RandomLocation}", faker.address().cityName());
 		}
 
 		// Replace SystemDate with offsets

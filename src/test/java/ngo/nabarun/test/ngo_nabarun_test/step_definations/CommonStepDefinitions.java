@@ -2,6 +2,9 @@ package ngo.nabarun.test.ngo_nabarun_test.step_definations;
 
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -10,8 +13,10 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.*;
 import ngo.nabarun.test.ngo_nabarun_test.config.Configs;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
@@ -48,14 +53,16 @@ public class CommonStepDefinitions {
 		driver.get(rootURL);
 	}
 
-	@Given("^I (click|click and hold) on \"(.+)\" (button|link|text) at \"(.+)\" (page|accordion)$")
+	@Given("^I (click|click and hold|scroll) on \"(.+)\" (button|link|text|textbox) at \"(.+)\" (page|accordion)$")
 	public void i_clicked_on_button(String actionName, String elementName, String elementType, String pageName,
 			String pageType) throws Exception {
 		WebElement element = controlLookup.getLookupElement(elementName, elementType, pageName, pageType);
 
 		switch (actionName.toUpperCase()) {
 		case "CLICK" -> elementHelper.click(element);
+		case "SCROLL" -> elementHelper.scrollIntoView(element);
 		case "CLICK AND HOLD" -> {
+			//elementHelper.scrollIntoView(element);
 			Actions action = new Actions(driver);
 			action.moveToElement(element).clickAndHold().build().perform();
 		}
@@ -71,6 +78,7 @@ public class CommonStepDefinitions {
 		String value = dataProvider.replacePlaceholders(rawValue);
 		switch (actionName.toUpperCase()) {
 		case "ENTER" -> {
+			//elementHelper.scrollIntoView(element);
 			element.clear();
 			element.sendKeys(value);
 		}
@@ -159,6 +167,17 @@ public class CommonStepDefinitions {
 	public void iMapCreateDonationAccordionAsAccordion(String xpath, String accordionName) throws Throwable {
 		WebElement element = driver.findElement(By.xpath(xpath));
 		controlLookup.setAccordionMapping(accordionName, element);
+	}
+
+	@Then("^I wait for following text to display at \"(.+)\" (page|accordion)$")
+	public void iWaitForFollowingTextToDisplay(String pageName,String pageType,DataTable table) throws Throwable {
+	    List<Map<String, String>> rows = table.asMaps(String.class, String.class);
+	    for (Map<String, String> columns : rows) {
+	        String content = columns.get("Expected_Content");
+			WebElement element = controlLookup.getLookupElement(content, "text", pageName, pageType);
+			element=elementHelper.elementWait().until(ExpectedConditions.visibilityOf(element));
+			Assertions.assertTrue(element.isDisplayed(),"Element "+content+" is not displayed.");
+	    }
 	}
 
 }

@@ -187,7 +187,7 @@ Feature: Donation
     Then I logout from current session
     
  @donation @donation04 @regression 
-  Scenario: Donation - Create and Update Member Onetime Donation E2E
+  Scenario: Donation - Create and Update Member Regular Donation E2E
   	Create Member Regular Donation 
     Raise donation for current month
     Check if donation is already raised for current month, if so then delete this from database

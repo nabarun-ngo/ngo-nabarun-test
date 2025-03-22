@@ -5,8 +5,6 @@ import com.mongodb.client.*;
 import org.bson.conversions.Bson;
 import static com.mongodb.client.model.Filters.*;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -42,10 +40,12 @@ public class DBUtility {
 		});
 	}
 
-	public static List<Document> findDonationsBetweenDates(Date startDate, Date endDate, String profileId,String type) {
+	public static List<Document> findDonationsBetweenDates(Date startDate, Date endDate, String profileId,
+			String type) {
 		return executeMongoOperation(database -> {
 			MongoCollection<Document> collection = database.getCollection("donations");
-			Bson dateFilter = and(gte("raisedOn", startDate), lte("raisedOn", endDate), eq("profile", profileId),eq("type", type));
+			Bson dateFilter = and(gte("raisedOn", startDate), lte("raisedOn", endDate), eq("profile", profileId),
+					eq("type", type));
 			List<Document> donations = new ArrayList<>();
 			collection.find(dateFilter).into(donations);
 			return donations;
@@ -59,22 +59,12 @@ public class DBUtility {
 			return deletedCount > 0;
 		});
 	}
-	
-	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
-	public static void main(String[] args) throws ParseException {
-		String firstName ="Member";
-		String lastName = "TestUser";
-		Document user =DBUtility.findUserByName(firstName, lastName);
-		Date startDate = dateFormat.parse(DataProvider.firstDayOfCurrentMonth());
-		Date endDate = dateFormat.parse(DataProvider.lastDayOfCurrentMonth());
-		String id = user.getString("_id");
-		System.out.println(id);
-		System.out.println();
-		List<Document> donations=DBUtility.findDonationsBetweenDates(startDate,endDate,id,"REGULAR");
-		for(Document donation:donations) {
-			System.out.println(donation.getString("_id"));
-			DBUtility.deleteDonationById(donation.getString("_id"));
-		}
+	public static Document findOTPDetails(String email) {
+		return executeMongoOperation(database -> {
+			Document filter = new Document("email", email);
+			MongoCollection<Document> collection = database.getCollection("tickets");
+			return collection.find(filter).first();
+		});
 	}
 }

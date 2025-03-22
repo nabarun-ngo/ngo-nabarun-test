@@ -27,7 +27,7 @@ public class ScenarioContext {
 	}
 
 	public enum ContextKeys {
-		Last_Window_Handle, Current_Window_Handle, Login_Option, DonationId
+		Last_Window_Handle, Current_Window_Handle, Login_Option, DonationId, RequestId, New_User_Email
 
 	}
 

@@ -11,6 +11,8 @@ import ngo.nabarun.test.ngo_nabarun_test.page_objects.DashboardPageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.DonationPageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.HomePageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.LoginPageObjects;
+import ngo.nabarun.test.ngo_nabarun_test.page_objects.ProfilePageObjects;
+import ngo.nabarun.test.ngo_nabarun_test.page_objects.WorkflowPageObjects;
 
 public class ControlLookup {
 
@@ -20,15 +22,19 @@ public class ControlLookup {
 	private DonationPageObjects donationPageObjects;
 	private DashboardPageObjects dashboardPageObjects;
 	private CommonPageObjects commonPageObjects;
+	private WorkflowPageObjects workflowPageObjects;
+	private ProfilePageObjects profilePageObjects;
 
 	public ControlLookup(CommonPageObjects commonPageObjects, LoginPageObjects loginPageObjects,
 			HomePageObjects homePageObjects, DonationPageObjects donationPageObjects,
-			DashboardPageObjects dashboardPageObjects) {
+			DashboardPageObjects dashboardPageObjects,WorkflowPageObjects workflowPageObjects,ProfilePageObjects profilePageObjects) {
 		this.commonPageObjects = commonPageObjects;
 		this.loginPageObjects = loginPageObjects;
 		this.homePageObjects = homePageObjects;
 		this.donationPageObjects = donationPageObjects;
 		this.dashboardPageObjects = dashboardPageObjects;
+		this.workflowPageObjects=workflowPageObjects;
+		this.profilePageObjects=profilePageObjects;
 	}
 
 	private static final String LOGIN_PAGE = "login";
@@ -36,6 +42,11 @@ public class ControlLookup {
 	private static final String DASHBOARD_PAGE = "dashboard";
 	private static final String DONATION_PAGE = "donation";
 	private static final String ACCORDION = "accordion";
+	private static final String WORKLIST_PAGE = "tasks";
+	private static final String REQUEST_PAGE = "request";
+	private static final String PROFILE_PAGE = "profile";
+
+	
 
 	public WebElement getLookupElement(String elementName, String elementType, String pageName, String pageType) {
 		SearchContext parent = null;
@@ -60,10 +71,14 @@ public class ControlLookup {
 	private WebElement getFileInputLookUp(String pageName, String elementName, SearchContext parentContext) {
 		return switch (pageName.toLowerCase()) {
 		case ACCORDION -> commonPageObjects.getFileInputMapping(elementName, parentContext);
-		case HOME_PAGE -> homePageObjects.getDatePickerMapping(elementName, parentContext);
-		case LOGIN_PAGE -> loginPageObjects.getDatePickerMapping(elementName, parentContext);
-		case DASHBOARD_PAGE -> dashboardPageObjects.getDatePickerMapping(elementName, parentContext);
-		case DONATION_PAGE -> donationPageObjects.getDatePickerMapping(elementName, parentContext);
+		case HOME_PAGE -> homePageObjects.getFileInputMapping(elementName, parentContext);
+		case LOGIN_PAGE -> loginPageObjects.getFileInputMapping(elementName, parentContext);
+		case DASHBOARD_PAGE -> dashboardPageObjects.getFileInputMapping(elementName, parentContext);
+		case DONATION_PAGE -> donationPageObjects.getFileInputMapping(elementName, parentContext);
+		case WORKLIST_PAGE -> workflowPageObjects.getFileInputMapping(elementName, parentContext);
+		case REQUEST_PAGE -> workflowPageObjects.getFileInputMapping(elementName, parentContext);
+		case PROFILE_PAGE -> profilePageObjects.getFileInputMapping(elementName, parentContext);
+
 		default -> throw new RuntimeException("Invalid page " + pageName);
 		};
 	}
@@ -75,6 +90,10 @@ public class ControlLookup {
 		case LOGIN_PAGE -> loginPageObjects.getDatePickerMapping(elementName, parentContext);
 		case DASHBOARD_PAGE -> dashboardPageObjects.getDatePickerMapping(elementName, parentContext);
 		case DONATION_PAGE -> donationPageObjects.getDatePickerMapping(elementName, parentContext);
+		case WORKLIST_PAGE -> workflowPageObjects.getDatePickerMapping(elementName, parentContext);
+		case REQUEST_PAGE -> workflowPageObjects.getDatePickerMapping(elementName, parentContext);
+		case PROFILE_PAGE -> profilePageObjects.getDatePickerMapping(elementName, parentContext);
+
 		default -> throw new RuntimeException("Invalid page " + pageName);
 		};
 	}
@@ -86,6 +105,10 @@ public class ControlLookup {
 		case LOGIN_PAGE -> loginPageObjects.getRadioMapping(elementName, parentContext);
 		case DASHBOARD_PAGE -> dashboardPageObjects.getRadioMapping(elementName, parentContext);
 		case DONATION_PAGE -> donationPageObjects.getRadioMapping(elementName, parentContext);
+		case WORKLIST_PAGE -> workflowPageObjects.getRadioMapping(elementName, parentContext);
+		case REQUEST_PAGE -> workflowPageObjects.getRadioMapping(elementName, parentContext);
+		case PROFILE_PAGE -> profilePageObjects.getRadioMapping(elementName, parentContext);
+
 		default -> throw new RuntimeException("Invalid page " + pageName);
 		};
 	}
@@ -97,6 +120,9 @@ public class ControlLookup {
 		case LOGIN_PAGE -> loginPageObjects.getDropdownMapping(elementName, parentContext);
 		case DASHBOARD_PAGE -> dashboardPageObjects.getDropdownMapping(elementName, parentContext);
 		case DONATION_PAGE -> donationPageObjects.getDropdownMapping(elementName, parentContext);
+		case WORKLIST_PAGE -> workflowPageObjects.getDropdownMapping(elementName, parentContext);
+		case REQUEST_PAGE -> workflowPageObjects.getDropdownMapping(elementName, parentContext);
+		case PROFILE_PAGE -> profilePageObjects.getDropdownMapping(elementName, parentContext);
 
 		default -> throw new RuntimeException("Invalid page " + pageName);
 		};
@@ -110,6 +136,9 @@ public class ControlLookup {
 		case LOGIN_PAGE -> loginPageObjects.getTextBoxMapping(elementName, parentContext, isTextArea);
 		case DASHBOARD_PAGE -> dashboardPageObjects.getTextBoxMapping(elementName, parentContext, isTextArea);
 		case DONATION_PAGE -> donationPageObjects.getTextBoxMapping(elementName, parentContext, isTextArea);
+		case WORKLIST_PAGE -> workflowPageObjects.getTextBoxMapping(elementName, parentContext,isTextArea);
+		case REQUEST_PAGE -> workflowPageObjects.getTextBoxMapping(elementName, parentContext,isTextArea);
+		case PROFILE_PAGE -> profilePageObjects.getTextBoxMapping(elementName, parentContext,isTextArea);
 
 		default -> throw new RuntimeException("Invalid page " + pageName);
 		};
@@ -122,6 +151,9 @@ public class ControlLookup {
 		case LOGIN_PAGE -> loginPageObjects.getTextMapping(elementName, parentContext);
 		case DASHBOARD_PAGE -> dashboardPageObjects.getTextMapping(elementName, parentContext);
 		case DONATION_PAGE -> donationPageObjects.getTextMapping(elementName, parentContext);
+		case WORKLIST_PAGE -> workflowPageObjects.getTextMapping(elementName, parentContext);
+		case REQUEST_PAGE -> workflowPageObjects.getTextMapping(elementName, parentContext);
+		case PROFILE_PAGE -> profilePageObjects.getTextMapping(elementName, parentContext);
 
 		default -> throw new RuntimeException("Invalid page " + pageName);
 		};
@@ -134,6 +166,9 @@ public class ControlLookup {
 		case LOGIN_PAGE -> loginPageObjects.getLinkMapping(elementName, parentContext);
 		case DASHBOARD_PAGE -> dashboardPageObjects.getLinkMapping(elementName, parentContext);
 		case DONATION_PAGE -> donationPageObjects.getLinkMapping(elementName, parentContext);
+		case WORKLIST_PAGE -> workflowPageObjects.getLinkMapping(elementName, parentContext);
+		case REQUEST_PAGE -> workflowPageObjects.getLinkMapping(elementName, parentContext);
+		case PROFILE_PAGE -> profilePageObjects.getLinkMapping(elementName, parentContext);
 
 		default -> throw new RuntimeException("Invalid page " + pageName);
 		};
@@ -146,6 +181,9 @@ public class ControlLookup {
 		case LOGIN_PAGE -> loginPageObjects.getButtonMapping(elementName, parentContext);
 		case DASHBOARD_PAGE -> dashboardPageObjects.getButtonMapping(elementName, parentContext);
 		case DONATION_PAGE -> donationPageObjects.getButtonMapping(elementName, parentContext);
+		case WORKLIST_PAGE -> workflowPageObjects.getButtonMapping(elementName, parentContext);
+		case REQUEST_PAGE -> workflowPageObjects.getButtonMapping(elementName, parentContext);
+		case PROFILE_PAGE -> profilePageObjects.getButtonMapping(elementName, parentContext);
 
 		default -> throw new RuntimeException("Invalid page " + pageName);
 		};

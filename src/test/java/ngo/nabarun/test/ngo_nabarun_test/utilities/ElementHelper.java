@@ -42,6 +42,8 @@ public class ElementHelper {
 	}
 
 	public void selectMatOption(WebElement selectEl, String value) throws Exception {
+		//scrollIntoView(selectEl);
+		elementWait().until(ExpectedConditions.elementToBeClickable(selectEl));
 		selectEl.click();
 
 		selectOpt(value, 0);
@@ -73,6 +75,7 @@ public class ElementHelper {
 	}
 
 	public void clickRadioOption(WebElement element, String value) throws Exception {
+		//scrollIntoView(element);
 		WebElement radioOpt = element.findElement(By.xpath(".//*[normalize-space()=\"" + value + "\"]"));
 		radioOpt.click();
 	}
@@ -105,6 +108,13 @@ public class ElementHelper {
 		default -> "";
 		};
 		driver.findElement(By.cssSelector(".mat-calendar-period-button")).click();
+		List<WebElement> dateCheck = driver.findElements(By.xpath(
+				"//button[contains(@class,'mat-calendar-body-cell') and normalize-space(string())='" + year + "']"));
+		while(dateCheck.size() == 0) {
+			driver.findElement(By.cssSelector(".mat-calendar-previous-button")).click();
+			 dateCheck = driver.findElements(By.xpath(
+						"//button[contains(@class,'mat-calendar-body-cell') and normalize-space(string())='" + year + "']"));
+		}
 		driver.findElement(By.xpath(
 				"//button[contains(@class,'mat-calendar-body-cell') and normalize-space(string())='" + year + "']"))
 				.click();
@@ -147,6 +157,7 @@ public class ElementHelper {
 	}
 
 	public void click(WebElement element, int attempt) throws Exception {
+		//scrollIntoView(element);
 		try {
 			switch (attempt) {
 			case 0:

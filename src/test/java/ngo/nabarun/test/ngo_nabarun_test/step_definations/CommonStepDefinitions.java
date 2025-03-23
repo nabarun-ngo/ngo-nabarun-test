@@ -19,6 +19,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.*;
 import ngo.nabarun.test.ngo_nabarun_test.config.Configs;
+import ngo.nabarun.test.ngo_nabarun_test.helpers.CommonHelpers;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext.ContextKeys;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.CommonPageObjects;
@@ -89,7 +90,10 @@ public class CommonStepDefinitions {
 			}
 		}
 		case "CLICK" -> elementHelper.clickRadioOption(element, value);
-		case "UPLOAD" -> elementHelper.uploadFileFromResource(element, value);
+		case "UPLOAD" -> {
+			String filePath = CommonHelpers.getFileFromResources(value);
+			element.sendKeys(filePath);
+		}
 		default -> throw new IllegalStateException("Invalid action : " + actionName);
 		}
 		;

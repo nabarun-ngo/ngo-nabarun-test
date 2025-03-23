@@ -80,7 +80,7 @@ Feature: Requests & Worklist
     Then I select "Mr" on "Title" dropdown at "Profile" page
     Then I select "Male" on "Gender" dropdown at "Profile" page
     Then I select "24/12/2017" on "Date of Birth" datepicker at "Profile" page
-    Then I enter "{RandomNumber:10}" on "Phone Number (WhatsApp)" textbox at "Profile" page
+    Then I enter "9123899870" on "Phone Number (WhatsApp)" textbox at "Profile" page
     Then I enter "{RandomText}" on "Descrive something about you" textarea at "Profile" page
     Then I click on "Permanent Address same as Present Address" text at "Profile" page
     And I wait for loading to complete

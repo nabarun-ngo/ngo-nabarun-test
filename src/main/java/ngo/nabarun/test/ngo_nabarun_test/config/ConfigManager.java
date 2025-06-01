@@ -1,12 +1,13 @@
 package ngo.nabarun.test.ngo_nabarun_test.config;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 
 import ngo.nabarun.test.ngo_nabarun_test.helpers.CommonHelpers;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
+
+import com.fasterxml.jackson.core.type.TypeReference;
 
 
 public class ConfigManager {
@@ -18,7 +19,7 @@ public class ConfigManager {
 
 	static {
 		String config_source = System.getProperty(CONFIG_SOURCE);
-		String config_env = System.getProperty(ENVIRONMENT,"stage");
+		String config_env = System.getProperty(ENVIRONMENT,"dev");
 		if(config_env == null) {
 			throw new RuntimeException("ENVIRONMENT must be set as argument");
 		}
@@ -39,7 +40,7 @@ public class ConfigManager {
 				e.printStackTrace();
 			}
 		} else {
-			String configFilePath = "test-config-"+config_env+".json";
+			String configFilePath = "test_config/test-config-"+config_env+".json";
 			try (InputStream inputStream = ConfigManager.class.getClassLoader().getResourceAsStream(configFilePath)) {
 				if (inputStream == null) {
 					throw new RuntimeException("Configuration file not found: " + configFilePath);

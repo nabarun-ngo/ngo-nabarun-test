@@ -5,17 +5,17 @@ import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.devtools.DevTools;
-import org.openqa.selenium.devtools.v131.network.Network;
-import org.openqa.selenium.devtools.v131.network.Network.GetResponseBodyResponse;
-import org.openqa.selenium.devtools.v131.network.model.PostDataEntry;
-import org.openqa.selenium.devtools.v131.network.model.Request;
-import org.openqa.selenium.devtools.v131.network.model.ResourceType;
-import org.openqa.selenium.devtools.v131.network.model.Response;
+import org.openqa.selenium.devtools.v137.network.Network;
+import org.openqa.selenium.devtools.v137.network.Network.GetResponseBodyResponse;
+import org.openqa.selenium.devtools.v137.network.model.PostDataEntry;
+import org.openqa.selenium.devtools.v137.network.model.Request;
+import org.openqa.selenium.devtools.v137.network.model.ResourceType;
+import org.openqa.selenium.devtools.v137.network.model.Response;
 import org.openqa.selenium.edge.EdgeDriver;
 
 import ngo.nabarun.test.ngo_nabarun_test.config.Configs;
 
-import org.openqa.selenium.devtools.v131.log.Log;
+import org.openqa.selenium.devtools.v137.log.Log;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -31,12 +31,11 @@ public class DevToolsUtility {
 	public DevToolsUtility(WebDriver driver) {
         logger.info("Starting browser session...");
 		String browser = Configs.BROWSER;
-		DevTools devTools = switch (browser.toUpperCase()) {
-		case "CHROME" -> ((ChromeDriver) driver).getDevTools();
-		case "EDGE" -> ((EdgeDriver) driver).getDevTools();
-		default -> throw new IllegalArgumentException("Unexpected value: " + browser.toUpperCase());
-		};
-		this.devTools = devTools;
+        this.devTools = switch (browser.toUpperCase()) {
+        case "CHROME" -> ((ChromeDriver) driver).getDevTools();
+        case "EDGE" -> ((EdgeDriver) driver).getDevTools();
+        default -> throw new IllegalArgumentException("Unexpected value: " + browser.toUpperCase());
+        };
 		this.devTools.createSession();
 	}
 

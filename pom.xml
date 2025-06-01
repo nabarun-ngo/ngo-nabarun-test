@@ -67,7 +67,7 @@
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-java</artifactId>
-			<version>4.27.0</version>
+			<version>4.33.0</version>
 		</dependency>
 		<dependency>
 			<groupId>net.java.dev.jna</groupId>
@@ -85,6 +85,7 @@
 			<version>1.18.36</version>
 			<scope>provided</scope>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.github.javafaker/javafaker -->
 		<dependency>
 			<groupId>com.github.javafaker</groupId>
 			<artifactId>javafaker</artifactId>
@@ -106,6 +107,11 @@
 			<groupId>org.mongodb</groupId>
 			<artifactId>mongodb-driver-sync</artifactId>
 			<version>4.11.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>bson</artifactId>
+			<version>5.5.0</version>
 		</dependency>
 	</dependencies>
 

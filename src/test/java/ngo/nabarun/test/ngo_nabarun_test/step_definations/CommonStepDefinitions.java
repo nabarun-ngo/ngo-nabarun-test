@@ -127,7 +127,7 @@ public class CommonStepDefinitions {
 
 	@Then("I wait for loading to complete")
 	public void i_wait_for_loading_to_complete() throws InterruptedException {
-		Thread.sleep(Duration.ofSeconds(2));
+		Thread.sleep(2000);
 		int timeout = 60;
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeout));
 		wait.until(t -> {
@@ -143,7 +143,7 @@ public class CommonStepDefinitions {
 				driver.manage().timeouts().implicitlyWait(implicitWait);
 			}
 		});
-		Thread.sleep(Duration.ofSeconds(2));
+		Thread.sleep(2000);
 	}
 
 	@Then("^the \"(.+)\" (button|section) should be displayed at \"(.+)\" page$")
@@ -155,7 +155,7 @@ public class CommonStepDefinitions {
 
 	@Then("^I wait for (\\d+) seconds$")
 	public void iWaitForSeconds(int wait) throws Throwable {
-		Thread.sleep(Duration.ofSeconds(wait));
+		Thread.sleep(wait* 1000L);
 	}
 
 	@Then("^I opened the accordion of index (\\d+) at \"([^\"]*)\" (page|accordion)$")

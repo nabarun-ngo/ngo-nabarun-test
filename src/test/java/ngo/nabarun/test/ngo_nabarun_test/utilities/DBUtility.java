@@ -1,9 +1,9 @@
 package ngo.nabarun.test.ngo_nabarun_test.utilities;
 
-import com.mongodb.ConnectionString;
-import com.mongodb.client.*;
-import org.bson.conversions.Bson;
-import static com.mongodb.client.model.Filters.*;
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.gte;
+import static com.mongodb.client.model.Filters.lte;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -13,30 +13,45 @@ import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.Document;
+
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
+import com.mongodb.ServerApi;
+import com.mongodb.ServerApiVersion;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+
 import ngo.nabarun.test.ngo_nabarun_test.config.Configs;
 
 public class DBUtility {
-	private static final Logger logger = LogManager.getLogger(DevToolsUtility.class);
+	private static final Logger logger = LogManager.getLogger(DBUtility.class);
 
 	private static <T> T executeMongoOperation(Function<MongoDatabase, T> operation) {
-		String mongodb_uri = Configs.MONGODB_CONNECTION_STRING;
-		ConnectionString connectionString = new ConnectionString(mongodb_uri);
-		try (MongoClient mongoClient = MongoClients.create(connectionString)) { // Auto-close connection
-			MongoDatabase database = mongoClient.getDatabase(connectionString.getDatabase());
-			return operation.apply(database); // Execute and return result
+		String connectionString = Configs.MONGODB_CONNECTION_STRING;
+
+		ServerApi serverApi = ServerApi.builder().version(ServerApiVersion.V1).build();
+
+		MongoClientSettings settings = MongoClientSettings.builder()
+				.applyConnectionString(new ConnectionString(connectionString))
+				.serverApi(serverApi)
+				.build();
+
+		try (MongoClient mongoClient = MongoClients.create(settings)) {
+			MongoDatabase database = mongoClient.getDatabase("nabarun_db");
+			return operation.apply(database);
 		} catch (Exception e) {
-			logger.error("failed to establish database connection", e);
-			return null;
+			logger.error("Error executing MongoDB operation", e);
+			throw new RuntimeException("Error executing MongoDB operation", e);
 		}
 	}
 
 	public static Document findUserByName(String firstName, String lastName) {
 		return executeMongoOperation(database -> {
-			Document filter = new Document("firstName",
-					new Document("$regex", "^" + firstName + "$").append("$options", "i"))
-					.append("lastName", new Document("$regex", "^" + lastName + "$").append("$options", "i"));
-			MongoCollection<Document> collection = database.getCollection("user_profiles");
-			return collection.find(filter).first();
+			MongoCollection<Document> collection = database.getCollection("users");
+			Document user = collection.find(and(eq("firstName", firstName), eq("lastName", lastName))).first();
+			return user;
 		});
 	}
 
@@ -44,10 +59,14 @@ public class DBUtility {
 			String type) {
 		return executeMongoOperation(database -> {
 			MongoCollection<Document> collection = database.getCollection("donations");
-			Bson dateFilter = and(gte("raisedOn", startDate), lte("raisedOn", endDate), eq("profile", profileId),
-					eq("type", type));
 			List<Document> donations = new ArrayList<>();
-			collection.find(dateFilter).into(donations);
+			try {
+				collection.find(and(gte("raisedOn", startDate), lte("raisedOn", endDate), eq("profile", profileId),
+						eq("type", type))).into(donations);
+			} catch (Exception e) {
+				logger.error("Error finding donations between dates", e);
+				throw new RuntimeException("Error finding donations between dates", e);
+			}
 			return donations;
 		});
 	}
@@ -55,16 +74,21 @@ public class DBUtility {
 	public static boolean deleteDonationById(String donationId) {
 		return executeMongoOperation(database -> {
 			MongoCollection<Document> collection = database.getCollection("donations");
-			long deletedCount = collection.deleteOne(eq("_id", donationId)).getDeletedCount();
-			return deletedCount > 0;
+			try {
+				collection.deleteOne(eq("_id", donationId));
+				return true;
+			} catch (Exception e) {
+				logger.error("Error deleting donation by id", e);
+				return false;
+			}
 		});
 	}
 
 	public static Document findOTPDetails(String email) {
 		return executeMongoOperation(database -> {
-			Document filter = new Document("email", email);
-			MongoCollection<Document> collection = database.getCollection("tickets");
-			return collection.find(filter).first();
+			MongoCollection<Document> collection = database.getCollection("otp_details");
+			Document otpDetails = collection.find(eq("email", email)).first();
+			return otpDetails;
 		});
 	}
 }

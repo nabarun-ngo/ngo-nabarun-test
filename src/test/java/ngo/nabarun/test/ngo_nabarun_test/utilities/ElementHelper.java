@@ -173,7 +173,7 @@ public class ElementHelper {
 				throw new RuntimeException("Failed to click after " + (attempt - 1) + " attempt.");
 			}
 		} catch (Exception e) {
-			Thread.sleep(Duration.ofSeconds(2));
+			Thread.sleep(2000);
 			attempt++;
 			click(element, attempt);
 		}

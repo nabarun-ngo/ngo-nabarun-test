@@ -17,9 +17,10 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
 
 import ngo.nabarun.test.ngo_nabarun_test.config.Configs;
@@ -29,6 +30,7 @@ import ngo.nabarun.test.ngo_nabarun_test.models.ApiPagination;
 import ngo.nabarun.test.ngo_nabarun_test.models.User;
 
 public class DataProvider {
+	private static final Logger logger = LogManager.getLogger(DataProvider.class);
 	private static final Faker faker = new Faker();
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 	private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -37,24 +39,22 @@ public class DataProvider {
 		String rootUrl = Configs.ROOT_URL;
 		String apiKey = Configs.TEST_APIKEY;
 		String requestUrl = rootUrl + "/api/user/list?roles=" + role + "&userByRole=true";
-		CloseableHttpClient httpClient = HttpClients.createDefault();
 		HttpGet request = new HttpGet(requestUrl);
 		request.addHeader("X-Api-Key", apiKey);
 		request.addHeader("accept", "application/json");
-		try (CloseableHttpResponse response = httpClient.execute(request)) {
+		try (CloseableHttpClient httpClient = HttpClients.createDefault();
+			 CloseableHttpResponse response = httpClient.execute(request)) {
 			HttpEntity entity = response.getEntity();
 			if (entity != null) {
 				String result = EntityUtils.toString(entity);
 				System.out.println(result);
-				ObjectMapper mapper = CommonHelpers.objectMapper;
-				ApiResponse<ApiPagination<User>> apiResponse = mapper.readValue(result,
+				ApiResponse<ApiPagination<User>> apiResponse = CommonHelpers.objectMapper.readValue(result,
 						new TypeReference<ApiResponse<ApiPagination<User>>>() {
 						});
-
-				// System.out.println(apiResponse);
 				return apiResponse.getResponsePayload().getContent();
 			}
 		} catch (IOException e) {
+			logger.error("Error fetching users by role: {}", role, e);
 			e.printStackTrace();
 		}
 		return List.of();
@@ -107,7 +107,6 @@ public class DataProvider {
 			input = input.replace("{RandomLocation}", faker.address().cityName());
 		}
 
-		// Replace SystemDate with offsets
 		Pattern datePattern = Pattern.compile("\\{SystemDate([+-]\\d+)\\}");
 		Matcher dateMatcher = datePattern.matcher(input);
 		while (dateMatcher.find()) {
@@ -115,7 +114,6 @@ public class DataProvider {
 			input = input.replace(dateMatcher.group(), getDateWithOffset(offset));
 		}
 
-		// Replace RandomPhoneNumber with specific digits
 		Pattern phonePattern = Pattern.compile("\\{RandomNumber:(\\d+)\\}");
 		Matcher phoneMatcher = phonePattern.matcher(input);
 		while (phoneMatcher.find()) {
@@ -143,5 +141,5 @@ public class DataProvider {
 	private static boolean containsPlaceholder(String input, String placeholder) {
 		return input.contains(placeholder);
 	}
-
 }
+

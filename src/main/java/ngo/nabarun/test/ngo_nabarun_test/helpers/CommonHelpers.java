@@ -14,6 +14,8 @@ import java.util.Date;
 
 import javax.imageio.ImageIO;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -21,6 +23,7 @@ import org.openqa.selenium.WebDriver;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class CommonHelpers {
+	private static final Logger logger = LogManager.getLogger(CommonHelpers.class);
 	
 	public static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -39,7 +42,7 @@ public class CommonHelpers {
 	            ImageIO.write(screenCapture, "png", outputFile);
 	            return outputFile;
 	        } catch (AWTException | IOException e1) {
-	            e1.printStackTrace();
+	            logger.error("Error taking screenshot using Robot", e1);
 	    		return null;
 	        }
 		}
@@ -75,3 +78,4 @@ public class CommonHelpers {
 	        return new File(resource.getFile()).getAbsolutePath();
 	    }
 }
+

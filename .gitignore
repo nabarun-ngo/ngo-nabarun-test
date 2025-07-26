@@ -61,3 +61,6 @@ build/
 
 test-config-*.json
 test-config.json
+
+springboot-env.conf
+/apps/

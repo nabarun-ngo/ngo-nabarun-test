@@ -12,6 +12,6 @@ import static io.cucumber.junit.platform.engine.Constants.GLUE_PROPERTY_NAME;;
 @IncludeEngines("cucumber")
 @SelectPackages("ngo_nabarun_test")
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "ngo.nabarun.test.ngo_nabarun_test")
-@ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "pretty,json:target/cucumber.json,html:target/cucumber.html")
+//@ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "pretty,html:target/cucumber.html")
 public class RunNGONabarunTest {
 }

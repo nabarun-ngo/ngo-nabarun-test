@@ -2,6 +2,8 @@ package ngo.nabarun.test.ngo_nabarun_test.config;
 
 
 import ngo.nabarun.test.ngo_nabarun_test.helpers.CommonHelpers;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +13,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 
 public class ConfigManager {
+	private static final Logger logger = LogManager.getLogger(ConfigManager.class);
 	private static Map<String, Object> config;
 	private static final String DOPPLER_PROJECT_NAME = "DOPPLER_PROJECT_NAME";
 	private static final String DOPPLER_SERVICE_TOKEN = "DOPPLER_SERVICE_TOKEN";
@@ -37,7 +40,7 @@ public class ConfigManager {
 				DopplerPropertySource source= new  DopplerPropertySource(projectName, config_env, token);
 				config=source.loadProperties();
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Error loading properties from Doppler", e);
 			}
 		} else {
 			String configFilePath = "test_config/test-config-"+config_env+".json";
@@ -48,6 +51,7 @@ public class ConfigManager {
 				config = CommonHelpers.objectMapper.readValue(inputStream, new TypeReference<Map<String, Object>>() {
 				});
 			} catch (IOException e) {
+				logger.error("Failed to load configuration from file", e);
 				throw new RuntimeException("Failed to load configuration", e);
 			}
 		}

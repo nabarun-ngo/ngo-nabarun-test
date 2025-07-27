@@ -55,7 +55,6 @@ public class TestHooks {
         edge_options.setExperimentalOption("prefs", prefs);
         edge_options.addArguments("--no-sandbox");
         edge_options.addArguments("--disable-dev-shm-usage");
-		
         if(headless.equals("Y")) {
             chrome_options.addArguments("--headless");
             edge_options.addArguments("--headless");

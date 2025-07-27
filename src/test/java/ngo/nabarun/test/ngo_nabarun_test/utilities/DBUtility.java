@@ -32,14 +32,14 @@ public class DBUtility {
 		String connectionString = Configs.MONGODB_CONNECTION_STRING;
 
 		ServerApi serverApi = ServerApi.builder().version(ServerApiVersion.V1).build();
-
+		ConnectionString connString = new ConnectionString(connectionString);
 		MongoClientSettings settings = MongoClientSettings.builder()
-				.applyConnectionString(new ConnectionString(connectionString))
+				.applyConnectionString(connString)
 				.serverApi(serverApi)
 				.build();
 
 		try (MongoClient mongoClient = MongoClients.create(settings)) {
-			MongoDatabase database = mongoClient.getDatabase("nabarun_db");
+			MongoDatabase database = mongoClient.getDatabase(connString.getDatabase());
 			return operation.apply(database);
 		} catch (Exception e) {
 			logger.error("Error executing MongoDB operation", e);
@@ -49,7 +49,7 @@ public class DBUtility {
 
 	public static Document findUserByName(String firstName, String lastName) {
 		return executeMongoOperation(database -> {
-			MongoCollection<Document> collection = database.getCollection("users");
+			MongoCollection<Document> collection = database.getCollection("user_profiles");
 			Document user = collection.find(and(eq("firstName", firstName), eq("lastName", lastName))).first();
 			return user;
 		});
@@ -86,7 +86,7 @@ public class DBUtility {
 
 	public static Document findOTPDetails(String email) {
 		return executeMongoOperation(database -> {
-			MongoCollection<Document> collection = database.getCollection("otp_details");
+			MongoCollection<Document> collection = database.getCollection("tickets");
 			Document otpDetails = collection.find(eq("email", email)).first();
 			return otpDetails;
 		});

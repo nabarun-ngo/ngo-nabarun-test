@@ -18,15 +18,16 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.*;
-import ngo.nabarun.test.ngo_nabarun_test.config.Configs;
-import ngo.nabarun.test.ngo_nabarun_test.helpers.CommonHelpers;
+import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
+import ngo.nabarun.test.ngo_nabarun_test.helpers.DataProvider;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext.ContextKeys;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.CommonPageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ControlLookup;
-import ngo.nabarun.test.ngo_nabarun_test.utilities.DataProvider;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.DevToolsUtility;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ElementHelper;
+import ngo.nabarun.test.ngo_nabarun_test.utils.CommonUtils;
+import ngo.nabarun.test.ngo_nabarun_test.utils.DataUtils;
 
 public class CommonStepDefinitions {
 
@@ -35,7 +36,7 @@ public class CommonStepDefinitions {
 	private WebDriver driver;
 	private CommonPageObjects commonPageObjects;
 	private ElementHelper elementHelper;
-	private DataProvider dataProvider;
+	//private DataProvider dataProvider;
 	private static SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
 	public CommonStepDefinitions(ScenarioContext scenarioContext, ControlLookup controlLookup,
@@ -45,7 +46,7 @@ public class CommonStepDefinitions {
 		this.scenarioContext = scenarioContext;
 		this.driver = scenarioContext.getDriver();
 		this.elementHelper = elementHelper;
-		this.dataProvider = dataProvider;
+		//this.dataProvider = dataProvider;
 	}
 
 	@Given("I have opened to Nabarun's web portal")
@@ -76,7 +77,7 @@ public class CommonStepDefinitions {
 	public void iEnterOnTextboxAtAccordion(String actionName, String rawValue, String elementName, String elementType,
 			String pageName, String pageType) throws Throwable {
 		WebElement element = controlLookup.getLookupElement(elementName, elementType, pageName, pageType);
-		String value = dataProvider.replacePlaceholders(rawValue);
+		String value = DataUtils.replacePlaceholders(rawValue);
 		switch (actionName.toUpperCase()) {
 		case "ENTER" -> {
 			//elementHelper.scrollIntoView(element);
@@ -91,7 +92,7 @@ public class CommonStepDefinitions {
 		}
 		case "CLICK" -> elementHelper.clickRadioOption(element, value);
 		case "UPLOAD" -> {
-			String filePath = CommonHelpers.getFileFromResources(value);
+			String filePath = CommonUtils.getFileFromResources(value);
 			element.sendKeys(filePath);
 		}
 		default -> throw new IllegalStateException("Invalid action : " + actionName);
@@ -183,5 +184,5 @@ public class CommonStepDefinitions {
 			Assertions.assertTrue(element.isDisplayed(),"Element "+content+" is not displayed.");
 	    }
 	}
-
+	
 }

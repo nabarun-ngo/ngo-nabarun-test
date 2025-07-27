@@ -1,1 +1,2 @@
 mvn clean test -Dcucumber.filter.tags=@donation01
+mvn test -q -Dcucumber.filter.tags=@workflow01 -Dcucumber.execution.dry-run=true

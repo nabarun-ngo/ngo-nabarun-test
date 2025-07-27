@@ -18,8 +18,9 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import ngo.nabarun.test.ngo_nabarun_test.helpers.CommonHelpers;
+import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
+import ngo.nabarun.test.ngo_nabarun_test.utils.CommonUtils;
 
 public class ElementHelper {
 
@@ -42,9 +43,9 @@ public class ElementHelper {
 	}
 
 	public void selectMatOption(WebElement selectEl, String value) throws Exception {
-		//scrollIntoView(selectEl);
+		// scrollIntoView(selectEl);
 		elementWait().until(ExpectedConditions.elementToBeClickable(selectEl));
-		selectEl.click();
+		click(selectEl);
 
 		selectOpt(value, 0);
 	}
@@ -75,7 +76,7 @@ public class ElementHelper {
 	}
 
 	public void clickRadioOption(WebElement element, String value) throws Exception {
-		//scrollIntoView(element);
+		// scrollIntoView(element);
 		WebElement radioOpt = element.findElement(By.xpath(".//*[normalize-space()=\"" + value + "\"]"));
 		radioOpt.click();
 	}
@@ -110,10 +111,11 @@ public class ElementHelper {
 		driver.findElement(By.cssSelector(".mat-calendar-period-button")).click();
 		List<WebElement> dateCheck = driver.findElements(By.xpath(
 				"//button[contains(@class,'mat-calendar-body-cell') and normalize-space(string())='" + year + "']"));
-		while(dateCheck.size() == 0) {
+		while (dateCheck.size() == 0) {
 			driver.findElement(By.cssSelector(".mat-calendar-previous-button")).click();
-			 dateCheck = driver.findElements(By.xpath(
-						"//button[contains(@class,'mat-calendar-body-cell') and normalize-space(string())='" + year + "']"));
+			dateCheck = driver.findElements(
+					By.xpath("//button[contains(@class,'mat-calendar-body-cell') and normalize-space(string())='" + year
+							+ "']"));
 		}
 		driver.findElement(By.xpath(
 				"//button[contains(@class,'mat-calendar-body-cell') and normalize-space(string())='" + year + "']"))
@@ -152,12 +154,12 @@ public class ElementHelper {
 	}
 
 	public void uploadFileFromResource(WebElement element, String value) {
-		String filePath = CommonHelpers.getFileFromResources(value);
+		String filePath = CommonUtils.getFileFromResources(value);
 		element.findElement(By.xpath(".//input[@type='file']")).sendKeys(filePath);
 	}
 
 	public void click(WebElement element, int attempt) throws Exception {
-		//scrollIntoView(element);
+		// 
 		try {
 			switch (attempt) {
 			case 0:
@@ -175,11 +177,25 @@ public class ElementHelper {
 		} catch (Exception e) {
 			Thread.sleep(2000);
 			attempt++;
+			scrollIntoView(element);
 			click(element, attempt);
 		}
 	}
 
 	public void click(WebElement element) throws Exception {
 		click(element, 0);
+	}
+
+	public boolean isElementPresent(By locator, int timeout) {
+		try {
+			driver.manage().timeouts().implicitlyWait(Duration.ofMillis(250));
+			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeout));
+			wait.until(ExpectedConditions.presenceOfElementLocated(locator));
+			return true;
+		} catch (Exception e) {
+			return false;
+		} finally {
+			driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(Configs.IMPLICIT_WAIT));
+		}
 	}
 }

@@ -1,7 +1,6 @@
-package ngo.nabarun.test.ngo_nabarun_test.config;
+package ngo.nabarun.test.ngo_nabarun_test.configs;
 
 
-import ngo.nabarun.test.ngo_nabarun_test.helpers.CommonHelpers;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -10,6 +9,8 @@ import java.io.InputStream;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+
+import ngo.nabarun.test.ngo_nabarun_test.utils.CommonUtils;
 
 
 public class ConfigManager {
@@ -48,7 +49,7 @@ public class ConfigManager {
 				if (inputStream == null) {
 					throw new RuntimeException("Configuration file not found: " + configFilePath);
 				}
-				config = CommonHelpers.objectMapper.readValue(inputStream, new TypeReference<Map<String, Object>>() {
+				config = CommonUtils.objectMapper.readValue(inputStream, new TypeReference<Map<String, Object>>() {
 				});
 			} catch (IOException e) {
 				logger.error("Failed to load configuration from file", e);

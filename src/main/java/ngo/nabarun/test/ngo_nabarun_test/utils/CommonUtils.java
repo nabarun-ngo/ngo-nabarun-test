@@ -1,4 +1,4 @@
-package ngo.nabarun.test.ngo_nabarun_test.helpers;
+package ngo.nabarun.test.ngo_nabarun_test.utils;
 
 import java.awt.AWTException;
 import java.awt.Rectangle;
@@ -11,7 +11,6 @@ import java.net.URL;
 import java.text.Normalizer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
 import javax.imageio.ImageIO;
 
 import org.apache.logging.log4j.LogManager;
@@ -22,8 +21,8 @@ import org.openqa.selenium.WebDriver;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class CommonHelpers {
-	private static final Logger logger = LogManager.getLogger(CommonHelpers.class);
+public class CommonUtils {
+	private static final Logger logger = LogManager.getLogger(CommonUtils.class);
 	
 	public static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -71,11 +70,14 @@ public class CommonHelpers {
 	    }
 	    
 	    public static String getFileFromResources(String fileName) {
-	        URL resource = CommonHelpers.class.getClassLoader().getResource(fileName);
+	        URL resource = CommonUtils.class.getClassLoader().getResource(fileName);
 	        if (resource == null) {
 	            throw new IllegalArgumentException("File not found: " + fileName);
 	        }
 	        return new File(resource.getFile()).getAbsolutePath();
 	    }
+	    
+		
+
 }
 

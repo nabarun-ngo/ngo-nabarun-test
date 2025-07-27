@@ -13,7 +13,7 @@ import org.openqa.selenium.devtools.v137.network.model.ResourceType;
 import org.openqa.selenium.devtools.v137.network.model.Response;
 import org.openqa.selenium.edge.EdgeDriver;
 
-import ngo.nabarun.test.ngo_nabarun_test.config.Configs;
+import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
 
 import org.openqa.selenium.devtools.v137.log.Log;
 import java.util.Base64;

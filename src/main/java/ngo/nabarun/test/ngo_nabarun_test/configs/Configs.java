@@ -1,4 +1,4 @@
-package ngo.nabarun.test.ngo_nabarun_test.config;
+package ngo.nabarun.test.ngo_nabarun_test.configs;
 
 public class Configs {
 

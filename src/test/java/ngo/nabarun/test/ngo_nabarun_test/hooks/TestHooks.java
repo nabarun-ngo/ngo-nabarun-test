@@ -59,6 +59,9 @@ public class TestHooks {
         if(headless.equals("Y")) {
             chrome_options.addArguments("--headless");
             edge_options.addArguments("--headless");
+            chrome_options.addArguments("--window-size=1920,1080");
+            edge_options.addArguments("--window-size=1920,1080");
+
         }
         
         if(uniqueProfile.equals("Y")) {

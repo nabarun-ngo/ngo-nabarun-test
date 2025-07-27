@@ -94,12 +94,12 @@ public class LoginStepDefinations {
 	}
 
 	private void handle_change_password_screen_if_it_appeared() throws Exception {
-		// Handling change password screen if it appeared
-		if (elementHelper.isElementPresent(pageObject.PasswordChangedTxtLocator, 5)) {
-			pageObject.NewPassword.get().sendKeys(Configs.TEST_DEFAULTPASSWORD);
-			pageObject.ConfirmNewPassword.get().sendKeys(Configs.TEST_DEFAULTPASSWORD);
-			elementHelper.click(pageObject.ChangePasswordSubmit.get());
-		}
+	    // Handling change password screen if it appeared
+	    if (elementHelper.isElementPresent(pageObject.PasswordChangedTxtLocator, 5)) {
+	        pageObject.NewPassword.get().sendKeys(Configs.TEST_DEFAULTPASSWORD);
+	        pageObject.ConfirmNewPassword.get().sendKeys(Configs.TEST_DEFAULTPASSWORD);
+	        elementHelper.click(pageObject.ChangePasswordSubmit.get());
+	    }
 	}
 
 	private void handle_complete_profile_screen_if_it_appeared() throws Exception {

@@ -6,10 +6,10 @@ import java.util.regex.Pattern;
 import org.bson.Document;
 
 import io.cucumber.java.en.Then;
+import ngo.nabarun.test.ngo_nabarun_test.helpers.DataProvider;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext.ContextKeys;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.HomePageObjects;
-import ngo.nabarun.test.ngo_nabarun_test.utilities.DBUtility;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ElementHelper;
 
 public class HomeStepDefinations {
@@ -17,11 +17,14 @@ public class HomeStepDefinations {
 	private HomePageObjects pageObject;
 	private ElementHelper elementHelper;
 	private ScenarioContext scenarioContext;
+	private DataProvider dataProvider;
 
-	public HomeStepDefinations(HomePageObjects pageObject,ScenarioContext scenarioContext,ElementHelper elementHelper) {
+	public HomeStepDefinations(HomePageObjects pageObject,ScenarioContext scenarioContext,ElementHelper elementHelper,
+			DataProvider dataProvider) {
 		this.pageObject=pageObject;
 		this.elementHelper=elementHelper;
 		this.scenarioContext=scenarioContext;
+		this.dataProvider = dataProvider;
 	}
 
 
@@ -29,7 +32,7 @@ public class HomeStepDefinations {
 	public void iRetrieveTheOTPFromDatabaseAndEnterItOnOTPTextbox() throws Throwable {
 		String email =pageObject.Join_Email_Text.get().getText();
 		scenarioContext.set(ContextKeys.New_User_Email, email);
-		Document otp_detail=DBUtility.findOTPDetails(email);
+		Document otp_detail=dataProvider.findOTPDetails(email);
 		elementHelper.scrollIntoView(pageObject.Join_OTP.get());
 		pageObject.Join_OTP.get().sendKeys(otp_detail.getString("oneTimePassword"));
 	}

@@ -1,7 +1,9 @@
 Feature: Requests & Worklist
   This fearure covers all scenarios if request procession workflows
 
-  @regression @smoke @workflow01
+  @regression 
+  @smoke 
+  @workflow01
   Scenario: Workflow - Create and fullfill Join Request - Happy Path
     Given I have opened to Nabarun's web portal
     Then I click on "Join Us" link at "Home" page
@@ -41,6 +43,7 @@ Feature: Requests & Worklist
     Then I switch to the new tab
     # Login With President
     Then I login with "president@nabarun.com" user using Password option
+    Then I handle all conditional post login screen if it appeared
     Then I must be landed to "WELCOME TO NABARUN'S SECURED DASHBOARD" screen
     When I click on "Tasks" text at "Dashboard" page
     And I wait for loading to complete
@@ -58,6 +61,7 @@ Feature: Requests & Worklist
     Then I logout from current session
     # Login With President
     Then I login with "secretary@nabarun.com" user using Password option
+    Then I handle all conditional post login screen if it appeared
     Then I must be landed to "WELCOME TO NABARUN'S SECURED DASHBOARD" screen
     When I click on "Tasks" text at "Dashboard" page
     And I wait for loading to complete
@@ -75,7 +79,7 @@ Feature: Requests & Worklist
     Then I logout from current session
     # Login With New User 1st time
     Then I login with "{NewUserEmail}" user using Password option
-    And I check if user consent screen appeared or not
+    Then I handle user consent screen if it appeared
     Then I must be landed to "COMPLETE PROFILE" screen
     Then I select "Mr" on "Title" dropdown at "Profile" page
     Then I select "Male" on "Gender" dropdown at "Profile" page
@@ -99,7 +103,7 @@ Feature: Requests & Worklist
     Then I logout from current session
     # Login With New User 2nd time
     Then I login with "{NewUserEmail}" user using Password option
-    And I check if user consent screen appeared or not
+    Then I handle user consent screen if it appeared
     Then I must be landed to "WELCOME TO NABARUN'S SECURED DASHBOARD" screen
     When I click on "Tasks" text at "Dashboard" page
     And I wait for loading to complete

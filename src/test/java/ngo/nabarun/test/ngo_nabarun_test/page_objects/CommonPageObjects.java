@@ -22,7 +22,8 @@ public class CommonPageObjects {
 	}
 
 	public By PageLoaderLocator = By.xpath(".//*[normalize-space(text())='Please wait, Things are getting ready...']");
-	public Supplier<WebElement> PageHeader = () -> driver.findElement(By.xpath("//app-page-title//span"));
+	public By PageHeaderLocator = By.xpath("//app-page-title//span");
+	public Supplier<WebElement> PageHeader = () -> driver.findElement(PageHeaderLocator);
 	public Supplier<WebElement> Popup_Container = () -> driver.findElement(By.xpath("//mat-dialog-container"));
 
 	public WebElement getAccordion(int i, SearchContext parentContext) {

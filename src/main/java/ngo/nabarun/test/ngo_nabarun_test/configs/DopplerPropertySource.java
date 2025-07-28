@@ -1,4 +1,4 @@
-package ngo.nabarun.test.ngo_nabarun_test.config;
+package ngo.nabarun.test.ngo_nabarun_test.configs;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -16,7 +16,7 @@ import org.apache.http.util.EntityUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import ngo.nabarun.test.ngo_nabarun_test.helpers.CommonHelpers;
+import ngo.nabarun.test.ngo_nabarun_test.utils.CommonUtils;
 
 public class DopplerPropertySource {
 
@@ -54,7 +54,7 @@ public class DopplerPropertySource {
 			};
 
 			String responseBody = httpclient.execute(httpget, responseHandler);
-			ObjectMapper objectMapper = CommonHelpers.objectMapper;
+			ObjectMapper objectMapper = CommonUtils.objectMapper;
 			JsonNode respNode = objectMapper.readTree(responseBody);
 			JsonNode secretsNode = respNode.get("secrets");
 			Iterator<Map.Entry<String, JsonNode>> fields = secretsNode.fields();

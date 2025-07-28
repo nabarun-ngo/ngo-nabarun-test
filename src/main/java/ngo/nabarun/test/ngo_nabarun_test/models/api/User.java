@@ -1,4 +1,4 @@
-package ngo.nabarun.test.ngo_nabarun_test.models;
+package ngo.nabarun.test.ngo_nabarun_test.models.api;
 import java.util.List;
 
 

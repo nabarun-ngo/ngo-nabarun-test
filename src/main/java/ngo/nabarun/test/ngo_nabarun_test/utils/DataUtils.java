@@ -1,64 +1,20 @@
-package ngo.nabarun.test.ngo_nabarun_test.utilities;
+package ngo.nabarun.test.ngo_nabarun_test.utils;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.javafaker.Faker;
 
-import ngo.nabarun.test.ngo_nabarun_test.config.Configs;
-import ngo.nabarun.test.ngo_nabarun_test.helpers.CommonHelpers;
-import ngo.nabarun.test.ngo_nabarun_test.models.ApiResponse;
-import ngo.nabarun.test.ngo_nabarun_test.models.ApiPagination;
-import ngo.nabarun.test.ngo_nabarun_test.models.User;
-
-public class DataProvider {
-	private static final Logger logger = LogManager.getLogger(DataProvider.class);
+public class DataUtils {
 	private static final Faker faker = new Faker();
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 	private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
-	public List<User> getUsersByRole(String role) {
-		String rootUrl = Configs.ROOT_URL;
-		String apiKey = Configs.TEST_APIKEY;
-		String requestUrl = rootUrl + "/api/user/list?roles=" + role + "&userByRole=true";
-		HttpGet request = new HttpGet(requestUrl);
-		request.addHeader("X-Api-Key", apiKey);
-		request.addHeader("accept", "application/json");
-		try (CloseableHttpClient httpClient = HttpClients.createDefault();
-			 CloseableHttpResponse response = httpClient.execute(request)) {
-			HttpEntity entity = response.getEntity();
-			if (entity != null) {
-				String result = EntityUtils.toString(entity);
-				System.out.println(result);
-				ApiResponse<ApiPagination<User>> apiResponse = CommonHelpers.objectMapper.readValue(result,
-						new TypeReference<ApiResponse<ApiPagination<User>>>() {
-						});
-				return apiResponse.getResponsePayload().getContent();
-			}
-		} catch (IOException e) {
-			logger.error("Error fetching users by role: {}", role, e);
-			e.printStackTrace();
-		}
-		return List.of();
-	}
 
 	public static String firstDayOfCurrentMonth() {
 		LocalDate firstDay = LocalDate.now().withDayOfMonth(1);
@@ -70,7 +26,7 @@ public class DataProvider {
 		return lastDay.format(FORMATTER);
 	}
 
-	public String replacePlaceholders(String input) {
+	public static String replacePlaceholders(String input) {
 		if (input == null || input.isEmpty()) {
 			return input;
 		}
@@ -142,4 +98,3 @@ public class DataProvider {
 		return input.contains(placeholder);
 	}
 }
-

@@ -10,12 +10,12 @@ import org.bson.Document;
 import org.openqa.selenium.WebElement;
 
 import io.cucumber.java.en.Then;
+import ngo.nabarun.test.ngo_nabarun_test.helpers.DataProvider;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext.ContextKeys;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.DonationPageObjects;
-import ngo.nabarun.test.ngo_nabarun_test.utilities.DBUtility;
-import ngo.nabarun.test.ngo_nabarun_test.utilities.DataProvider;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ElementHelper;
+import ngo.nabarun.test.ngo_nabarun_test.utils.DataUtils;
 
 public class DonationStepDefinations {
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
@@ -23,12 +23,14 @@ public class DonationStepDefinations {
 	private DonationPageObjects donationPageObjects;
 	private ScenarioContext scenarioContext;
 	private ElementHelper elementHelper;
+	private DataProvider dataProvider;
 
 	public DonationStepDefinations(ScenarioContext scenarioContext,
-			ElementHelper elementHelper, DonationPageObjects donationPageObjects) {
+			ElementHelper elementHelper, DonationPageObjects donationPageObjects,DataProvider dataProvider) {
 		this.donationPageObjects = donationPageObjects;
 		this.scenarioContext = scenarioContext;
 		this.elementHelper = elementHelper;
+		this.dataProvider= dataProvider;
 	}
 
 	@Then("^I capture and store the donation id$")
@@ -82,14 +84,14 @@ public class DonationStepDefinations {
 	public void iCheckAndDeleteRegularDonationRaisedForThisMonth(String memberName) throws Throwable {
 		String firstName = memberName.split(" ")[0];
 		String lastName = memberName.split(" ")[1];
-		Document user =DBUtility.findUserByName(firstName, lastName);
-		Date startDate = dateFormat.parse(DataProvider.firstDayOfCurrentMonth());
-		Date endDate = dateFormat.parse(DataProvider.lastDayOfCurrentMonth());
+		Document user =dataProvider.findUserByName(firstName, lastName);
+		Date startDate = dateFormat.parse(DataUtils.firstDayOfCurrentMonth());
+		Date endDate = dateFormat.parse(DataUtils.lastDayOfCurrentMonth());
 		String id = user.getString("_id");
-		List<Document> donations=DBUtility.findDonationsBetweenDates(startDate,endDate,id,"REGULAR");
+		List<Document> donations=dataProvider.findDonationsBetweenDates(startDate,endDate,id,"REGULAR");
 		for(Document donation:donations) {
 			String donationId=donation.getString("_id");
-			DBUtility.deleteDonationById(donationId);
+			dataProvider.deleteDonationById(donationId);
 		}
 	}
 }

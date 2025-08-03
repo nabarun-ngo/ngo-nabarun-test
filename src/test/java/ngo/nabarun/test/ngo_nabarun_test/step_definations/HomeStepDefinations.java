@@ -3,12 +3,11 @@ package ngo.nabarun.test.ngo_nabarun_test.step_definations;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.bson.Document;
-
 import io.cucumber.java.en.Then;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.DataProvider;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext.ContextKeys;
+import ngo.nabarun.test.ngo_nabarun_test.models.db.TicketDBModel;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.HomePageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ElementHelper;
 
@@ -32,9 +31,9 @@ public class HomeStepDefinations {
 	public void iRetrieveTheOTPFromDatabaseAndEnterItOnOTPTextbox() throws Throwable {
 		String email =pageObject.Join_Email_Text.get().getText();
 		scenarioContext.set(ContextKeys.New_User_Email, email);
-		Document otp_detail=dataProvider.findOTPDetails(email);
+		TicketDBModel otp_detail=dataProvider.findOTPDetails(email);
 		elementHelper.scrollIntoView(pageObject.Join_OTP.get());
-		pageObject.Join_OTP.get().sendKeys(otp_detail.getString("oneTimePassword"));
+		pageObject.Join_OTP.get().sendKeys(otp_detail.getOneTimePassword());
 	}
 	
 	@Then("^I capture and store the request id$")

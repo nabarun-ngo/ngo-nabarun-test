@@ -1,0 +1,29 @@
+name: 'PR Merged: Build And Release'
+on:
+  pull_request:
+    paths-ignore:
+    - '.github/**'
+    types: [opened, synchronize, reopened, closed]
+    branches:
+    - main
+    - master
+    - stage
+
+permissions:
+  contents: write      
+
+jobs:
+  build:
+   name: Build and Test
+   uses: nabarun-ngo/ngo-nabarun-templates/.github/workflows/Build-Test.yml@main
+   with:
+      platform: "java"
+      command: "mvn clean install"
+      
+  create_release:
+    if: github.event.pull_request.merged == true
+    needs: build
+    name: Create Tag and Release
+    uses: nabarun-ngo/ngo-nabarun-templates/.github/workflows/Create-Tag-Release.yml@main
+    with:
+     source_branch: ${{ github.base_ref }}

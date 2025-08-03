@@ -4,7 +4,7 @@ Feature: Requests & Worklist
   @regression 
   @smoke 
   @workflow01
-  Scenario: Workflow - Create and fullfill Join Request - Happy Path
+  Scenario Outline: Workflow - Create and fullfill Join Request - Happy Path
     Given I have opened to Nabarun's web portal
     Then I click on "Join Us" link at "Home" page
     Then I enter "{RandomFirstName}" on "Your First Name" textbox at "Home" page
@@ -42,7 +42,7 @@ Feature: Requests & Worklist
     Then I click on "Login" link at "Home" page
     Then I switch to the new tab
     # Login With President
-    Then I login with "president@nabarun.com" user using Password option
+    Then I login with "<Approver1>" user using Password option
     Then I handle all conditional post login screen if it appeared
     Then I must be landed to "WELCOME TO NABARUN'S SECURED DASHBOARD" screen
     When I click on "Tasks" text at "Dashboard" page
@@ -60,7 +60,7 @@ Feature: Requests & Worklist
     Then I click on "Back to Dashboard" link at "Tasks" page
     Then I logout from current session
     # Login With President
-    Then I login with "secretary@nabarun.com" user using Password option
+    Then I login with "<Approver2>" user using Password option
     Then I handle all conditional post login screen if it appeared
     Then I must be landed to "WELCOME TO NABARUN'S SECURED DASHBOARD" screen
     When I click on "Tasks" text at "Dashboard" page
@@ -114,3 +114,7 @@ Feature: Requests & Worklist
       | Expected_Content  |
       | No records found. |
     Then I logout from current session
+    
+    Examples:
+    | Approver1             | Approver2             |
+    | president@nabarun.com | secretary@nabarun.com |

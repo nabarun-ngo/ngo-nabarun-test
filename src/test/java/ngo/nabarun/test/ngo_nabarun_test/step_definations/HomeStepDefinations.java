@@ -19,8 +19,8 @@ public class HomeStepDefinations {
 	private ScenarioContext scenarioContext;
 	private DataProvider dataProvider;
 
-	public HomeStepDefinations(HomePageObjects pageObject,ScenarioContext scenarioContext,ElementHelper elementHelper,
-			DataProvider dataProvider) {
+	public HomeStepDefinations(ScenarioContext scenarioContext,ElementHelper elementHelper,
+			DataProvider dataProvider,HomePageObjects pageObject) {
 		this.pageObject=pageObject;
 		this.elementHelper=elementHelper;
 		this.scenarioContext=scenarioContext;

@@ -6,13 +6,14 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.bson.Document;
 import org.openqa.selenium.WebElement;
 
 import io.cucumber.java.en.Then;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.DataProvider;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext.ContextKeys;
+import ngo.nabarun.test.ngo_nabarun_test.models.db.DonationDBModel;
+import ngo.nabarun.test.ngo_nabarun_test.models.db.UserDBModel;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.DonationPageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ElementHelper;
 import ngo.nabarun.test.ngo_nabarun_test.utils.DataUtils;
@@ -85,13 +86,13 @@ public class DonationStepDefinations {
 	public void iCheckAndDeleteRegularDonationRaisedForThisMonth(String memberName) throws Throwable {
 		String firstName = memberName.split(" ")[0];
 		String lastName = memberName.split(" ")[1];
-		Document user =dataProvider.findUserByName(firstName, lastName);
+		UserDBModel user =dataProvider.findUserByName(firstName, lastName);
 		Date startDate = dateFormat.parse(DataUtils.firstDayOfCurrentMonth());
 		Date endDate = dateFormat.parse(DataUtils.lastDayOfCurrentMonth());
-		String id = user.getObjectId("_id").toString();
-		List<Document> donations=dataProvider.findDonationsBetweenDates(startDate,endDate,id,"REGULAR");
-		for(Document donation:donations) {
-			String donationId=donation.getString("_id");
+		String id = user.getId();
+		List<DonationDBModel> donations=dataProvider.findDonationsBetweenDates(startDate,endDate,id,"REGULAR");
+		for(DonationDBModel donation:donations) {
+			String donationId=donation.getId();
 			dataProvider.deleteDonationById(donationId);
 		}
 	}

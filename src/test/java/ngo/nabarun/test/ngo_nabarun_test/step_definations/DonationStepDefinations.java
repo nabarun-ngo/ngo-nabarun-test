@@ -25,12 +25,13 @@ public class DonationStepDefinations {
 	private ElementHelper elementHelper;
 	private DataProvider dataProvider;
 
-	public DonationStepDefinations(ScenarioContext scenarioContext,
-			ElementHelper elementHelper, DonationPageObjects donationPageObjects,DataProvider dataProvider) {
+	public DonationStepDefinations(ScenarioContext sc, ElementHelper eh,
+			DataProvider dp,
+			DonationPageObjects donationPageObjects) {
 		this.donationPageObjects = donationPageObjects;
-		this.scenarioContext = scenarioContext;
-		this.elementHelper = elementHelper;
-		this.dataProvider= dataProvider;
+		this.scenarioContext = sc;
+		this.elementHelper = eh;
+		this.dataProvider= dp;
 	}
 
 	@Then("^I capture and store the donation id$")
@@ -87,7 +88,7 @@ public class DonationStepDefinations {
 		Document user =dataProvider.findUserByName(firstName, lastName);
 		Date startDate = dateFormat.parse(DataUtils.firstDayOfCurrentMonth());
 		Date endDate = dateFormat.parse(DataUtils.lastDayOfCurrentMonth());
-		String id = user.getString("_id");
+		String id = user.getObjectId("_id").toString();
 		List<Document> donations=dataProvider.findDonationsBetweenDates(startDate,endDate,id,"REGULAR");
 		for(Document donation:donations) {
 			String donationId=donation.getString("_id");

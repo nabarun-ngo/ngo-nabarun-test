@@ -67,7 +67,7 @@ public class DataUtils {
 		Matcher dateMatcher = datePattern.matcher(input);
 		while (dateMatcher.find()) {
 			int offset = Integer.parseInt(dateMatcher.group(1));
-			input = input.replace(dateMatcher.group(), getDateWithOffset(offset));
+			input = input.replace(dateMatcher.group(), dateFormat.format(getDateWithOffset(offset)));
 		}
 
 		Pattern phonePattern = Pattern.compile("\\{RandomNumber:(\\d+)\\}");
@@ -80,7 +80,7 @@ public class DataUtils {
 		return input;
 	}
 
-	private static String generateRandomNumber(int digits) {
+	public static String generateRandomNumber(int digits) {
 		StringBuilder phoneNumber = new StringBuilder();
 		for (int i = 0; i < digits; i++) {
 			phoneNumber.append(faker.number().randomDigit());
@@ -88,13 +88,19 @@ public class DataUtils {
 		return phoneNumber.toString();
 	}
 
-	private static String getDateWithOffset(int days) {
-		Calendar calendar = Calendar.getInstance();
-		calendar.add(Calendar.DAY_OF_MONTH, days);
-		return dateFormat.format(calendar.getTime());
-	}
-
 	private static boolean containsPlaceholder(String input, String placeholder) {
 		return input.contains(placeholder);
 	}
+	
+	 /**
+     * Returns a java.util.Date object for today plus/minus the given number of days.
+     * @param daysOffset Number of days to add (positive) or subtract (negative) from today
+     * @return java.util.Date object
+     */
+    public static Date getDateWithOffset(int daysOffset) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, daysOffset);
+        return calendar.getTime();
+    }
+	
 }

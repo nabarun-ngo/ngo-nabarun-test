@@ -24,8 +24,8 @@ public class LoginPageObjects extends CommonPageObjects {
 	public Supplier<WebElement> LoginSubmit = () -> driver.findElement(By.xpath("//button[@type='submit']"));
 
 	public Supplier<WebElement> LoginPageHeader = () -> driver.findElement(By.xpath("//p[normalize-space(text())='Welcome to Nabarun']"));
-	public Supplier<WebElement> NewPassword = () -> driver.findElement(By.xpath("//*[@placeholder='Enter new password'"));
-	public Supplier<WebElement> ConfirmNewPassword = () -> driver.findElement(By.xpath("//*[@placeholder='Confirm new password'"));
+	public Supplier<WebElement> NewPassword = () -> driver.findElement(By.xpath("//*[@placeholder='Enter new password']"));
+	public Supplier<WebElement> ConfirmNewPassword = () -> driver.findElement(By.xpath("//*[@placeholder='Confirm new password']"));
 	public Supplier<WebElement> ChangePasswordSubmit = () -> driver.findElement(By.cssSelector(".af-nextButton"));
 
 	public Supplier<WebElement> AcceptConsent = () -> driver.findElement(AcceptConsentLocator);

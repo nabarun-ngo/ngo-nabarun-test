@@ -7,12 +7,16 @@ Feature: Donation Management
     Then I click on "Login" link at "Home" page
     Then I switch to the new tab
     Then I login with "cashier@nabarun.com" user using Password option
+    Then I handle all conditional post login screen if it appeared
     Then I must be landed to "WELCOME TO NABARUN'S SECURED DASHBOARD" screen
     When I click on "Donations" text at "Dashboard" page
     And I wait for loading to complete
     Then I must be landed to "DONATION DASHBOARD" screen
 
-  @donation @regression @smoke @donation01
+  @donation 
+  @regression 
+  @smoke 
+  @donation01
   Scenario: Create and Update Guest Donation (No Event, UPI Payment)
     When I click on "Guest Donations" text at "Donation" page
     And I wait for loading to complete
@@ -60,7 +64,9 @@ Feature: Donation Management
     Then I click on "Back to Dashboard" link at "Donation" page
     Then I logout from current session
 
-  @donation @donation02 @regression
+  @donation 
+  @donation02 
+  @regression
   Scenario: Create and Update Guest Donation (With Event, Cash Payment, Status Transitions)
     When I click on "Guest Donations" text at "Donation" page
     And I wait for loading to complete
@@ -127,7 +133,9 @@ Feature: Donation Management
     Then I click on "Back to Dashboard" link at "Donation" page
     Then I logout from current session
 
-  @donation @donation03 @regression
+  @donation 
+  @donation03 
+  @regression
   Scenario: Create and Update Member Onetime Donation (With Event, Net Banking)
     When I click on "Member Donations" text at "Donation" page
     And I wait for loading to complete
@@ -170,7 +178,9 @@ Feature: Donation Management
     Then I click on "Back to Dashboard" link at "Donation" page
     Then I logout from current session
 
-  @donation @donation04 @regression
+  @donation 
+  @donation04 
+  @regression
   Scenario: Create and Update Member Regular Donation (Full Status Flow, UPI)
     When I click on "Member Donations" text at "Donation" page
     And I wait for loading to complete

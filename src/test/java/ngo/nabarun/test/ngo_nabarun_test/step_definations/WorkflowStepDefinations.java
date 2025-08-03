@@ -1,6 +1,7 @@
 package ngo.nabarun.test.ngo_nabarun_test.step_definations;
 
 import io.cucumber.java.en.Then;
+import ngo.nabarun.test.ngo_nabarun_test.helpers.DataProvider;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext.ContextKeys;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.WorkflowPageObjects;
@@ -12,7 +13,7 @@ public class WorkflowStepDefinations {
 	private ElementHelper elementHelper;
 	private WorkflowPageObjects workflowPageObjects;
 
-	public WorkflowStepDefinations(ScenarioContext scenarioContext,ElementHelper elementHelper,WorkflowPageObjects workflowPageObjects) {
+	public WorkflowStepDefinations(ScenarioContext scenarioContext,ElementHelper elementHelper,DataProvider dp,WorkflowPageObjects workflowPageObjects) {
 		this.scenarioContext=scenarioContext;
 		this.elementHelper=elementHelper;
 		this.workflowPageObjects=workflowPageObjects;

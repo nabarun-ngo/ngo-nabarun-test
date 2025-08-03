@@ -39,13 +39,13 @@ public class CommonStepDefinitions {
 	//private DataProvider dataProvider;
 	private static SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
-	public CommonStepDefinitions(ScenarioContext scenarioContext, ControlLookup controlLookup,
-			CommonPageObjects commonPageObjects, ElementHelper elementHelper, DataProvider dataProvider) {
+	public CommonStepDefinitions(ScenarioContext sc,ElementHelper eh,DataProvider dp
+			,CommonPageObjects commonPageObjects, ControlLookup controlLookup) {
 		this.controlLookup = controlLookup;
 		this.commonPageObjects = commonPageObjects;
-		this.scenarioContext = scenarioContext;
+		this.scenarioContext = sc;
 		this.driver = scenarioContext.getDriver();
-		this.elementHelper = elementHelper;
+		this.elementHelper = eh;
 		//this.dataProvider = dataProvider;
 	}
 

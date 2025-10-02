@@ -11,9 +11,9 @@ import ngo.nabarun.test.ngo_nabarun_test.utilities.ElementHelper;
 
 public class DashboardStepDefinations {
 	
-	private DashboardPageObjects dashboardPageObjects;
-	private LoginPageObjects loginPageObjects;
-	private ElementHelper elementHelper;
+	private final DashboardPageObjects dashboardPageObjects;
+	private final LoginPageObjects loginPageObjects;
+	private final ElementHelper elementHelper;
 
 
 	public DashboardStepDefinations(ScenarioContext scenarioContext,ElementHelper elementHelper, DataProvider dataProvider,
@@ -30,7 +30,7 @@ public class DashboardStepDefinations {
 		elementHelper.click(dashboardPageObjects.LogoutLink.get());
 		elementHelper.click(dashboardPageObjects.LogoutPopupYes.get());
 
-		boolean isDisplayed=loginPageObjects.LoginPageHeader.get().isDisplayed();
+		boolean isDisplayed=loginPageObjects.LoginPageHeader.get().isVisible();
 		Assertions.assertTrue(isDisplayed,"Login Page is not displayed.");
 	}
 

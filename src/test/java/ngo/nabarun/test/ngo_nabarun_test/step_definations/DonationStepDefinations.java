@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.openqa.selenium.WebElement;
+import com.microsoft.playwright.Locator;
+
 
 import io.cucumber.java.en.Then;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.DataProvider;
@@ -37,7 +38,7 @@ public class DonationStepDefinations {
 
 	@Then("^I capture and store the donation id$")
 	public void iCaptureAndStoreTheDonationId() throws Throwable {
-		String message = donationPageObjects.DonationCreateAlert.get().getText();
+		String message = donationPageObjects.DonationCreateAlert.get().textContent();
 		Pattern pattern = Pattern.compile("NDON\\w+");
 		Matcher matcher = pattern.matcher(message);
 
@@ -55,14 +56,14 @@ public class DonationStepDefinations {
 	public void iSearchTheCreatedDonation(String tab) throws Throwable {
 		String donationId = scenarioContext.get(ContextKeys.DonationId, String.class);
 		elementHelper.scrollToTop();
-		WebElement parent = null;
+		Locator parent = null;
 		if (tab.toLowerCase().contains("member")) {
 			elementHelper.click(donationPageObjects.getButtonMapping("Filter", null));
-			parent = donationPageObjects.Popup_Container.get();
+			parent = donationPageObjects.Popup_Container();
 		} else {
 			elementHelper.click(donationPageObjects.getButtonMapping("Advanced Search", null));
 		}
-		donationPageObjects.ADVSearch_DonationId.get().sendKeys(donationId);
+		donationPageObjects.ADVSearch_DonationId.get().fill(donationId);
 		elementHelper.click(donationPageObjects.getButtonMapping("Search", parent));
 
 	}
@@ -77,8 +78,8 @@ public class DonationStepDefinations {
 		String lastName = memberName.split(" ")[1];
 		elementHelper.scrollToTop();
 		elementHelper.click(donationPageObjects.getButtonMapping("Advanced Search", null));
-		donationPageObjects.ADVSearch_FirstName.get().sendKeys(firstName);
-		donationPageObjects.ADVSearch_LastName.get().sendKeys(lastName);
+		donationPageObjects.ADVSearch_FirstName.get().fill(firstName);
+		donationPageObjects.ADVSearch_LastName.get().fill(lastName);
 		elementHelper.click(donationPageObjects.getButtonMapping("Search", null));
 	}
 

@@ -13,11 +13,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.imageio.ImageIO;
 
+import com.microsoft.playwright.Page;
+import com.microsoft.playwright.options.ScreenshotType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.WebDriver;
+
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -27,25 +27,7 @@ public class CommonUtils {
 	public static final ObjectMapper objectMapper = new ObjectMapper();
 
 	
-	public static File takeScreenshot(WebDriver driver){
-		try {
-			return ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
-		}catch (Exception e) {
-			try {
-	            Robot robot = new Robot();
-	            BufferedImage screenCapture = robot.createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
-	            String tempDir = System.getProperty("java.io.tmpdir");
-	            String timestamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-	            String filename = "Screenshot_" + timestamp + ".png";
-	            File outputFile = new File(tempDir + filename);
-	            ImageIO.write(screenCapture, "png", outputFile);
-	            return outputFile;
-	        } catch (AWTException | IOException e1) {
-	            logger.error("Error taking screenshot using Robot", e1);
-	    		return null;
-	        }
-		}
-	}
+
 		
 	 	private static final String INVALID_CHARACTERS = "[<>:\"/\\|?*]";
 

@@ -4,8 +4,7 @@ Feature: Donation Management
   Background:
     Given I have opened to Nabarun's web portal
     Then I click and hold on "More" link at "Home" page
-    Then I click on "Login" link at "Home" page
-    Then I switch to the new tab
+    Then I click on "Login" link at "Home" page and wait for new window to load
     Then I login with "cashier@nabarun.com" user using Password option
     Then I handle all conditional post login screen if it appeared
     Then I must be landed to "WELCOME TO NABARUN'S SECURED DASHBOARD" screen
@@ -22,15 +21,15 @@ Feature: Donation Management
     And I wait for loading to complete
     Then the "Add Guest Donation" button should be displayed at "Donation" page
     Then I click on "Add Guest Donation" button at "Donation" page
-    Then I map "//*[@id='createDonation']" element as "Create_Donation" accordion
-    Then I enter "{RandomName}" on "Name" textbox at "Create_Donation" accordion
-    Then I enter "{RandomEmail}" on "Email address" textbox at "Create_Donation" accordion
-    Then I enter "+91{RandomNumber:10}" on "Contact number" textbox at "Create_Donation" accordion
+    Then I map "#createDonation" element as "Create_Donation" accordion
+    Then I enter "{RandomName}" on "Name" textbox at "Donation" page
+    Then I enter "{RandomEmail}" on "Email address" textbox at "Donation" page
+    Then I enter "+91{RandomNumber:10}" on "Contact number" textbox at "Donation" page
     Then I wait for 3 seconds
-    Then I select "One Time" on "Donation type" dropdown at "Create_Donation" accordion
-    Then I enter "{RandomNumber:3}" on "Donation amount" textbox at "Create_Donation" accordion
-    Then I click "No" on "Is this donation made for any events?" radio at "Create_Donation" accordion
-    Then I click on "Create" button at "Create_Donation" accordion
+    Then I select "One Time" on "Donation type" dropdown at "Donation" page
+    Then I enter "{RandomNumber:3}" on "Donation amount" textbox at "Donation" page
+    Then I click "No" on "Is this donation made for any events?" radio at "Donation" page
+    Then I click on "Create" button at "Donation" page
     And I wait for loading to complete
     Then I capture and store the donation id
     Then I wait for 5 seconds

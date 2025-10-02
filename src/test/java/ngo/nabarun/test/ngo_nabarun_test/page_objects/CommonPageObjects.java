@@ -1,92 +1,82 @@
 package ngo.nabarun.test.ngo_nabarun_test.page_objects;
 
-import java.time.Duration;
+import com.microsoft.playwright.*;
 import java.util.function.Supplier;
-
-import org.openqa.selenium.By;
-import org.openqa.selenium.SearchContext;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 
 public class CommonPageObjects {
 
-	protected WebDriver driver;
-	protected WebDriverWait elementWait;
+    public enum FindBy {
+        TEXT, LABEL, XPATH, CSS,ANY
+    }
 
-	public CommonPageObjects(ScenarioContext scenarioContext) {
-		this.driver = scenarioContext.getDriver();
-		this.elementWait = new WebDriverWait(driver, Duration.ofSeconds(60));
+    private final ScenarioContext scenarioContext;
+
+    public CommonPageObjects(ScenarioContext scenarioContext) {
+		this.scenarioContext =scenarioContext ;
 	}
 
-	public By PageLoaderLocator = By.xpath(".//*[normalize-space(text())='Please wait, Things are getting ready...']");
-	public By PageHeaderLocator = By.xpath("//app-page-title//span");
-	public Supplier<WebElement> PageHeader = () -> driver.findElement(PageHeaderLocator);
-	public Supplier<WebElement> Popup_Container = () -> driver.findElement(By.xpath("//mat-dialog-container"));
-
-	public WebElement getAccordion(int i, SearchContext parentContext) {
-		return getSearchContext(parentContext).findElement(By.xpath("(.//mat-expansion-panel)[" + i + "]"));
+	public String PageLoaderSelector = "//*[normalize-space(text())='Please wait, Things are getting ready...']";
+	public String PageHeaderSelector = "//app-page-title//h1";
+	public Locator PageHeader() {
+		return findLocator(PageHeaderSelector);
+	}
+	public Locator Popup_Container() {
+		return findLocator("//mat-dialog-container");
 	}
 
-	public WebElement getButtonMapping(String elementName, SearchContext parentContext) {
-		return switch (elementName) {
-		default -> getSearchContext(parentContext)
-				.findElement(By.xpath(".//button[normalize-space(string())=\"" + elementName + "\"]"));
-		};
+	public Locator getAccordion(int i, Locator parent) {
+		return findLocator("(//mat-expansion-panel)[" + i + "]",parent,FindBy.XPATH);
 	}
 
-	public WebElement getLinkMapping(String elementName, SearchContext parentContext) {
-		return switch (elementName) {
-		default -> getSearchContext(parentContext)
-				.findElement(By.xpath(".//a[normalize-space(text())=\"" + elementName + "\"]"));
-		};
+    protected Locator findLocator(String selector, Locator parent,FindBy selectBy) {
+        Page root = scenarioContext.getPage();
+        //parent = root.locator("body");
+        return switch (selectBy) {
+            case TEXT -> parent != null ? parent.getByText(selector) : root.getByText(selector);
+            case LABEL -> parent != null ? parent.getByLabel(selector) : root.getByLabel(selector);
+            case XPATH -> parent != null ? parent.locator("xpath=" + selector) :root.locator("xpath=" + selector);
+            case CSS -> parent != null ? parent.locator("css=" + selector) : root.locator("css=" + selector);
+            case ANY -> parent != null ? parent.locator(selector) : root.locator(selector);
+        };
+    }
+
+    protected Locator findLocator(String selector) {
+        return findLocator(selector,null,FindBy.ANY);
+    }
+
+	public Locator getButtonMapping(String elementName,Locator parent) {
+		return findLocator("//button[normalize-space(string())='" + elementName + "']", parent,FindBy.XPATH);
 	}
 
-	public WebElement getTextMapping(String elementName, SearchContext parentContext) {
-		return switch (elementName) {
-		default -> getSearchContext(parentContext)
-				.findElement(By.xpath(".//*[normalize-space(text())=\"" + elementName + "\"]"));
-		};
+	public Locator getLinkMapping(String elementName,Locator parent) {
+		return findLocator("//a[normalize-space(text())='" + elementName + "']",parent,FindBy.XPATH);
 	}
 
-	protected SearchContext getSearchContext(SearchContext parentContext) {
-		return parentContext == null ? driver : parentContext;
+	public Locator getTextMapping(String elementName,Locator parent) {
+		return findLocator("//*[normalize-space(text())='" + elementName + "']",parent,FindBy.XPATH);
 	}
 
-	public WebElement getTextBoxMapping(String elementName, SearchContext parentContext, boolean isTextArea) {
-		return switch (elementName) {
-		default -> getSearchContext(parentContext).findElement(By.xpath(".//*[normalize-space(text())='" + elementName
-				+ "']/following-sibling::*" + (isTextArea ? "//textarea" : "//input")));
-		};
+	public Locator getTextBoxMapping(String elementName,Locator parent, boolean isTextArea) {
+		String selector = "//*[normalize-space(text())='" + elementName + "']/following-sibling::*"
+				+ (isTextArea ? "//textarea" : "//input");
+		return findLocator(selector,parent,FindBy.XPATH);
 	}
 
-	public WebElement getDropdownMapping(String elementName, SearchContext parentContext) {
-		return switch (elementName) {
-		default -> getSearchContext(parentContext).findElement(
-				By.xpath(".//*[normalize-space(text())='" + elementName + "']/following-sibling::*//mat-select"));
-		};
+	public Locator getDropdownMapping(String elementName,Locator parent) {
+		return findLocator("//*[normalize-space(text())='" + elementName + "']/following-sibling::*//mat-select",parent,FindBy.XPATH);
 	}
 
-	public WebElement getRadioMapping(String elementName, SearchContext parentContext) {
-		return switch (elementName) {
-		default -> getSearchContext(parentContext)
-				.findElement(By.xpath(".//*[normalize-space(text())='" + elementName + "']/following-sibling::*"));
-		};
+	public Locator getRadioMapping(String elementName,Locator parent) {
+		return findLocator("//*[normalize-space(text())='" + elementName + "']/following-sibling::*",parent,FindBy.XPATH);
 	}
 
-	public WebElement getDatePickerMapping(String elementName, SearchContext parentContext) {
-		return switch (elementName) {
-		default -> getSearchContext(parentContext)
-				.findElement(By.xpath(".//*[normalize-space(text())='" + elementName + "']/following-sibling::*"));
-		};
+	public Locator getDatePickerMapping(String elementName,Locator parent) {
+		return findLocator("//*[normalize-space(text())='" + elementName + "']/following-sibling::*",parent,FindBy.XPATH);
 	}
 
-	public WebElement getFileInputMapping(String elementName, SearchContext parentContext) {
-		return switch (elementName) {
-		default -> getSearchContext(parentContext).findElement(By.xpath(
-				".//*[normalize-space(text())='" + elementName + "']/following-sibling::*//input[@type='file']"));
-		};
+	public Locator getFileInputMapping(String elementName,Locator parent) {
+		return findLocator("//*[normalize-space(text())='" + elementName + "']/following-sibling::*//input[@type='file']",parent,FindBy.XPATH);
 	}
 }

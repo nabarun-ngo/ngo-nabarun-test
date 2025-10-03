@@ -25,14 +25,14 @@ Feature: Donation Management
     Then I enter "{RandomName}" on "Name" textbox at "Create_Donation" accordion
     Then I enter "{RandomEmail}" on "Email address" textbox at "Create_Donation" accordion
     Then I enter "+91{RandomNumber:10}" on "Contact number" textbox at "Create_Donation" accordion
-    Then I wait for 3 seconds
+    #Then I wait for 3 seconds
     Then I select "One Time" on "Donation type" dropdown at "Create_Donation" accordion
     Then I enter "{RandomNumber:3}" on "Donation amount" textbox at "Create_Donation" accordion
     Then I click "No" on "Is this donation made for any events?" radio at "Create_Donation" accordion
     Then I click on "Create" button at "Create_Donation" accordion
     And I wait for loading to complete
     Then I capture and store the donation id
-    Then I wait for 5 seconds
+    #Then I wait for 5 seconds
     Then I search the created donation under "Guest Donation" tab
     And I wait for loading to complete
     Then I opened the accordion of index 1 at "Donation" page
@@ -54,12 +54,12 @@ Feature: Donation Management
     Then I select "Google Pay" on "UPI name" dropdown at "Donation" page
     Then I enter "Test Test" on "Remarks" textarea at "Donation" page
     Then I upload "test_files/test_pdf.pdf" on "Upload document(s)" fileinput at "Donation" page
-    Then I wait for 2 seconds
+    #Then I wait for 2 seconds
     Then I click on "Confirm" button at "Donation" page
     And I wait for loading to complete
     Then I check if transaction is created for this donation
     And I wait for loading to complete
-    Then I wait for 2 seconds
+    #Then I wait for 2 seconds
     Then I click on "Back to Dashboard" link at "Donation" page
     Then I logout from current session
 
@@ -75,7 +75,7 @@ Feature: Donation Management
     Then I enter "{RandomName}" on "Name" textbox at "Create_Donation" accordion
     Then I enter "{RandomEmail}" on "Email address" textbox at "Create_Donation" accordion
     Then I enter "+91{RandomNumber:10}" on "Contact number" textbox at "Create_Donation" accordion
-    Then I wait for 3 seconds
+    #Then I wait for 3 seconds
     Then I select "One Time" on "Donation type" dropdown at "Create_Donation" accordion
     Then I enter "{RandomNumber:3}" on "Donation amount" textbox at "Create_Donation" accordion
     Then I click "Yes" on "Is this donation made for any events?" radio at "Create_Donation" accordion
@@ -84,7 +84,7 @@ Feature: Donation Management
     Then I click on "Create" button at "Create_Donation" accordion
     And I wait for loading to complete
     Then I capture and store the donation id
-    Then I wait for 5 seconds
+    #Then I wait for 5 seconds
     Then I search the created donation under "Guest Donation" tab
     And I wait for loading to complete
     Then I opened the accordion of index 1 at "Donation" page
@@ -104,7 +104,7 @@ Feature: Donation Management
     Then I select "Cashier TestUser" on "Donation paid to" dropdown at "Donation" page
     Then I select "Cash" on "Payment method" dropdown at "Donation" page
     Then I enter "Test Test" on "Remarks" textarea at "Donation" page
-    Then I wait for 2 seconds
+    #Then I wait for 2 seconds
     Then I click on "Confirm" button at "Donation" page
     And I wait for loading to complete
     Then I check if transaction is created for this donation
@@ -128,7 +128,7 @@ Feature: Donation Management
     Then I enter "Test Test" on "Reason for cancel" textarea at "Donation" page
     Then I click on "Confirm" button at "Donation" page
     And I wait for loading to complete
-    Then I wait for 2 seconds
+    #Then I wait for 2 seconds
     Then I click on "Back to Dashboard" link at "Donation" page
     Then I logout from current session
 
@@ -152,7 +152,7 @@ Feature: Donation Management
     Then I click on "Create" button at "Create_Donation" accordion
     And I wait for loading to complete
     Then I capture and store the donation id
-    Then I wait for 5 seconds
+    #Then I wait for 5 seconds
     Then I search the created donation under "Member Donation" tab
     And I wait for loading to complete
     Then I map "(//app-donation-accordion)[1]" element as "Member_Details" accordion
@@ -168,11 +168,11 @@ Feature: Donation Management
     Then I select "Net Banking" on "Payment method" dropdown at "Donation" page
     Then I enter "Test Test" on "Remarks" textarea at "Donation" page
     Then I upload "test_files/test_pdf.pdf" on "Upload document(s)" fileinput at "Donation" page
-    Then I wait for 2 seconds
+    #Then I wait for 2 seconds
     Then I click on "Confirm" button at "Donation" page
     And I wait for loading to complete
     Then I check if transaction is created for this donation
-    Then I wait for 2 seconds
+    #Then I wait for 2 seconds
     Then I click on "Back to Dashboard" link at "Donation" page
     Then I logout from current session
 
@@ -191,12 +191,12 @@ Feature: Donation Management
     Then I map "//*[@id='createDonation']" element as "Create_Donation" accordion
     Then I select "Regular" on "Donation type" dropdown at "Create_Donation" accordion
     Then I enter "{RandomNumber:3}" on "Donation amount" textbox at "Create_Donation" accordion
-    Then I select "{FirstOfCurrentMonth}" on "Donation start date" datepicker at "Donation" page
-    Then I select "{LastOfCurrentMonth}" on "Donation end date" datepicker at "Donation" page
+    Then I select "{FirstOfCurrentMonth}" on "Donation start date" datepicker at "Create_Donation" accordion
+    Then I select "{LastOfCurrentMonth}" on "Donation end date" datepicker at "Create_Donation" accordion
     Then I click on "Create" button at "Create_Donation" accordion
     And I wait for loading to complete
     Then I capture and store the donation id
-    Then I wait for 5 seconds
+    #Then I wait for 5 seconds
     Then I search the created donation under "Member Donation" tab
     And I wait for loading to complete
     Then I map "(//app-donation-accordion)[1]" element as "Member_Details" accordion
@@ -226,7 +226,7 @@ Feature: Donation Management
     Then I select "PhonePe" on "UPI name" dropdown at "Donation" page
     Then I enter "Test Test" on "Remarks" textarea at "Donation" page
     Then I upload "test_files/test_pdf.pdf" on "Upload document(s)" fileinput at "Donation" page
-    Then I wait for 2 seconds
+    #Then I wait for 2 seconds
     Then I click on "Confirm" button at "Donation" page
     And I wait for loading to complete
     Then I check if transaction is created for this donation
@@ -257,6 +257,6 @@ Feature: Donation Management
     Then I enter "Test Test" on "Reason for cancel" textarea at "Donation" page
     Then I click on "Confirm" button at "Donation" page
     And I wait for loading to complete
-    Then I wait for 2 seconds
+    #Then I wait for 2 seconds
     Then I click on "Back to Dashboard" link at "Donation" page
     Then I logout from current session

@@ -24,7 +24,6 @@ public class TestHooks {
 	private final ScenarioContext scenarioContext;
 	private Browser browser;
 	private BrowserContext context;
-	private Page page;
 
 	public TestHooks(ScenarioContext scenarioContext) {
 		this.scenarioContext = scenarioContext;
@@ -48,10 +47,13 @@ public class TestHooks {
             boolean headless = System.getProperty("headless", "N").equals("Y");
             launchOptions.setHeadless(headless);
             launchOptions.setArgs(List.of("--start-maximized"));
+            launchOptions.setSlowMo(500);
             browser =playwright.chromium().launch(launchOptions);
             context = browser.newContext(new Browser.NewContextOptions()
                     .setViewportSize(null));
-            page = context.newPage();
+            Page page = context.newPage();
+            int implicitWait = Configs.IMPLICIT_WAIT;
+            page.setDefaultTimeout(implicitWait * 1000);
             scenarioContext.setPage(page);
 
 
@@ -68,6 +70,7 @@ public class TestHooks {
 
 	@After
 	public void afterScenario(Scenario scenario) throws InterruptedException, IOException {
+        Page page = scenarioContext.getPage();
 		if (scenario.isFailed()) {
 			byte[] screenshot = page.screenshot(new Page.ScreenshotOptions().setType(ScreenshotType.PNG));
 			scenario.attach(screenshot, "image/png", "error_screenshot");

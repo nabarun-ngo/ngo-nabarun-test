@@ -14,11 +14,11 @@ permissions:
 
 jobs:
   build:
-   name: Build
+   name: Build Test Solution
    uses: nabarun-ngo/ngo-nabarun-templates/.github/workflows/Build-Test.yml@main
    with:
       platform: "java"
-      command: "mvn clean install -DskipTests"
+      command: "clean install -DskipTests"
       
   create_release:
     if: github.event.pull_request.merged == true

@@ -3,13 +3,13 @@ package ngo.nabarun.test.ngo_nabarun_test.helpers;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.openqa.selenium.WebDriver;
+import com.microsoft.playwright.Page;
 
 public class ScenarioContext {
 	private final Map<ContextKeys, Object> context = new HashMap<>();
-	private WebDriver driver;
+    private Page page;
 
-	public void set(ContextKeys key, Object value) {
+    public void set(ContextKeys key, Object value) {
 		context.put(key, value);
 	}
 
@@ -23,7 +23,7 @@ public class ScenarioContext {
 
 	public void reset() {
 		context.clear();
-		driver = null;
+		page = null;
 	}
 
 	public enum ContextKeys {
@@ -31,11 +31,11 @@ public class ScenarioContext {
 
 	}
 
-	public void setDriver(WebDriver driver) {
-		this.driver = driver;
+	public void setPage(Page page) {
+		this.page = page;
 	}
 
-	public WebDriver getDriver() {
-		return this.driver;
+	public Page getPage() {
+		return this.page;
 	}
 }

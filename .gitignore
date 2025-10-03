@@ -64,3 +64,4 @@ test-config.json
 
 springboot-env.conf
 /apps/
+/.env

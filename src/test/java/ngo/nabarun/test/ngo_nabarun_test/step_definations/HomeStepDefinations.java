@@ -13,10 +13,10 @@ import ngo.nabarun.test.ngo_nabarun_test.utilities.ElementHelper;
 
 public class HomeStepDefinations {
 	
-	private HomePageObjects pageObject;
-	private ElementHelper elementHelper;
-	private ScenarioContext scenarioContext;
-	private DataProvider dataProvider;
+	private final HomePageObjects pageObject;
+	private final ElementHelper elementHelper;
+	private final ScenarioContext scenarioContext;
+	private final DataProvider dataProvider;
 
 	public HomeStepDefinations(ScenarioContext scenarioContext,ElementHelper elementHelper,
 			DataProvider dataProvider,HomePageObjects pageObject) {
@@ -29,16 +29,16 @@ public class HomeStepDefinations {
 
 	@Then("^I retrieve the OTP from database and enter it on OTP textbox$")
 	public void iRetrieveTheOTPFromDatabaseAndEnterItOnOTPTextbox() throws Throwable {
-		String email =pageObject.Join_Email_Text.get().getText();
+		String email =pageObject.Join_Email_Text.get().textContent();
 		scenarioContext.set(ContextKeys.New_User_Email, email);
 		TicketDBModel otp_detail=dataProvider.findOTPDetails(email);
 		elementHelper.scrollIntoView(pageObject.Join_OTP.get());
-		pageObject.Join_OTP.get().sendKeys(otp_detail.getOneTimePassword());
+		pageObject.Join_OTP.get().fill(otp_detail.getOneTimePassword());
 	}
 	
 	@Then("^I capture and store the request id$")
 	public void iCaptureAndStoreTheDonationId() throws Throwable {
-		String message = pageObject.Request_Alert.get().getText();
+		String message = pageObject.Request_Alert.get().textContent();
 		Pattern pattern = Pattern.compile("NWF\\w+");
 		Matcher matcher = pattern.matcher(message);
 

@@ -7,13 +7,13 @@ import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext.ContextKeys;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.WorkflowPageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ElementHelper;
 
-public class WorkflowStepDefinations {
+public class WorkflowStepDefinitions {
 
-	private ScenarioContext scenarioContext;
-	private ElementHelper elementHelper;
-	private WorkflowPageObjects workflowPageObjects;
+	private final ScenarioContext scenarioContext;
+	private final ElementHelper elementHelper;
+	private final WorkflowPageObjects workflowPageObjects;
 
-	public WorkflowStepDefinations(ScenarioContext scenarioContext,ElementHelper elementHelper,DataProvider dp,WorkflowPageObjects workflowPageObjects) {
+	public WorkflowStepDefinitions(ScenarioContext scenarioContext, ElementHelper elementHelper, DataProvider dp, WorkflowPageObjects workflowPageObjects) {
 		this.scenarioContext=scenarioContext;
 		this.elementHelper=elementHelper;
 		this.workflowPageObjects=workflowPageObjects;
@@ -24,7 +24,7 @@ public class WorkflowStepDefinations {
 		String requestId = scenarioContext.get(ContextKeys.RequestId, String.class);
 		elementHelper.scrollToTop();
 		elementHelper.click(workflowPageObjects.getButtonMapping("Advanced Search", null));
-		workflowPageObjects.ADVSearch_RequestId.get().sendKeys(requestId);
+		workflowPageObjects.ADVSearch_RequestId.get().fill(requestId);
 		elementHelper.click(workflowPageObjects.getButtonMapping("Search", null));
 	}
 }

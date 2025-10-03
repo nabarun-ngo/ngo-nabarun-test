@@ -4,8 +4,7 @@ Feature: Donation Management
   Background:
     Given I have opened to Nabarun's web portal
     Then I click and hold on "More" link at "Home" page
-    Then I click on "Login" link at "Home" page
-    Then I switch to the new tab
+    Then I click on "Login" link at "Home" page and wait for new window to load
     Then I login with "cashier@nabarun.com" user using Password option
     Then I handle all conditional post login screen if it appeared
     Then I must be landed to "WELCOME TO NABARUN'S SECURED DASHBOARD" screen
@@ -13,9 +12,9 @@ Feature: Donation Management
     And I wait for loading to complete
     Then I must be landed to "DONATION DASHBOARD" screen
 
-  @donation 
-  @regression 
-  @smoke 
+  @donation
+  @regression
+  @smoke
   @donation01
   Scenario: Create and Update Guest Donation (No Event, UPI Payment)
     When I click on "Guest Donations" text at "Donation" page
@@ -64,8 +63,8 @@ Feature: Donation Management
     Then I click on "Back to Dashboard" link at "Donation" page
     Then I logout from current session
 
-  @donation 
-  @donation02 
+  @donation
+  @donation02
   @regression
   Scenario: Create and Update Guest Donation (With Event, Cash Payment, Status Transitions)
     When I click on "Guest Donations" text at "Donation" page
@@ -133,8 +132,8 @@ Feature: Donation Management
     Then I click on "Back to Dashboard" link at "Donation" page
     Then I logout from current session
 
-  @donation 
-  @donation03 
+  @donation
+  @donation03
   @regression
   Scenario: Create and Update Member Onetime Donation (With Event, Net Banking)
     When I click on "Member Donations" text at "Donation" page
@@ -156,7 +155,7 @@ Feature: Donation Management
     Then I wait for 5 seconds
     Then I search the created donation under "Member Donation" tab
     And I wait for loading to complete
-    Then I map "(//mat-expansion-panel)[1]" element as "Member_Details" accordion
+    Then I map "(//app-donation-accordion)[1]" element as "Member_Details" accordion
     Then I opened the accordion of index 1 at "Member_Details" accordion
     And I wait for loading to complete
     # Update Status to PAID
@@ -170,7 +169,6 @@ Feature: Donation Management
     Then I enter "Test Test" on "Remarks" textarea at "Donation" page
     Then I upload "test_files/test_pdf.pdf" on "Upload document(s)" fileinput at "Donation" page
     Then I wait for 2 seconds
-    Then I wait for 2 seconds
     Then I click on "Confirm" button at "Donation" page
     And I wait for loading to complete
     Then I check if transaction is created for this donation
@@ -178,8 +176,8 @@ Feature: Donation Management
     Then I click on "Back to Dashboard" link at "Donation" page
     Then I logout from current session
 
-  @donation 
-  @donation04 
+  @donation
+  @donation04
   @regression
   Scenario: Create and Update Member Regular Donation (Full Status Flow, UPI)
     When I click on "Member Donations" text at "Donation" page
@@ -201,7 +199,7 @@ Feature: Donation Management
     Then I wait for 5 seconds
     Then I search the created donation under "Member Donation" tab
     And I wait for loading to complete
-    Then I map "(//mat-expansion-panel)[1]" element as "Member_Details" accordion
+    Then I map "(//app-donation-accordion)[1]" element as "Member_Details" accordion
     Then I opened the accordion of index 1 at "Member_Details" accordion
     And I wait for loading to complete
     # Status: Pending
@@ -262,10 +260,3 @@ Feature: Donation Management
     Then I wait for 2 seconds
     Then I click on "Back to Dashboard" link at "Donation" page
     Then I logout from current session
-    
-    
-
-    
-    
-    
-    

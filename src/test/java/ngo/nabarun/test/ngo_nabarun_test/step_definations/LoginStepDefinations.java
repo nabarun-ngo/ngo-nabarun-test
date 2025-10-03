@@ -14,20 +14,20 @@ import ngo.nabarun.test.ngo_nabarun_test.utilities.ElementHelper;
 
 public class LoginStepDefinations {
 
-	private LoginPageObjects pageObject;
-	private DataProvider dataProvider;
-	private ScenarioContext scenarioContext;
-	private ElementHelper elementHelper;
-	private ProfileStepDefinations profileStepDefinations;
+	private final LoginPageObjects pageObject;
+    private final DataProvider dataProvider;
+	private final ScenarioContext scenarioContext;
+	private final ElementHelper elementHelper;
+    private final ProfileStepDefinations profileStepDefinations;
 
-	public LoginStepDefinations(ScenarioContext scenarioContext,ElementHelper elementHelper, DataProvider dataProvider,LoginPageObjects pageObject,
+    public LoginStepDefinations(ScenarioContext scenarioContext,ElementHelper elementHelper, DataProvider dataProvider,LoginPageObjects pageObject,
 			ProfileStepDefinations profileStepDefinations) {
 		this.pageObject = pageObject;
 		this.dataProvider = dataProvider;
 		this.scenarioContext = scenarioContext;
 		this.elementHelper = elementHelper;
-		this.profileStepDefinations = profileStepDefinations;
-	}
+        this.profileStepDefinations = profileStepDefinations;
+    }
 
 	@Given("^I login with \"(.+)\" (user|role) using (Password|OTP) option$")
 	public void i_performed_login_with_an_user_having_role(String loginId, String loginIdType, String loginOption)
@@ -52,9 +52,9 @@ public class LoginStepDefinations {
 
 		if (loginOption.equalsIgnoreCase("Password")) {
 			elementHelper.click(pageObject.ContinueWithPasswordButton.get());
-			pageObject.LoginEmail.get().sendKeys(email);
+			pageObject.LoginEmail.get().fill(email);
 			elementHelper.click(pageObject.LoginSubmit.get());
-			pageObject.LoginPassword.get().sendKeys(password);
+			pageObject.LoginPassword.get().fill(password);
 			elementHelper.click(pageObject.LoginSubmit.get());
 		} else {
 			throw new RuntimeException("LoginOption '" + loginOption + "' is not allowed.");
@@ -93,11 +93,11 @@ public class LoginStepDefinations {
 	private void handle_change_password_screen_if_it_appeared() throws Exception {
 		// Handling change password screen if it appeared
 		if (elementHelper.isElementPresent(pageObject.PasswordChangedTxtLocator, 15)) {
-			pageObject.NewPassword.get().sendKeys(Configs.TEST_DEFAULTPASSWORD);
-			pageObject.ConfirmNewPassword.get().sendKeys(Configs.TEST_DEFAULTPASSWORD);
+			pageObject.NewPassword.get().fill(Configs.TEST_DEFAULTPASSWORD);
+			pageObject.ConfirmNewPassword.get().fill(Configs.TEST_DEFAULTPASSWORD);
 			elementHelper.click(pageObject.ChangePasswordSubmit.get());
 			Thread.sleep(10000); // wait for the change password to complete
-			scenarioContext.getDriver().navigate().refresh();
+			scenarioContext.getPage().reload();
 			Thread.sleep(5000);
 			i_performed_login_with_an_user_having_role(
 					scenarioContext.get(ContextKeys.Login_Id, String.class),
@@ -108,8 +108,8 @@ public class LoginStepDefinations {
 
 	private void handle_complete_profile_screen_if_it_appeared() throws Exception {
 		// Handling complete profile screen if it appeared
-		if (elementHelper.isElementPresent(pageObject.PageHeaderLocator, 10)
-				&& pageObject.PageHeader.get().getText().toUpperCase().contains("COMPLETE PROFILE")) {
+		if (elementHelper.isElementPresent(pageObject.PageHeader(), 10)
+				&& pageObject.PageHeader().textContent().toUpperCase().contains("COMPLETE PROFILE")) {
 
 			profileStepDefinations.fillCompleteProfileForm();
 		}

@@ -1,201 +1,149 @@
 package ngo.nabarun.test.ngo_nabarun_test.utilities;
 
+import com.microsoft.playwright.*;
 import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyEvent;
-import java.time.Duration;
+import java.nio.file.Path;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
-import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 import ngo.nabarun.test.ngo_nabarun_test.utils.CommonUtils;
 
 public class ElementHelper {
+    private final ScenarioContext scenarioContext;
 
-	private WebDriver driver;
+    //private final Page page;
 
-	public ElementHelper(ScenarioContext scenarioContext) {
-		this.driver = scenarioContext.getDriver();
-	}
+    public ElementHelper(ScenarioContext scenarioContext) {
+        this.scenarioContext = scenarioContext;
+    }
 
-	public void scrollIntoView(WebElement element) {
-		((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", element);
-	}
+    public void scrollIntoView(Locator element) {
+        element.scrollIntoViewIfNeeded();
+    }
 
-	public WebDriverWait elementWait() {
-		return elementWait(60);
-	}
+    public void elementWait(Locator element, int timeoutSeconds) {
+        element.waitFor(new Locator.WaitForOptions().setTimeout(timeoutSeconds * 1000));
+    }
 
-	public WebDriverWait elementWait(int timeout) {
-		return new WebDriverWait(driver, Duration.ofSeconds(timeout));
-	}
+    public void selectMatOption(Locator selectEl, String value) throws Exception {
+        selectEl.waitFor();
+        selectEl.click();
+        List<Locator> options = this.scenarioContext.getPage().locator("xpath=//mat-option").all();
+       // options.waitFor();
+        for (Locator option : options) {
+            if (option.textContent().trim().equalsIgnoreCase(value.trim())) {
+                option.click();
+                return;
+            }
+        }
+        throw new Exception("Option not found: " + value);
+    }
 
-	public void selectMatOption(WebElement selectEl, String value) throws Exception {
-		// scrollIntoView(selectEl);
-		elementWait().until(ExpectedConditions.elementToBeClickable(selectEl));
-		click(selectEl);
+    public void click(Locator element) {
+        element.click();
+    }
 
-		selectOpt(value, 0);
-	}
+    public void clickRadioOption(Locator element, String value) {
+        // scrollIntoView(element);
+        Locator radioOpt = element.getByText(value);
+        radioOpt.click();
+    }
 
-	private void selectOpt(String value, int attempt) throws Exception {
-		try {
-			List<WebElement> options = elementWait()
-					.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath("//mat-option")));
-			Thread.sleep(2000);
-			Optional<WebElement> matchingOption = options.stream()
-					.filter(option -> option.getText().strip().equalsIgnoreCase(value.strip())).findFirst();
+    public void scrollToTop() {
+        this.scenarioContext.getPage().evaluate("window.scrollTo(0, 0)");
+    }
 
-			if (matchingOption.isPresent()) {
-				matchingOption.get().click();
-			} else {
-				List<String> availableOptions = options.stream().map(WebElement::getText).toList();
-				throw new RuntimeException("No option '" + value + "' found. Available options: " + availableOptions);
-			}
+    public void selectMatDate(Locator element, Date value) {
+        Page page = this.scenarioContext.getPage();
+        element.locator("mat-datepicker-toggle button").click();
+        //elementWait().until(ExpectedConditions.presenceOfElementLocated(By.xpath("//mat-calendar")));
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(value);
+        int year = cal.get(Calendar.YEAR);
+        int day = cal.get(Calendar.DATE);
+        String monthCode = switch (cal.get(Calendar.MONTH)) {
+            case Calendar.JANUARY -> "JAN";
+            case Calendar.FEBRUARY -> "FEB";
+            case Calendar.MARCH -> "MAR";
+            case Calendar.APRIL -> "APR";
+            case Calendar.MAY -> "MAY";
+            case Calendar.JUNE -> "JUN";
+            case Calendar.JULY -> "JUL";
+            case Calendar.AUGUST -> "AUG";
+            case Calendar.SEPTEMBER -> "SEP";
+            case Calendar.OCTOBER -> "OCT";
+            case Calendar.NOVEMBER -> "NOV";
+            case Calendar.DECEMBER -> "DEC";
+            default -> "";
+        };
+        page.locator(".mat-calendar-period-button").click();
+        List<Locator> dateCheck = page.locator(
+                "//button[contains(@class,'mat-calendar-body-cell') and normalize-space(string())='" + year + "']").all();
+        while (dateCheck.isEmpty()) {
+            page.locator(".mat-calendar-previous-button").click();
+            dateCheck = page.locator("//button[contains(@class,'mat-calendar-body-cell') and normalize-space(string())='" + year
+                    + "']").all();
+        }
+        page.locator(
+                        "//button[contains(@class,'mat-calendar-body-cell') and normalize-space(string())='" + year + "']")
+                .click();
+        page.locator("//button[contains(@class,'mat-calendar-body-cell') and normalize-space(string())='"
+                + monthCode + "']").click();
+        page.locator(
+                        "//button[contains(@class,'mat-calendar-body-cell') and normalize-space(string())='" + day + "']")
+                .click();
 
-		} catch (StaleElementReferenceException e) {
-			if (attempt > 5) {
-				throw new RuntimeException("Failed to select after 5 attempt.");
-			}
-			Thread.sleep(2000);
-			attempt++;
-			selectOpt(value, attempt);
-		}
-	}
+    }
 
-	public void clickRadioOption(WebElement element, String value) throws Exception {
-		// scrollIntoView(element);
-		WebElement radioOpt = element.findElement(By.xpath(".//*[normalize-space()=\"" + value + "\"]"));
-		radioOpt.click();
-	}
+    public void uploadFile(Locator element, String value) throws Exception {
+        element.click();
 
-	public void scrollToTop() {
-		JavascriptExecutor js = (JavascriptExecutor) driver;
-		js.executeScript("window.scrollTo(0, 0);");
-	}
+        Thread.sleep(2000);
+        // Use Robot class to handle OS-level file upload
+        Robot robot = new Robot();
+        robot.delay(2000);
 
-	public void selectMatDate(WebElement element, Date value) throws Exception {
-		element.findElement(By.xpath(".//mat-datepicker-toggle//button")).click();
-		elementWait().until(ExpectedConditions.presenceOfElementLocated(By.xpath("//mat-calendar")));
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(value);
-		int year = cal.get(Calendar.YEAR);
-		int day = cal.get(Calendar.DATE);
-		String monthCode = switch (cal.get(Calendar.MONTH)) {
-		case Calendar.JANUARY -> "JAN";
-		case Calendar.FEBRUARY -> "FEB";
-		case Calendar.MARCH -> "MAR";
-		case Calendar.APRIL -> "APR";
-		case Calendar.MAY -> "MAY";
-		case Calendar.JUNE -> "JUN";
-		case Calendar.JULY -> "JUL";
-		case Calendar.AUGUST -> "AUG";
-		case Calendar.SEPTEMBER -> "SEP";
-		case Calendar.OCTOBER -> "OCT";
-		case Calendar.NOVEMBER -> "NOV";
-		case Calendar.DECEMBER -> "DEC";
-		default -> "";
-		};
-		driver.findElement(By.cssSelector(".mat-calendar-period-button")).click();
-		List<WebElement> dateCheck = driver.findElements(By.xpath(
-				"//button[contains(@class,'mat-calendar-body-cell') and normalize-space(string())='" + year + "']"));
-		while (dateCheck.size() == 0) {
-			driver.findElement(By.cssSelector(".mat-calendar-previous-button")).click();
-			dateCheck = driver.findElements(
-					By.xpath("//button[contains(@class,'mat-calendar-body-cell') and normalize-space(string())='" + year
-							+ "']"));
-		}
-		driver.findElement(By.xpath(
-				"//button[contains(@class,'mat-calendar-body-cell') and normalize-space(string())='" + year + "']"))
-				.click();
-		driver.findElement(By.xpath("//button[contains(@class,'mat-calendar-body-cell') and normalize-space(string())='"
-				+ monthCode + "']")).click();
-		driver.findElement(By.xpath(
-				"//button[contains(@class,'mat-calendar-body-cell') and normalize-space(string())='" + day + "']"))
-				.click();
+        // Copy file path to clipboard
+        StringSelection filePath = new StringSelection(value);
+        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(filePath, null);
 
-	}
+        // Press CTRL + V to paste
+        robot.keyPress(KeyEvent.VK_CONTROL);
+        robot.keyPress(KeyEvent.VK_V);
+        robot.keyRelease(KeyEvent.VK_V);
+        robot.keyRelease(KeyEvent.VK_CONTROL);
+        Thread.sleep(1000);
 
-	public void uploadFile(WebElement element, String value) throws Exception {
-		element.click();
+        // Press Enter to confirm
+        robot.keyPress(KeyEvent.VK_ENTER);
+        robot.keyRelease(KeyEvent.VK_ENTER);
+        Thread.sleep(2000);
+    }
 
-		Thread.sleep(2000);
-		// Use Robot class to handle OS-level file upload
-		Robot robot = new Robot();
-		robot.delay(2000);
+    public void uploadFileFromResource(Locator element, String value) {
+        String filePath = CommonUtils.getFileFromResources(value);
+        element.locator(".//input[@type='file']").setInputFiles(Path.of(filePath));
+    }
 
-		// Copy file path to clipboard
-		StringSelection filePath = new StringSelection(value);
-		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(filePath, null);
 
-		// Press CTRL + V to paste
-		robot.keyPress(KeyEvent.VK_CONTROL);
-		robot.keyPress(KeyEvent.VK_V);
-		robot.keyRelease(KeyEvent.VK_V);
-		robot.keyRelease(KeyEvent.VK_CONTROL);
-		Thread.sleep(1000);
 
-		// Press Enter to confirm
-		robot.keyPress(KeyEvent.VK_ENTER);
-		robot.keyRelease(KeyEvent.VK_ENTER);
-		Thread.sleep(2000);
-	}
+public boolean isElementPresent(Locator locator, int timeout) {
+    try {
+        locator.waitFor(new Locator.WaitForOptions().setTimeout(timeout * 1000));
+        return true;
+    } catch (Exception e) {
+        return false;
+    }
+}
 
-	public void uploadFileFromResource(WebElement element, String value) {
-		String filePath = CommonUtils.getFileFromResources(value);
-		element.findElement(By.xpath(".//input[@type='file']")).sendKeys(filePath);
-	}
-
-	public void click(WebElement element, int attempt) throws Exception {
-		// 
-		try {
-			switch (attempt) {
-			case 0:
-			case 1:
-			case 2:
-				elementWait().until(ExpectedConditions.elementToBeClickable(element)).click();
-				break;
-			case 3:
-				JavascriptExecutor js = (JavascriptExecutor) driver;
-				js.executeScript("arguments[0].click();", element);
-				break;
-			default:
-				throw new RuntimeException("Failed to click after " + (attempt - 1) + " attempt.");
-			}
-		} catch (Exception e) {
-			Thread.sleep(2000);
-			attempt++;
-			scrollIntoView(element);
-			click(element, attempt);
-		}
-	}
-
-	public void click(WebElement element) throws Exception {
-		click(element, 0);
-	}
-
-	public boolean isElementPresent(By locator, int timeout) {
-		try {
-			driver.manage().timeouts().implicitlyWait(Duration.ofMillis(250));
-			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeout));
-			wait.until(ExpectedConditions.presenceOfElementLocated(locator));
-			return true;
-		} catch (Exception e) {
-			return false;
-		} finally {
-			driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(Configs.IMPLICIT_WAIT));
-		}
-	}
+    public boolean isElementPresent(String selector, int timeout) {
+        Locator locator = scenarioContext.getPage().locator(selector);
+        return isElementPresent(locator, timeout);
+    }
 }

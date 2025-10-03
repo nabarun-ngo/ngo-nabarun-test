@@ -12,8 +12,8 @@ public class LoginPageObjects extends CommonPageObjects {
 		super(scenarioContext);
 	}
 	
-	//public By AcceptConsentLocator=By.xpath("//*[text()='Accept']");
-	//public By PasswordChangedTxtLocator=By.xpath("//*[normalize-space(text())='Your old password has been expired']");
+	public String AcceptConsentLocator="//*[text()='Accept']";
+	public String PasswordChangedTxtLocator="//*[normalize-space(text())='Your old password has been expired']";
 	
 	
 	public Supplier<Locator> ContinueWithPasswordButton = () -> findLocator("#password");

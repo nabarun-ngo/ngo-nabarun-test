@@ -21,8 +21,8 @@ public class HomePageObjects extends CommonPageObjects {
 		return switch (elementName) {
 		case "Your Email (JoinUs)" -> Join_Email.get();
 		case "Your Mobile Number (JoinUs)" -> Join_Mobile.get();
-		default -> findLocator("//label[normalize-space(text())=\"" + elementName + "\"]/preceding-sibling::*", parentContext, FindBy.XPATH);
-		};
+        default -> findLocator("//label[.//*[text()='"+elementName+"']]/following-sibling::*", parentContext, FindBy.XPATH);
+        };
 	}
 
 }

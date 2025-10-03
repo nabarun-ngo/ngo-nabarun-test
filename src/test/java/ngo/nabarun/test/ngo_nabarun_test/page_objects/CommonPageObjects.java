@@ -1,7 +1,6 @@
 package ngo.nabarun.test.ngo_nabarun_test.page_objects;
 
 import com.microsoft.playwright.*;
-import java.util.function.Supplier;
 
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 
@@ -27,22 +26,33 @@ public class CommonPageObjects {
 	}
 
 	public Locator getAccordion(int i, Locator parent) {
-		return findLocator("(//mat-expansion-panel)[" + i + "]",parent,FindBy.XPATH);
-	}
-
-    protected Locator findLocator(String selector, Locator parent,FindBy selectBy) {
-        Page root = scenarioContext.getPage();
-        //parent = root.locator("body");
-        return switch (selectBy) {
-            case TEXT -> parent != null ? parent.getByText(selector) : root.getByText(selector);
-            case LABEL -> parent != null ? parent.getByLabel(selector) : root.getByLabel(selector);
-            case XPATH -> parent != null ? parent.locator("xpath=" + selector) :root.locator("xpath=" + selector);
-            case CSS -> parent != null ? parent.locator("css=" + selector) : root.locator("css=" + selector);
-            case ANY -> parent != null ? parent.locator(selector) : root.locator(selector);
-        };
+        return findLocator("//mat-expansion-panel[" + i + "]", parent, FindBy.XPATH);
     }
 
-    protected Locator findLocator(String selector) {
+    public final Locator findLocator(String selector, Locator parent, FindBy selectBy) {
+            Page root = scenarioContext.getPage();
+            Locator locator = switch (selectBy) {
+                case TEXT -> parent != null ? parent.getByText(selector) : root.getByText(selector);
+                case LABEL -> parent != null ? parent.getByLabel(selector) : root.getByLabel(selector);
+                case XPATH -> parent != null ? parent.locator("xpath=." + selector) : root.locator("xpath=" + selector);
+                case CSS -> parent != null ? parent.locator("css=" + selector) : root.locator("css=" + selector);
+                case ANY -> parent != null ? parent.locator(selector) : root.locator(selector);
+            };
+            locator.evaluate(
+                "el => {" +
+                "  let count = 0;" +
+                "  const blink = () => {" +
+                "    el.style.outline = (count % 2 === 0) ? '3px solid red' : '';" +
+                "    count++;" +
+                "    if (count < 6) setTimeout(blink, 250);" +
+                "  };" +
+                "  blink();" +
+                "}"
+            );
+            return locator;
+        }
+
+    public final Locator findLocator(String selector) {
         return findLocator(selector,null,FindBy.ANY);
     }
 

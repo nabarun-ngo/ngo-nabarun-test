@@ -131,35 +131,19 @@ public class ElementHelper {
         element.locator(".//input[@type='file']").setInputFiles(Path.of(filePath));
     }
 
-    public void click(Locator element, int attempt) throws Exception {
-        Page page = this.scenarioContext.getPage();
-        try {
-            switch (attempt) {
-                case 0:
-                case 1:
-                case 2:
-                    element.click();
-                    break;
-                case 3:
-                    page.evaluate("arguments[0].click();", element);
-                    break;
-                default:
-                    throw new RuntimeException("Failed to click after " + (attempt - 1) + " attempt.");
-            }
-        } catch (Exception e) {
-            Thread.sleep(2000);
-            attempt++;
-            scrollIntoView(element);
-            click(element, attempt);
-        }
-    }
+
 
 public boolean isElementPresent(Locator locator, int timeout) {
     try {
-        locator.waitFor(new Locator.WaitForOptions().setTimeout(timeout * 2000));
+        locator.waitFor(new Locator.WaitForOptions().setTimeout(timeout * 1000));
         return true;
     } catch (Exception e) {
         return false;
     }
 }
+
+    public boolean isElementPresent(String selector, int timeout) {
+        Locator locator = scenarioContext.getPage().locator(selector);
+        return isElementPresent(locator, timeout);
+    }
 }

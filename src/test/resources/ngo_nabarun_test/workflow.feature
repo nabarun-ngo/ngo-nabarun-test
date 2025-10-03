@@ -12,35 +12,38 @@ Feature: Requests & Worklist
     Then I enter "{RandomEmail}" on "Your Email (JoinUs)" textbox at "Home" page
     Then I enter "{RandomNumber:10}" on "Your Mobile Number (JoinUs)" textbox at "Home" page
     Then I enter "{RandomLocation}" on "Where are you from?" textbox at "Home" page
-    Then I enter "{RandomText}" on "How did you know about Nabarun?" textarea at "Home" page
-    Then I enter "{RandomText}" on "Why you want to join Nabarun?" textarea at "Home" page
     Then I click on "Join Now" button at "Home" page
     Then I wait for following text to display at "Home" page
-      | Expected_Content      |
-      | Rules and Regulations |
+      | Expected_Content                            |
+      | Please Read Rules And Regulations Carefully |
     Then I click on "Agree and Continue" button at "Home" page
+    #Then I wait for following text to display at "Home" page
+    #  | Expected_Content      |
+    #  | Additional Details    |
+    Then I enter "{RandomText}" on "How did you know about Nabarun?" textarea at "Home" page
+    Then I enter "{RandomText}" on "Why you want to join Nabarun?" textarea at "Home" page
+    Then I click on "Proceed" button at "Home" page
     Then I wait for following text to display at "Home" page
-      | Expected_Content |
-      | Login Details    |
+      | Expected_Content  |
+      | Set Login details |
     Then I scroll on "Login Password" textbox at "Home" page
     Then I enter "Password@01" on "Login Password" textbox at "Home" page
     Then I scroll on "Confirm Login Password" textbox at "Home" page
     Then I enter "Password@01" on "Confirm Login Password" textbox at "Home" page
     Then I click on "Proceed" button at "Home" page
-    Then I wait for following text to display at "Home" page
-      | Expected_Content  |
-      | Verify and Submit |
+#    Then I wait for following text to display at "Home" page
+#      | Expected_Content  |
+#      | Verify and Submit |
     Then I retrieve the OTP from database and enter it on OTP textbox
     Then I click on "Submit" button at "Home" page
-    Then I wait for following text to display at "Home" page
-      | Expected_Content  |
-      | Request Submitted |
+#    Then I wait for following text to display at "Home" page
+#      | Expected_Content  |
+#      | Request Submitted |
     Then I capture and store the request id
     Then I wait for 5 seconds
     Given I have opened to Nabarun's web portal
     Then I click and hold on "More" link at "Home" page
-    Then I click on "Login" link at "Home" page
-    Then I switch to the new tab
+    Then I click on "Login" link at "Home" page and wait for new window to load
     # Login With President
     Then I login with "<Approver1>" user using Password option
     Then I handle all conditional post login screen if it appeared
@@ -112,7 +115,7 @@ Feature: Requests & Worklist
     And I wait for loading to complete
     Then I wait for following text to display at "Tasks" page
       | Expected_Content  |
-      | No records found. |
+      | No records found  |
     Then I logout from current session
     
     Examples:

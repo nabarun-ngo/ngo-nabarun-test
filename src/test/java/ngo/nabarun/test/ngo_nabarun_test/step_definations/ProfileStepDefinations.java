@@ -31,13 +31,13 @@ public class ProfileStepDefinations {
 		elementHelper.selectMatDate(dateOfBirth, DataUtils.getDateWithOffset(-365*19));
 
         Locator number1 = profilePageObjects.getTextBoxMapping("Phone Number (WhatsApp)",null,false);
-		if(number1.getAttribute("value") != null && number1.getAttribute("value").isEmpty()) {
+		if(number1.inputValue() != null && number1.inputValue().isEmpty()) {
 			number1.clear();
 			number1.fill(DataUtils.generateRandomNumber(10));
 		}
 
         Locator number2 = profilePageObjects.getTextBoxMapping("Phone Number (Alternative)",null,false);
-		if(number2.getAttribute("value") != null && number2.getAttribute("value").isEmpty()) {
+		if(number2.inputValue() != null && number2.inputValue().isEmpty()) {
 			number2.clear();
 			number2.fill(DataUtils.generateRandomNumber(10));
 		}

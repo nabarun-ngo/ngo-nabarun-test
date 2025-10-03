@@ -3,10 +3,11 @@ package ngo.nabarun.test.ngo_nabarun_test.models.db;
 import java.util.Date;
 
 import dev.morphia.annotations.Entity;
+import dev.morphia.annotations.Id;
 
 @Entity("donations")
 public class DonationDBModel {
-	
+    @Id
 	private String id;
 		
 	private Double amount;

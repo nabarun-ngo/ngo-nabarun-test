@@ -65,7 +65,7 @@ public class DopplerPropertySource {
 				String rawValue = field.getValue().get("raw").asText();
 				String rawVisibility = field.getValue().get("rawVisibility").asText();
 				propertySource.put(key, rawValue);
-				System.out.println(key + " : " + (rawVisibility.equals("restricted") ? "***" : rawValue));
+				System.out.println(key + " : " + (rawVisibility.equals("restricted") || rawVisibility.equals("masked") ? "***" : rawValue));
 			}
 		}
 		return propertySource;

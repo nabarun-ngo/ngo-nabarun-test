@@ -22,9 +22,10 @@ public class ConfigManager {
 	private static final String CONFIG_SOURCE = "CONFIG_SOURCE";
 
 	static {
-		String config_source = System.getProperty(CONFIG_SOURCE);
-		String config_env = System.getProperty(ENVIRONMENT,"dev");
-		if(config_env == null) {
+        String config_source=System.getenv(CONFIG_SOURCE) == null ? System.getProperty(CONFIG_SOURCE) : System.getenv(CONFIG_SOURCE);
+        String config_env=System.getenv(ENVIRONMENT) == null ? System.getProperty(ENVIRONMENT,"dev") : System.getenv(ENVIRONMENT);
+
+        if(config_env == null) {
 			throw new RuntimeException("ENVIRONMENT must be set as argument");
 		}
 
@@ -58,6 +59,7 @@ public class ConfigManager {
 		}
 
 	}
+
 
 	static String get(String key) {
 		Object value = System.getProperty(key) != null ? System.getProperty(key) : config.get(key);

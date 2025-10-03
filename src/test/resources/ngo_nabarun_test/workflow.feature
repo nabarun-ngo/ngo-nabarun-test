@@ -40,7 +40,7 @@ Feature: Requests & Worklist
 #      | Expected_Content  |
 #      | Request Submitted |
     Then I capture and store the request id
-    Then I wait for 5 seconds
+    #Then I wait for 5 seconds
     Given I have opened to Nabarun's web portal
     Then I click and hold on "More" link at "Home" page
     Then I click on "Login" link at "Home" page and wait for new window to load
@@ -59,7 +59,7 @@ Feature: Requests & Worklist
     Then I enter "Ok Approved" on "Remarks" textarea at "Tasks" page
     Then I click on "Confirm" button at "Tasks" page
     And I wait for loading to complete
-    Then I wait for 2 seconds
+    #Then I wait for 2 seconds
     Then I click on "Back to Dashboard" link at "Tasks" page
     Then I logout from current session
     # Login With President
@@ -77,7 +77,7 @@ Feature: Requests & Worklist
     Then I enter "Ok Approved" on "Remarks" textarea at "Tasks" page
     Then I click on "Confirm" button at "Tasks" page
     And I wait for loading to complete
-    Then I wait for 2 seconds
+    #Then I wait for 2 seconds
     Then I click on "Back to Dashboard" link at "Tasks" page
     Then I logout from current session
     # Login With New User 1st time

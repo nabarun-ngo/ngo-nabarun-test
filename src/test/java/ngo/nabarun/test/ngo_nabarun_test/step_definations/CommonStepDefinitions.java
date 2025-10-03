@@ -69,7 +69,10 @@ public class CommonStepDefinitions {
         Page page = scenarioContext.getPage();
         Locator element = controlLookup.getLookupElement(elementName, elementType, pageName, pageType);
         Page newWindowPage = page.context().waitForPage(element::click);
+        int implicitWait = Configs.IMPLICIT_WAIT;
+        newWindowPage.setDefaultTimeout(implicitWait * 1000);
         scenarioContext.setPage(newWindowPage);
+        page.close();
     }
 
 	@Then("^I (enter|select|click|upload) \"([^\"]*)\" on \"([^\"]*)\" (textbox|dropdown|radio|datepicker|textarea|fileinput) at \"([^\"]*)\" (page|accordion)$")
@@ -128,12 +131,7 @@ public class CommonStepDefinitions {
 		if(pageType.equalsIgnoreCase("accordion")) {
 			parent= controlLookup.getAccordionMapping(pageName);
 		}
-        if(parent != null){
-            System.out.println("Hello Parent -> "+parent.textContent()+ " \n");
-        }
-
         Locator elm = commonPageObjects.getAccordion(index, parent);
-        System.out.println("Hello -> "+elm.textContent()+ " \n");
         elm.click();
 
     }

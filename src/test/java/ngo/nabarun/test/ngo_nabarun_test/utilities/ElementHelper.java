@@ -49,7 +49,7 @@ public class ElementHelper {
         element.click();
     }
 
-    public void clickRadioOption(Locator element, String value) throws Exception {
+    public void clickRadioOption(Locator element, String value) {
         // scrollIntoView(element);
         Locator radioOpt = element.getByText(value);
         radioOpt.click();
@@ -59,7 +59,7 @@ public class ElementHelper {
         this.scenarioContext.getPage().evaluate("window.scrollTo(0, 0)");
     }
 
-    public void selectMatDate(Locator element, Date value) throws Exception {
+    public void selectMatDate(Locator element, Date value) {
         Page page = this.scenarioContext.getPage();
         element.locator("mat-datepicker-toggle button").click();
         //elementWait().until(ExpectedConditions.presenceOfElementLocated(By.xpath("//mat-calendar")));
@@ -154,16 +154,12 @@ public class ElementHelper {
         }
     }
 
-    public boolean isElementPresent(Locator locator, int timeout) {
-//		try {
-//			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeout));
-//			wait.until(ExpectedConditions.presenceOfElementLocated(locator));
-//			return true;
-//		} catch (Exception e) {
-//			return false;
-//		} finally {
-//			driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(Configs.IMPLICIT_WAIT));
-//		}
+public boolean isElementPresent(Locator locator, int timeout) {
+    try {
+        locator.waitFor(new Locator.WaitForOptions().setTimeout(timeout * 2000));
         return true;
+    } catch (Exception e) {
+        return false;
     }
+}
 }

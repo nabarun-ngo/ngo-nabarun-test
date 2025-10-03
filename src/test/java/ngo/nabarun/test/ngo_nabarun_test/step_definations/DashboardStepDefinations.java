@@ -1,7 +1,5 @@
 package ngo.nabarun.test.ngo_nabarun_test.step_definations;
 
-import org.junit.jupiter.api.Assertions;
-
 import io.cucumber.java.en.Then;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.DataProvider;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
@@ -27,7 +25,7 @@ public class DashboardStepDefinations {
 
 
 	@Then("^I logout from current session$")
-	public void iLogoutFromCurrentSession() throws Throwable {
+	public void iLogoutFromCurrentSession() {
 		elementHelper.click(dashboardPageObjects.ProfileIcon.get());
 		elementHelper.click(dashboardPageObjects.LogoutLink.get());
 		elementHelper.click(dashboardPageObjects.LogoutPopupYes.get());

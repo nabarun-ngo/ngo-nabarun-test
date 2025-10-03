@@ -21,11 +21,9 @@ Feature: Donation Management
     And I wait for loading to complete
     Then the "Add Guest Donation" button should be displayed at "Donation" page
     Then I click on "Add Guest Donation" button at "Donation" page
-    Then I map "#createDonation" element as "Create_Donation" accordion
     Then I enter "{RandomName}" on "Name" textbox at "Donation" page
     Then I enter "{RandomEmail}" on "Email address" textbox at "Donation" page
     Then I enter "+91{RandomNumber:10}" on "Contact number" textbox at "Donation" page
-    Then I wait for 3 seconds
     Then I select "One Time" on "Donation type" dropdown at "Donation" page
     Then I enter "{RandomNumber:3}" on "Donation amount" textbox at "Donation" page
     Then I click "No" on "Is this donation made for any events?" radio at "Donation" page
@@ -71,17 +69,16 @@ Feature: Donation Management
     And I wait for loading to complete
     Then the "Add Guest Donation" button should be displayed at "Donation" page
     Then I click on "Add Guest Donation" button at "Donation" page
-    Then I map "//*[@id='createDonation']" element as "Create_Donation" accordion
-    Then I enter "{RandomName}" on "Name" textbox at "Create_Donation" accordion
-    Then I enter "{RandomEmail}" on "Email address" textbox at "Create_Donation" accordion
-    Then I enter "+91{RandomNumber:10}" on "Contact number" textbox at "Create_Donation" accordion
+    Then I enter "{RandomName}" on "Name" textbox at "Donation" page
+    Then I enter "{RandomEmail}" on "Email address" textbox at "Donation" page
+    Then I enter "+91{RandomNumber:10}" on "Contact number" textbox at "Donation" page
     Then I wait for 3 seconds
-    Then I select "One Time" on "Donation type" dropdown at "Create_Donation" accordion
-    Then I enter "{RandomNumber:3}" on "Donation amount" textbox at "Create_Donation" accordion
-    Then I click "Yes" on "Is this donation made for any events?" radio at "Create_Donation" accordion
+    Then I select "One Time" on "Donation type" dropdown at "Donation" page
+    Then I enter "{RandomNumber:3}" on "Donation amount" textbox at "Donation" page
+    Then I click "Yes" on "Is this donation made for any events?" radio at "Donation" page
     And I wait for loading to complete
-    Then I select "Test Event" on "Select event" dropdown at "Create_Donation" accordion
-    Then I click on "Create" button at "Create_Donation" accordion
+    Then I select "Test Event" on "Select event" dropdown at "Donation" page
+    Then I click on "Create" button at "Donation" page
     And I wait for loading to complete
     Then I capture and store the donation id
     Then I wait for 5 seconds
@@ -144,12 +141,12 @@ Feature: Donation Management
     And I wait for loading to complete
     Then I click on "Add Icon" button at "Donation" page
     Then I map "//*[@id='createDonation']" element as "Create_Donation" accordion
-    Then I select "One Time" on "Donation type" dropdown at "Create_Donation" accordion
-    Then I enter "{RandomNumber:3}" on "Donation amount" textbox at "Create_Donation" accordion
-    Then I click "Yes" on "Is this donation made for any events?" radio at "Create_Donation" accordion
+    Then I select "One Time" on "Donation type" dropdown at "Donation" page
+    Then I enter "{RandomNumber:3}" on "Donation amount" textbox at "Donation" page
+    Then I click "Yes" on "Is this donation made for any events?" radio at "Donation" page
     And I wait for loading to complete
-    Then I select "Test Event" on "Select event" dropdown at "Create_Donation" accordion
-    Then I click on "Create" button at "Create_Donation" accordion
+    Then I select "Test Event" on "Select event" dropdown at "Donation" page
+    Then I click on "Create" button at "Donation" page
     And I wait for loading to complete
     Then I capture and store the donation id
     Then I wait for 5 seconds
@@ -190,11 +187,11 @@ Feature: Donation Management
     Then I check and delete regular donation raised for "Member TestUser" this month
     Then I click on "Add Icon" button at "Donation" page
     Then I map "//*[@id='createDonation']" element as "Create_Donation" accordion
-    Then I select "Regular" on "Donation type" dropdown at "Create_Donation" accordion
-    Then I enter "{RandomNumber:3}" on "Donation amount" textbox at "Create_Donation" accordion
+    Then I select "Regular" on "Donation type" dropdown at "Donation" page
+    Then I enter "{RandomNumber:3}" on "Donation amount" textbox at "Donation" page
     Then I select "{FirstOfCurrentMonth}" on "Donation start date" datepicker at "Donation" page
     Then I select "{LastOfCurrentMonth}" on "Donation end date" datepicker at "Donation" page
-    Then I click on "Create" button at "Create_Donation" accordion
+    Then I click on "Create" button at "Donation" page
     And I wait for loading to complete
     Then I capture and store the donation id
     Then I wait for 5 seconds

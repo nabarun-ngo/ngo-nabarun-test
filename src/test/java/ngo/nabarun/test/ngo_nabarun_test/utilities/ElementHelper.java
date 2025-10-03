@@ -6,24 +6,21 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyEvent;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 
-
-import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 import ngo.nabarun.test.ngo_nabarun_test.utils.CommonUtils;
 
 public class ElementHelper {
+    private final ScenarioContext scenarioContext;
 
-    private final Page page;
+    //private final Page page;
 
     public ElementHelper(ScenarioContext scenarioContext) {
-        this.page = scenarioContext.getPage();
+        this.scenarioContext = scenarioContext;
     }
 
     public void scrollIntoView(Locator element) {
@@ -37,7 +34,7 @@ public class ElementHelper {
     public void selectMatOption(Locator selectEl, String value) throws Exception {
         selectEl.waitFor();
         selectEl.click();
-        List<Locator> options = page.locator("xpath=//mat-option").all();
+        List<Locator> options = this.scenarioContext.getPage().locator("xpath=//mat-option").all();
        // options.waitFor();
         for (Locator option : options) {
             if (option.textContent().trim().equalsIgnoreCase(value.trim())) {
@@ -54,16 +51,17 @@ public class ElementHelper {
 
     public void clickRadioOption(Locator element, String value) throws Exception {
         // scrollIntoView(element);
-        Locator radioOpt = element.locator(".//*[normalize-space()=\"" + value + "\"]");
+        Locator radioOpt = element.getByText(value);
         radioOpt.click();
     }
 
     public void scrollToTop() {
-        page.evaluate("window.scrollTo(0, 0)");
+        this.scenarioContext.getPage().evaluate("window.scrollTo(0, 0)");
     }
 
     public void selectMatDate(Locator element, Date value) throws Exception {
-        element.locator(".//mat-datepicker-toggle//button").click();
+        Page page = this.scenarioContext.getPage();
+        element.locator("mat-datepicker-toggle button").click();
         //elementWait().until(ExpectedConditions.presenceOfElementLocated(By.xpath("//mat-calendar")));
         Calendar cal = Calendar.getInstance();
         cal.setTime(value);
@@ -134,7 +132,7 @@ public class ElementHelper {
     }
 
     public void click(Locator element, int attempt) throws Exception {
-        //
+        Page page = this.scenarioContext.getPage();
         try {
             switch (attempt) {
                 case 0:

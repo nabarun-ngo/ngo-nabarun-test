@@ -9,6 +9,8 @@ import ngo.nabarun.test.ngo_nabarun_test.page_objects.DashboardPageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.LoginPageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ElementHelper;
 
+import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
+
 public class DashboardStepDefinations {
 	
 	private final DashboardPageObjects dashboardPageObjects;
@@ -30,8 +32,7 @@ public class DashboardStepDefinations {
 		elementHelper.click(dashboardPageObjects.LogoutLink.get());
 		elementHelper.click(dashboardPageObjects.LogoutPopupYes.get());
 
-		boolean isDisplayed=loginPageObjects.LoginPageHeader.get().isVisible();
-		Assertions.assertTrue(isDisplayed,"Login Page is not displayed.");
+        assertThat(loginPageObjects.LoginPageHeader.get()).isVisible();
 	}
 
 }

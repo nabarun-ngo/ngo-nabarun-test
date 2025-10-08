@@ -57,7 +57,10 @@ public class CommonPageObjects {
     }
 
 	public Locator getButtonMapping(String elementName,Locator parent) {
-		return findLocator("//button[normalize-space(string())='" + elementName + "']", parent,FindBy.XPATH);
+        return switch (elementName){
+            case "Add Icon"-> findLocator(".fab", parent,FindBy.CSS);
+            default-> findLocator("//button[normalize-space(string())='" + elementName + "']", parent,FindBy.XPATH);
+        };
 	}
 
 	public Locator getLinkMapping(String elementName,Locator parent) {

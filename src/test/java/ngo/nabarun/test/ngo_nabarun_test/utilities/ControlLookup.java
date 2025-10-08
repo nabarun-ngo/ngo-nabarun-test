@@ -5,17 +5,11 @@ import java.util.Map;
 
 import com.microsoft.playwright.*;
 
-import ngo.nabarun.test.ngo_nabarun_test.page_objects.CommonPageObjects;
-import ngo.nabarun.test.ngo_nabarun_test.page_objects.DashboardPageObjects;
-import ngo.nabarun.test.ngo_nabarun_test.page_objects.DonationPageObjects;
-import ngo.nabarun.test.ngo_nabarun_test.page_objects.HomePageObjects;
-import ngo.nabarun.test.ngo_nabarun_test.page_objects.LoginPageObjects;
-import ngo.nabarun.test.ngo_nabarun_test.page_objects.ProfilePageObjects;
-import ngo.nabarun.test.ngo_nabarun_test.page_objects.WorkflowPageObjects;
+import ngo.nabarun.test.ngo_nabarun_test.page_objects.*;
 
 public class ControlLookup {
 
-	private final Map<String, Locator> accordionMapping = new HashMap<>();
+    private final Map<String, Locator> accordionMapping = new HashMap<>();
 	private final LoginPageObjects loginPageObjects;
 	private final HomePageObjects homePageObjects;
 	private final DonationPageObjects donationPageObjects;
@@ -23,10 +17,12 @@ public class ControlLookup {
 	private final CommonPageObjects commonPageObjects;
 	private final WorkflowPageObjects workflowPageObjects;
 	private final ProfilePageObjects profilePageObjects;
+    private final AccountsPageObject accountsPageObjects;
 
-	public ControlLookup(CommonPageObjects commonPageObjects, LoginPageObjects loginPageObjects,
-			HomePageObjects homePageObjects, DonationPageObjects donationPageObjects,
-			DashboardPageObjects dashboardPageObjects,WorkflowPageObjects workflowPageObjects,ProfilePageObjects profilePageObjects) {
+    public ControlLookup(CommonPageObjects commonPageObjects, LoginPageObjects loginPageObjects,
+                         HomePageObjects homePageObjects, DonationPageObjects donationPageObjects,
+                         DashboardPageObjects dashboardPageObjects, WorkflowPageObjects workflowPageObjects, ProfilePageObjects profilePageObjects, 
+                         AccountsPageObject accountsPageObjects) {
 		this.commonPageObjects = commonPageObjects;
 		this.loginPageObjects = loginPageObjects;
 		this.homePageObjects = homePageObjects;
@@ -34,6 +30,7 @@ public class ControlLookup {
 		this.dashboardPageObjects = dashboardPageObjects;
 		this.workflowPageObjects=workflowPageObjects;
 		this.profilePageObjects=profilePageObjects;
+        this.accountsPageObjects=accountsPageObjects;
 	}
 
 	private static final String LOGIN_PAGE = "login";
@@ -44,6 +41,7 @@ public class ControlLookup {
 	private static final String WORKLIST_PAGE = "tasks";
 	private static final String REQUEST_PAGE = "request";
 	private static final String PROFILE_PAGE = "profile";
+    private static final String ACCOUNTS_PAGE = "accounts";
 
 	
 
@@ -76,7 +74,7 @@ public class ControlLookup {
 		case DONATION_PAGE -> donationPageObjects.getFileInputMapping(elementName, parentContext);
 		case WORKLIST_PAGE,REQUEST_PAGE -> workflowPageObjects.getFileInputMapping(elementName, parentContext);
 		case PROFILE_PAGE -> profilePageObjects.getFileInputMapping(elementName, parentContext);
-
+        case ACCOUNTS_PAGE -> accountsPageObjects.getFileInputMapping(elementName, parentContext);
 		default -> throw new RuntimeException("Invalid page " + pageName);
 		};
 	}
@@ -90,6 +88,7 @@ public class ControlLookup {
 		case DONATION_PAGE -> donationPageObjects.getDatePickerMapping(elementName, parentContext);
 		case WORKLIST_PAGE,REQUEST_PAGE -> workflowPageObjects.getDatePickerMapping(elementName, parentContext);
 		case PROFILE_PAGE -> profilePageObjects.getDatePickerMapping(elementName, parentContext);
+        case ACCOUNTS_PAGE -> accountsPageObjects.getDatePickerMapping(elementName, parentContext);
 		default -> throw new RuntimeException("Invalid page " + pageName);
 		};
 	}
@@ -103,6 +102,7 @@ public class ControlLookup {
 		case DONATION_PAGE -> donationPageObjects.getRadioMapping(elementName, parentContext);
 		case WORKLIST_PAGE,REQUEST_PAGE -> workflowPageObjects.getRadioMapping(elementName, parentContext);
 		case PROFILE_PAGE -> profilePageObjects.getRadioMapping(elementName, parentContext);
+        case ACCOUNTS_PAGE -> accountsPageObjects.getRadioMapping(elementName, parentContext);
 		default -> throw new RuntimeException("Invalid page " + pageName);
 		};
 	}
@@ -116,6 +116,7 @@ public class ControlLookup {
 		case DONATION_PAGE -> donationPageObjects.getDropdownMapping(elementName, parentContext);
 		case WORKLIST_PAGE,REQUEST_PAGE -> workflowPageObjects.getDropdownMapping(elementName, parentContext);
 		case PROFILE_PAGE -> profilePageObjects.getDropdownMapping(elementName, parentContext);
+        case ACCOUNTS_PAGE -> accountsPageObjects.getDropdownMapping(elementName, parentContext);
 		default -> throw new RuntimeException("Invalid page " + pageName);
 		};
 	}
@@ -130,6 +131,7 @@ public class ControlLookup {
 		case DONATION_PAGE -> donationPageObjects.getTextBoxMapping(elementName, parentContext, isTextArea);
 		case WORKLIST_PAGE, REQUEST_PAGE -> workflowPageObjects.getTextBoxMapping(elementName, parentContext,isTextArea);
         case PROFILE_PAGE -> profilePageObjects.getTextBoxMapping(elementName, parentContext,isTextArea);
+        case ACCOUNTS_PAGE -> accountsPageObjects.getTextBoxMapping(elementName, parentContext,isTextArea);
 		default -> throw new RuntimeException("Invalid page " + pageName);
 		};
 	}
@@ -143,7 +145,8 @@ public class ControlLookup {
 		case DONATION_PAGE -> donationPageObjects.getTextMapping(elementName, parentContext);
 		case WORKLIST_PAGE, REQUEST_PAGE -> workflowPageObjects.getTextMapping(elementName, parentContext);
         case PROFILE_PAGE -> profilePageObjects.getTextMapping(elementName, parentContext);
-		default -> throw new RuntimeException("Invalid page " + pageName);
+        case ACCOUNTS_PAGE -> accountsPageObjects.getTextMapping(elementName, parentContext);
+        default -> throw new RuntimeException("Invalid page " + pageName);
 		};
 	}
 
@@ -156,6 +159,7 @@ public class ControlLookup {
 		case DONATION_PAGE -> donationPageObjects.getLinkMapping(elementName, parentContext);
 		case WORKLIST_PAGE, REQUEST_PAGE -> workflowPageObjects.getLinkMapping(elementName, parentContext);
         case PROFILE_PAGE -> profilePageObjects.getLinkMapping(elementName, parentContext);
+        case ACCOUNTS_PAGE -> accountsPageObjects.getLinkMapping(elementName, parentContext);
 		default -> throw new RuntimeException("Invalid page " + pageName);
 		};
 	}
@@ -169,6 +173,7 @@ public class ControlLookup {
 		case DONATION_PAGE -> donationPageObjects.getButtonMapping(elementName, parentContext);
 		case WORKLIST_PAGE, REQUEST_PAGE -> workflowPageObjects.getButtonMapping(elementName, parentContext);
         case PROFILE_PAGE -> profilePageObjects.getButtonMapping(elementName, parentContext);
+        case ACCOUNTS_PAGE -> accountsPageObjects.getButtonMapping(elementName, parentContext);
 		default -> throw new RuntimeException("Invalid page " + pageName);
 		};
 	}

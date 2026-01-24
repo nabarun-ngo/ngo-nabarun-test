@@ -18,7 +18,7 @@ public class DonationPageObjects extends CommonPageObjects {
 	public Supplier<Locator> ADVSearch_DonationId = () -> findLocator("#donationId");
 	public Supplier<Locator> ADVSearch_FirstName = () -> findLocator("#firstName");
 	public Supplier<Locator> ADVSearch_LastName = () ->findLocator("#lastName");
-	public Supplier<Locator> Accordion_AddIcon = () -> findLocator("//mat-icon[text()='add']");
+	public Supplier<Locator> Modal_UserSearch = () ->findLocator("#user_search");
 
 	@Override
 	public Locator getButtonMapping(String elementName, Locator parentContext) {

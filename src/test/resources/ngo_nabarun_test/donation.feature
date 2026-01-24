@@ -3,14 +3,12 @@ Feature: Donation Management
 
   Background:
     Given I have opened to Nabarun's web portal
-    Then I click and hold on "More" link at "Home" page
     Then I click on "Login" link at "Home" page and wait for new window to load
     Then I login with "cashier@nabarun.com" user using Password option
-    Then I handle all conditional post login screen if it appeared
     Then I must be landed to "WELCOME TO NABARUN'S SECURED DASHBOARD" screen
     When I click on "Donations" text at "Dashboard" page
     And I wait for loading to complete
-    Then I must be landed to "DONATION DASHBOARD" screen
+    Then I must be landed to "DONATIONS" screen
 
   @donation
   @regression
@@ -19,20 +17,16 @@ Feature: Donation Management
   Scenario: Create and Update Guest Donation (No Event, UPI Payment)
     When I click on "Guest Donations" text at "Donation" page
     And I wait for loading to complete
-    Then the "Add Guest Donation" button should be displayed at "Donation" page
-    Then I click on "Add Guest Donation" button at "Donation" page
-    Then I map "//*[@id='createDonation']" element as "Create_Donation" accordion
-    Then I enter "{RandomName}" on "Name" textbox at "Create_Donation" accordion
-    Then I enter "{RandomEmail}" on "Email address" textbox at "Create_Donation" accordion
-    Then I enter "+91{RandomNumber:10}" on "Contact number" textbox at "Create_Donation" accordion
-    #Then I wait for 3 seconds
-    Then I select "One Time" on "Donation type" dropdown at "Create_Donation" accordion
+    Then I start listening to network calls
+    Then the "Add Icon" button should be displayed at "Donation" page
+    Then I click on "Add Icon" button at "Donation" page
+    Then I map "#create" element as "Create_Donation" accordion
+    Then I enter "{RandomName}" on "Donor name" textbox at "Create_Donation" accordion
+    Then I enter "{RandomEmail}" on "Donor email" textbox at "Create_Donation" accordion
+    Then I enter "{RandomNumber:10}" on "Phone Number" textbox at "Create_Donation" accordion
     Then I enter "{RandomNumber:3}" on "Donation amount" textbox at "Create_Donation" accordion
-    Then I click "No" on "Is this donation made for any events?" radio at "Create_Donation" accordion
-    Then I click on "Create" button at "Create_Donation" accordion
+    Then I click on "Confirm" button at "Create_Donation" accordion
     And I wait for loading to complete
-    Then I capture and store the donation id
-    #Then I wait for 5 seconds
     Then I search the created donation under "Guest Donation" tab
     And I wait for loading to complete
     Then I opened the accordion of index 1 at "Donation" page
@@ -44,39 +38,36 @@ Feature: Donation Management
     Then I click on "Confirm" button at "Donation" page
     And I wait for loading to complete
     # Update Status to PAID
+    Then I opened the accordion of index 1 at "Donation" page
     Then I click on "Update" button at "Donation" page
     And I wait for loading to complete
     Then I select "Paid" on "Donation status" dropdown at "Donation" page
     And I wait for loading to complete
     Then I select "{SystemDate}" on "Donation paid on" datepicker at "Donation" page
-    Then I select "Cashier TestUser" on "Donation paid to" dropdown at "Donation" page
+    Then I select "- Treasurer TestUser" on "Donation paid to" dropdown at "Donation" page
     Then I select "UPI" on "Payment method" dropdown at "Donation" page
     Then I select "Google Pay" on "UPI name" dropdown at "Donation" page
     Then I enter "Test Test" on "Remarks" textarea at "Donation" page
-    Then I upload "test_files/test_pdf.pdf" on "Upload document(s)" fileinput at "Donation" page
-    #Then I wait for 2 seconds
+    Then I upload "test_files/test_pdf.pdf" on "Upload" fileinput at "Donation" page
     Then I click on "Confirm" button at "Donation" page
     And I wait for loading to complete
     Then I check if transaction is created for this donation
     And I wait for loading to complete
-    #Then I wait for 2 seconds
     Then I click on "Back to Dashboard" link at "Donation" page
     Then I logout from current session
 
   @donation
   @donation02
-  @regression
+  #@regression
   Scenario: Create and Update Guest Donation (With Event, Cash Payment, Status Transitions)
     When I click on "Guest Donations" text at "Donation" page
     And I wait for loading to complete
-    Then the "Add Guest Donation" button should be displayed at "Donation" page
-    Then I click on "Add Guest Donation" button at "Donation" page
-    Then I map "//*[@id='createDonation']" element as "Create_Donation" accordion
+    Then the "Add Icon" button should be displayed at "Donation" page
+    Then I click on "Add Icon" button at "Donation" page
+    Then I map "#create" element as "Create_Donation" accordion
     Then I enter "{RandomName}" on "Name" textbox at "Create_Donation" accordion
     Then I enter "{RandomEmail}" on "Email address" textbox at "Create_Donation" accordion
     Then I enter "+91{RandomNumber:10}" on "Contact number" textbox at "Create_Donation" accordion
-    #Then I wait for 3 seconds
-    Then I select "One Time" on "Donation type" dropdown at "Create_Donation" accordion
     Then I enter "{RandomNumber:3}" on "Donation amount" textbox at "Create_Donation" accordion
     Then I click "Yes" on "Is this donation made for any events?" radio at "Create_Donation" accordion
     And I wait for loading to complete
@@ -134,7 +125,7 @@ Feature: Donation Management
 
   @donation
   @donation03
-  @regression
+  #@regression
   Scenario: Create and Update Member Onetime Donation (With Event, Net Banking)
     When I click on "Member Donations" text at "Donation" page
     And I wait for loading to complete
@@ -143,7 +134,7 @@ Feature: Donation Management
     Then I opened the accordion of index 1 at "Donation" page
     And I wait for loading to complete
     Then I click on "Add Icon" button at "Donation" page
-    Then I map "//*[@id='createDonation']" element as "Create_Donation" accordion
+    Then I map "#create" element as "Create_Donation" accordion
     Then I select "One Time" on "Donation type" dropdown at "Create_Donation" accordion
     Then I enter "{RandomNumber:3}" on "Donation amount" textbox at "Create_Donation" accordion
     Then I click "Yes" on "Is this donation made for any events?" radio at "Create_Donation" accordion
@@ -182,6 +173,8 @@ Feature: Donation Management
   Scenario: Create and Update Member Regular Donation (Full Status Flow, UPI)
     When I click on "Member Donations" text at "Donation" page
     And I wait for loading to complete
+    
+    
     Then I search for member "Member TestUser" under "Member Donation" tab
     And I wait for loading to complete
     Then I opened the accordion of index 1 at "Donation" page

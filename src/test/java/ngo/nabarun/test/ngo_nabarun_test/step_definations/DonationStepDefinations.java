@@ -1,11 +1,14 @@
 package ngo.nabarun.test.ngo_nabarun_test.step_definations;
 
+import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.playwright.Locator;
 
 
@@ -74,13 +77,11 @@ public class DonationStepDefinations {
 
 	@Then("^I search for member \"([^\"]*)\" under \"([^\"]*)\" tab$")
 	public void iSearchForMemberUnderTab(String memberName, String tab) throws Throwable {
-		String firstName = memberName.split(" ")[0];
-		String lastName = memberName.split(" ")[1];
-		elementHelper.scrollToTop();
-		elementHelper.click(donationPageObjects.getButtonMapping("Advanced Search", null));
-		donationPageObjects.ADVSearch_FirstName.get().fill(firstName);
-		donationPageObjects.ADVSearch_LastName.get().fill(lastName);
-		elementHelper.click(donationPageObjects.getButtonMapping("Search", null));
+		Locator selectorModal = donationPageObjects.getTextMapping("Select Members", null);
+		assertThat(selectorModal).isVisible();
+		donationPageObjects.Modal_UserSearch.get().fill(memberName);
+		Locator selectBtn=donationPageObjects.getButtonMapping("Select", null);
+		elementHelper.click(selectBtn); 
 	}
 
 	@Then("^I check and delete regular donation raised for \"([^\"]*)\" this month$")
@@ -96,5 +97,28 @@ public class DonationStepDefinations {
 			String donationId=donation.getId();
 			dataProvider.deleteDonationById(donationId);
 		}
+	}
+	
+	@Then("I start listening to network calls")
+	public void I_start_listening_to_network_calls() throws Throwable {
+		scenarioContext.getPage().onResponse(response -> {
+			
+	    	System.out.println("[DONATION] "+response.url() + " ("+response.request().resourceType()+") --> " + response.status());
+	        if (response.url().contains("donation/create") 
+	        		&& response.request().resourceType().equals("xhr")
+	        		&& response.status() == 201) {
+
+	            try {
+	                ObjectMapper mapper = new ObjectMapper();
+	                JsonNode json = mapper.readTree(response.text());
+	                String donationId = json.get("responsePayload").get("id").asText();
+	                scenarioContext.set(ContextKeys.DonationId,donationId);
+
+	                System.out.println("Captured Donation ID: " + donationId);
+	            } catch (Exception e) {
+	                e.printStackTrace();
+	            }
+	        }
+	    });
 	}
 }

@@ -57,7 +57,7 @@ public class DataUtils {
 			input = input.replace("{RandomLastName}", faker.name().lastName());
 		}
 		if (containsPlaceholder(input, "{RandomText}")) {
-			input = input.replace("{RandomText}", faker.lorem().sentence());
+			input = input.replace("{RandomText}", faker.lorem().sentence(5));
 		}
 		if (containsPlaceholder(input, "{RandomLocation}")) {
 			input = input.replace("{RandomLocation}", faker.address().cityName());

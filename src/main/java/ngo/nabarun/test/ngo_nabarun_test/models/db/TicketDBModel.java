@@ -2,9 +2,9 @@ package ngo.nabarun.test.ngo_nabarun_test.models.db;
 
 import java.util.Date;
 
-import dev.morphia.annotations.Entity;
+import ngo.nabarun.test.ngo_nabarun_test.utils.DbEntity;
 
-@Entity("tickets")
+@DbEntity("tickets")
 public class TicketDBModel {
 
 	private String id;

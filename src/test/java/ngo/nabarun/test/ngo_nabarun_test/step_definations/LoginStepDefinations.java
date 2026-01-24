@@ -108,9 +108,7 @@ public class LoginStepDefinations {
 
 	private void handle_complete_profile_screen_if_it_appeared() throws Exception {
 		// Handling complete profile screen if it appeared
-		if (elementHelper.isElementPresent(pageObject.PageHeader(), 10)
-				&& pageObject.PageHeader().textContent().toUpperCase().contains("COMPLETE PROFILE")) {
-
+		if (elementHelper.isElementPresent(pageObject.PageHeader("COMPLETE PROFILE"), 10)) {
 			profileStepDefinations.fillCompleteProfileForm();
 		}
 	}

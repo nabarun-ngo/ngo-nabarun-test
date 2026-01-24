@@ -3,7 +3,6 @@ package ngo.nabarun.test.ngo_nabarun_test.hooks;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.List;
 
 import com.microsoft.playwright.*;
@@ -35,29 +34,31 @@ public class TestHooks {
 
 	@Before()
 	public void beforeScenario(Scenario scenario) {
-		scenarioContext.reset();
-        Playwright playwright = Playwright.create();
+	    scenarioContext.reset();
+	    Playwright playwright = Playwright.create();
 
-            String browserName = Configs.BROWSER.toLowerCase();
-            BrowserType.LaunchOptions launchOptions = switch (browserName) {
-                case "chrome" -> new BrowserType.LaunchOptions().setChannel("chrome");
-                case "edge" -> new BrowserType.LaunchOptions().setChannel("msedge");
-                default -> throw new IllegalArgumentException("Unexpected value: " + browserName);
-            };
-            boolean headless = System.getProperty("headless", "N").equals("Y");
-            launchOptions.setHeadless(headless);
-            launchOptions.setArgs(List.of("--start-maximized"));
-            launchOptions.setSlowMo(500);
-            browser =playwright.chromium().launch(launchOptions);
-            context = browser.newContext(new Browser.NewContextOptions()
-                    .setViewportSize(null));
-            Page page = context.newPage();
-            int implicitWait = Configs.IMPLICIT_WAIT;
-            page.setDefaultTimeout(implicitWait * 1000);
-            scenarioContext.setPage(page);
+	    String browserName = Configs.BROWSER.toLowerCase();
+	    BrowserType.LaunchOptions launchOptions = switch (browserName) {
+	        case "chrome" -> new BrowserType.LaunchOptions().setChannel("chrome");
+	        case "edge" -> new BrowserType.LaunchOptions().setChannel("msedge");
+	        default -> throw new IllegalArgumentException("Unexpected value: " + browserName);
+	    };
 
+	    boolean headless = System.getProperty("headless", "N").equals("Y");
+	    launchOptions.setHeadless(headless);
+	    launchOptions.setArgs(List.of("--start-maximized"));
+	    launchOptions.setSlowMo(500);
 
+	    browser = playwright.chromium().launch(launchOptions);
+	    context = browser.newContext(new Browser.NewContextOptions().setViewportSize(null));
+
+	    Page page = context.newPage();
+	    page.setDefaultTimeout(Configs.IMPLICIT_WAIT * 1000);
+	    scenarioContext.setPage(page);
+
+	    
 	}
+
 
 	@BeforeStep
 	public void beforeStep(Scenario scenario) {

@@ -56,8 +56,6 @@ public class CommonStepDefinitions {
             case "scroll" -> element.scrollIntoViewIfNeeded();
             case "click and hold" -> {
                 element.hover();
-                //element.dispatchEvent("mousedown");
-                // Playwright does not have direct click-and-hold, but you can use dispatchEvent if needed
             }
             default -> throw new IllegalStateException("Invalid action : " + actionName);
         }
@@ -93,8 +91,11 @@ public class CommonStepDefinitions {
             }
             case "CLICK" -> elementHelper.clickRadioOption(element, value);
             case "UPLOAD" -> {
-                String filePath = CommonUtils.getFileFromResources(value);
-                element.setInputFiles(Path.of(filePath));
+                String filePath = CommonUtils.getFileFromResources(value);                
+                FileChooser fileChooser = scenarioContext.getPage().waitForFileChooser(() -> {
+                    element.click();
+                });
+                fileChooser.setFiles(Path.of(filePath));
             }
             default -> throw new IllegalStateException("Invalid action : " + actionName);
         }
@@ -102,7 +103,8 @@ public class CommonStepDefinitions {
 
     @Then("I must be landed to {string} screen")
 	public void i_must_be_landed_to_screen(String screenName) {
-        assertThat(commonPageObjects.PageHeader()).containsText(screenName);
+    	Locator header = commonPageObjects.PageHeader(screenName);
+		assertThat(header).isVisible();
     }
 
 	@Then("I wait for loading to complete")

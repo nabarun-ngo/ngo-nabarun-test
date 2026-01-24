@@ -37,7 +37,7 @@ public class ElementHelper {
         List<Locator> options = this.scenarioContext.getPage().locator("xpath=//mat-option").all();
        // options.waitFor();
         for (Locator option : options) {
-            if (option.textContent().trim().equalsIgnoreCase(value.trim())) {
+            if (option.textContent().toLowerCase().trim().contains(value.toLowerCase().trim())) {
                 option.click();
                 return;
             }
@@ -128,7 +128,7 @@ public class ElementHelper {
 
     public void uploadFileFromResource(Locator element, String value) {
         String filePath = CommonUtils.getFileFromResources(value);
-        element.locator(".//input[@type='file']").setInputFiles(Path.of(filePath));
+        element.locator("//input[@type='file']").setInputFiles(Path.of(filePath));
     }
 
 

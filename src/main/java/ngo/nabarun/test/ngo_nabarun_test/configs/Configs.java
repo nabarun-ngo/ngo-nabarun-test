@@ -7,8 +7,7 @@ public class Configs {
 	public static final Integer IMPLICIT_WAIT = Integer.parseInt(ConfigManager.get("TEST_IMPLICIT_WAIT"));
 	public static final Integer GLOBAL_EXPLICIT_WAIT = Integer.parseInt(ConfigManager.get("TEST_GLOBAL_EXPLICIT_WAIT"));
 	public static final String TEST_DEFAULTPASSWORD = ConfigManager.get("TEST_DEFAULTPASSWORD");
-	public static final String TEST_APIKEY = ConfigManager.get("TEST_APIKEY");
-	public static final String TEST_QMETRY_APIKEY = ConfigManager.get("TEST_QMETRY_APIKEY");
-	public static final String MONGODB_CONNECTION_STRING= ConfigManager.get("MONGODB_CONNECTION_STRING");
-
+	public static final String DB_URL = ConfigManager.get("POSTGRES_URI");
+	public static final String DB_USERNAME = ConfigManager.get("POSTGRES_USERNAME");
+	public static final String DB_PASSWORD = ConfigManager.get("POSTGRES_PASSWORD");
 }

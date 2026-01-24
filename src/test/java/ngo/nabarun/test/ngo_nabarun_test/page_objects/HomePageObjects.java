@@ -11,8 +11,8 @@ public class HomePageObjects extends CommonPageObjects {
 		super(scenarioContext);
 	}
 
-	public Supplier<Locator> Join_Email = () -> findLocator("#JoinUsForm #email");
-	public Supplier<Locator> Join_Mobile = () -> findLocator("#JoinUsForm #mobileno");
+	public Supplier<Locator> Join_Email = () -> findLocator("//div[@id='join']//input[@id='email']");
+	public Supplier<Locator> Join_Mobile = () -> findLocator("//div[@id='join']//input[@id='contactNumber']");
 	public Supplier<Locator> Join_Email_Text = () -> findLocator("#id");
 	public Supplier<Locator> Join_OTP = () -> findLocator("#otp");
 	public Supplier<Locator> Request_Alert = () -> findLocator(".alert-success");
@@ -21,8 +21,17 @@ public class HomePageObjects extends CommonPageObjects {
 		return switch (elementName) {
 		case "Your Email (JoinUs)" -> Join_Email.get();
 		case "Your Mobile Number (JoinUs)" -> Join_Mobile.get();
-        default -> findLocator("//label[.//*[text()='"+elementName+"']]/following-sibling::*", parentContext, FindBy.XPATH);
+        default -> findLocator("//label[//*[text()='"+elementName+"']]/following-sibling::*", parentContext, FindBy.XPATH);
         };
+	}
+	
+	@Override
+	public Locator getTextMapping(String elementName, Locator parent) {
+		return switch (elementName) {
+		case "I agree with the Rules and Regulations of Nabarun" -> findLocator("#acceptance");
+		case "Your Mobile Number (JoinUs)" -> Join_Mobile.get();
+        default ->super.getTextMapping(elementName, parent);
+        };		
 	}
 
 }

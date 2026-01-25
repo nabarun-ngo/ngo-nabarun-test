@@ -19,19 +19,21 @@ public class HomePageObjects extends CommonPageObjects {
 
 	public Locator getTextBoxMapping(String elementName, Locator parentContext, boolean isTextArea) {
 		return switch (elementName) {
-		case "Your Email (JoinUs)" -> Join_Email.get();
-		case "Your Mobile Number (JoinUs)" -> Join_Mobile.get();
-        default -> findLocator("//label[//*[text()='"+elementName+"']]/following-sibling::*", parentContext, FindBy.XPATH);
-        };
+			case "Your Email (JoinUs)" -> Join_Email.get();
+			case "Your Mobile Number (JoinUs)" -> Join_Mobile.get();
+			default ->
+				findLocator("//*[normalize-space(text())='" + elementName + "']/parent::label/following-sibling::*",
+						parentContext, FindBy.XPATH);
+		};
 	}
-	
+
 	@Override
 	public Locator getTextMapping(String elementName, Locator parent) {
 		return switch (elementName) {
-		case "I agree with the Rules and Regulations of Nabarun" -> findLocator("#acceptance");
-		case "Your Mobile Number (JoinUs)" -> Join_Mobile.get();
-        default ->super.getTextMapping(elementName, parent);
-        };		
+			case "I agree with the Rules and Regulations of Nabarun" -> findLocator("#acceptance");
+			case "Your Mobile Number (JoinUs)" -> Join_Mobile.get();
+			default -> super.getTextMapping(elementName, parent);
+		};
 	}
 
 }

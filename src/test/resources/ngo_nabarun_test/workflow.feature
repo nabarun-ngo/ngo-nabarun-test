@@ -7,24 +7,23 @@ Feature: Requests & Worklist
   Scenario Outline: Workflow - Create and fullfill Join Request - Happy Path
     Given I have opened to Nabarun's web portal
     Then I click on "Join Us" link at "Home" page
+    Then I start listening to network calls
     Then I enter "{RandomFirstName}" on "Your First Name" textbox at "Home" page
     Then I enter "{RandomLastName}" on "Your Last Name" textbox at "Home" page
     Then I enter "{RandomEmail}" on "Your Email" textbox at "Home" page
     Then I enter "{RandomNumber:10}" on "Your Mobile Number (JoinUs)" textbox at "Home" page
     Then I enter "{RandomLocation}" on "Where are you from?" textbox at "Home" page
-    Then I enter "{RandomText}" on "How did you hear about us?" textarea at "Home" page
+    Then I enter "{RandomLocation}" on "How did you hear about us?" textarea at "Home" page
     Then I click on "I agree with the Rules and Regulations of Nabarun" text at "Home" page
     Then I click on "Join Now" button at "Home" page
     Then I wait for following text to display at "Home" page
-      | Expected_Content  |
+      | Expected_Content                                                        |
       | Thank you for showing interest! Please check your email for next steps. |
     #Then I wait for 5 seconds
     Given I have opened to Nabarun's web portal
-    Then I click and hold on "More" link at "Home" page
     Then I click on "Login" link at "Home" page and wait for new window to load
     # Login With President
     Then I login with "<Approver1>" user using Password option
-    Then I handle all conditional post login screen if it appeared
     Then I must be landed to "WELCOME TO NABARUN'S SECURED DASHBOARD" screen
     When I click on "Tasks" text at "Dashboard" page
     And I wait for loading to complete
@@ -92,10 +91,10 @@ Feature: Requests & Worklist
     Then I search the created request under "Pending Tasks" tab
     And I wait for loading to complete
     Then I wait for following text to display at "Tasks" page
-      | Expected_Content  |
-      | No records found  |
+      | Expected_Content |
+      | No records found |
     Then I logout from current session
-    
+
     Examples:
-    | Approver1             | Approver2             |
-    | president@nabarun.com | secretary@nabarun.com |
+      | Approver1                    | Approver2             |
+      | groupcoordinator@nabarun.com | secretary@nabarun.com |

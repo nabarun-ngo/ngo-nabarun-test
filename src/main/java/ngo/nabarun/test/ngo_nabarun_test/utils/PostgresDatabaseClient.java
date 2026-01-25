@@ -10,6 +10,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
 import java.util.*;
+import java.util.Date;
 import java.util.stream.Collectors;
 
 public class PostgresDatabaseClient implements IDatabaseClient {
@@ -30,7 +31,19 @@ public class PostgresDatabaseClient implements IDatabaseClient {
 
     private String getTableName(Class<?> clazz) {
         DbEntity entity = clazz.getAnnotation(DbEntity.class);
-        return entity != null ? entity.value() : clazz.getSimpleName().toLowerCase();
+        String name = entity != null ? entity.value() : clazz.getSimpleName().toLowerCase();
+        return "\"" + name + "\"";
+    }
+
+    private void setParameters(PreparedStatement stmt, List<Object> params) throws SQLException {
+        for (int i = 0; i < params.size(); i++) {
+            Object param = params.get(i);
+            if (param instanceof Date) {
+                stmt.setTimestamp(i + 1, new Timestamp(((Date) param).getTime()));
+            } else {
+                stmt.setObject(i + 1, param);
+            }
+        }
     }
 
     @Override
@@ -50,19 +63,17 @@ public class PostgresDatabaseClient implements IDatabaseClient {
             String whereClause = filters.stream()
                     .map(filter -> {
                         params.add(filter.getValue());
-                        return filter.getField() + " " + filter.getOperator().getSqlOperator() + " ?";
+                        return "\"" + filter.getField() + "\" " + filter.getOperator().getSqlOperator() + " ?";
                     })
                     .collect(Collectors.joining(" AND "));
             query.append(whereClause);
         }
 
         List<T> results = new ArrayList<>();
-        System.out.println("Executing query: " + query);
+        logger.info("Executing query: " + query);
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query.toString())) {
-            for (int i = 0; i < params.size(); i++) {
-                stmt.setObject(i + 1, params.get(i));
-            }
+            setParameters(stmt, params);
             try (ResultSet rs = stmt.executeQuery()) {
                 ResultSetMetaData metaData = rs.getMetaData();
                 int columnCount = metaData.getColumnCount();
@@ -93,7 +104,7 @@ public class PostgresDatabaseClient implements IDatabaseClient {
             String whereClause = filters.stream()
                     .map(filter -> {
                         params.add(filter.getValue());
-                        return filter.getField() + " " + filter.getOperator().getSqlOperator() + " ?";
+                        return "\"" + filter.getField() + "\" " + filter.getOperator().getSqlOperator() + " ?";
                     })
                     .collect(Collectors.joining(" AND "));
             query.append(whereClause);
@@ -101,12 +112,52 @@ public class PostgresDatabaseClient implements IDatabaseClient {
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query.toString())) {
-            for (int i = 0; i < params.size(); i++) {
-                stmt.setObject(i + 1, params.get(i));
-            }
+            setParameters(stmt, params);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             logger.error("Error executing postgres delete: " + query, e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<Map<String, Object>> executeQuery(String sql, List<Object> params) {
+        List<Map<String, Object>> results = new ArrayList<>();
+        logger.info("Executing raw query: " + sql);
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            if (params != null) {
+                setParameters(stmt, params);
+            }
+            try (ResultSet rs = stmt.executeQuery()) {
+                ResultSetMetaData metaData = rs.getMetaData();
+                int columnCount = metaData.getColumnCount();
+                while (rs.next()) {
+                    Map<String, Object> row = new HashMap<>();
+                    for (int i = 1; i <= columnCount; i++) {
+                        row.put(metaData.getColumnName(i), rs.getObject(i));
+                    }
+                    results.add(row);
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Error executing raw postgres query: " + sql, e);
+            throw new RuntimeException(e);
+        }
+        return results;
+    }
+
+    @Override
+    public boolean executeUpdate(String sql, List<Object> params) {
+        logger.info("Executing raw update: " + sql);
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            if (params != null) {
+                setParameters(stmt, params);
+            }
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            logger.error("Error executing raw postgres update: " + sql, e);
             throw new RuntimeException(e);
         }
     }

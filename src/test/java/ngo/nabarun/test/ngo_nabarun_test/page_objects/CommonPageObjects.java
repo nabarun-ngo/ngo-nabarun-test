@@ -52,7 +52,9 @@ public class CommonPageObjects {
 	}
 	
 	public Supplier<Locator> Accordion_AddIcon = () -> findLocator("//mat-icon[text()='add']");
+	public Supplier<Locator> MatOption = () -> findLocator("//mat-option");
 
+	
 
 	public Locator getButtonMapping(String elementName, Locator parent) {
 		return switch (elementName) {

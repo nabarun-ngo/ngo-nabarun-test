@@ -51,7 +51,7 @@ public class DataProvider {
 			return DBUtils.getClient().findMany(DonationDBModel.class, Arrays.asList(
 					DBFilter.gte("raisedOn", startDate),
 					DBFilter.lte("raisedOn", endDate),
-					DBFilter.eq("profile", profileId),
+					DBFilter.eq("donorId", profileId),
 					DBFilter.eq("type", type)
 			));
 		} catch (Exception e) {

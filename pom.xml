@@ -42,7 +42,16 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-
+	<repositories>
+		<repository>
+			<id>central</id>
+			<url>https://repo.maven.apache.org/maven2</url>
+		</repository>
+		<repository>
+			<id>github</id>
+			<url>https://maven.pkg.github.com/nabarun-ngo/*</url>
+		</repository>
+	</repositories>
 	<dependencies>
 		<dependency>
 			<groupId>io.cucumber</groupId>
@@ -136,6 +145,16 @@
 			<artifactId>lombok</artifactId>
 			<version>1.18.30</version>
 			<scope>provided</scope>
+		</dependency>
+			<dependency>
+			<groupId>ngo.nabarun</groupId>
+			<artifactId>doppler-java-client</artifactId>
+			<version>1.1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>ngo.nabarun</groupId>
+			<artifactId>ngo-nabarun-common</artifactId>
+			<version>1.2.3</version>
 		</dependency>
 	</dependencies>
 

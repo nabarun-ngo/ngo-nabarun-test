@@ -3,11 +3,10 @@ package ngo.nabarun.test.ngo_nabarun_test.utils;
 import java.io.File;
 import java.net.URL;
 import java.text.Normalizer;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class CommonUtils {
+import ngo.nabarun.common.util.CommonUtil;
 
-	public static final ObjectMapper objectMapper = new ObjectMapper();
+public class CommonUtils extends CommonUtil {
 
 	private static final String INVALID_CHARACTERS = "[<>:\"/\\|?*]";
 

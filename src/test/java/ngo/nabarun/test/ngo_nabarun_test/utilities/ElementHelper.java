@@ -6,9 +6,11 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyEvent;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
@@ -34,8 +36,12 @@ public class ElementHelper {
     public void selectMatOption(Locator selectEl, String value) throws Exception {
         selectEl.waitFor();
         selectEl.click();
-        List<Locator> options = this.scenarioContext.getPage().locator("xpath=//mat-option").all();
-       // options.waitFor();
+        // Scope to overlay panel so we don't pick options from another open dropdown (Playwright best practice)
+        Page page = this.scenarioContext.getPage();
+        Locator optionsLocator = page.locator(".cdk-overlay-pane mat-option").count() > 0
+                ? page.locator(".cdk-overlay-pane mat-option")
+                : page.locator("mat-option");
+        List<Locator> options = optionsLocator.all();
         for (Locator option : options) {
             if (option.textContent().toLowerCase().trim().contains(value.toLowerCase().trim())) {
                 option.click();
@@ -43,6 +49,30 @@ public class ElementHelper {
             }
         }
         throw new Exception("Option not found: " + value);
+    }
+
+    /** Select multiple options in a mat-select multiple. Value is comma-separated (e.g. "A, B, C"). */
+    public void selectMatOptions(Locator selectEl, String commaSeparatedValues) throws Exception {
+        List<String> values = Arrays.stream(commaSeparatedValues.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toList());
+        if (values.isEmpty()) return;
+        selectEl.waitFor();
+        selectEl.click();
+        Page page = this.scenarioContext.getPage();
+        Locator optionsLocator = page.locator(".cdk-overlay-pane mat-option").count() > 0
+                ? page.locator(".cdk-overlay-pane mat-option")
+                : page.locator("mat-option");
+        for (String value : values) {
+            List<Locator> options = optionsLocator.all();
+            for (Locator option : options) {
+                if (option.textContent().toLowerCase().trim().contains(value.toLowerCase().trim())) {
+                    option.click();
+                    break;
+                }
+            }
+        }
     }
 
     public void click(Locator element) {

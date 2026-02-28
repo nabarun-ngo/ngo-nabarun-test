@@ -3,7 +3,6 @@ package ngo.nabarun.test.ngo_nabarun_test.step_definations;
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,7 +14,6 @@ import io.cucumber.java.en.Then;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.DataProvider;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext.ContextKeys;
-import ngo.nabarun.test.ngo_nabarun_test.models.db.DonationDBModel;
 import ngo.nabarun.test.ngo_nabarun_test.models.db.UserDBModel;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.DonationPageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ElementHelper;
@@ -23,7 +21,6 @@ import ngo.nabarun.test.ngo_nabarun_test.utils.DataUtils;
 
 public class DonationStepDefinations {
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-	private static final ObjectMapper mapper = new ObjectMapper();
 
 	private DonationPageObjects donationPageObjects;
 	private ScenarioContext scenarioContext;
@@ -60,7 +57,12 @@ public class DonationStepDefinations {
 		String donationId = scenarioContext.get(ContextKeys.DonationId, String.class);
 		elementHelper.scrollToTop();
 		Locator parent = null;
-		elementHelper.click(donationPageObjects.getButtonMapping("Advanced Search", null));
+		if (tab.toLowerCase().contains("member")) {
+			elementHelper.click(donationPageObjects.getButtonMapping("Filter", null));
+			parent = donationPageObjects.Popup_Container();
+		} else {
+			elementHelper.click(donationPageObjects.getButtonMapping("Advanced Search", null));
+		}
 		donationPageObjects.ADVSearch_DonationId.get().fill(donationId);
 		elementHelper.click(donationPageObjects.getButtonMapping("Search", parent));
 
@@ -68,10 +70,6 @@ public class DonationStepDefinations {
 
 	@Then("^I check if transaction is (created|reverted) for this donation$")
 	public void iCheckIfTransactionIsReverted(String type) throws Throwable {
-		// String donationId = scenarioContext.get(ContextKeys.DonationId,
-		// String.class);
-		// DonationDBModel donation = dataProvider.fin(donationId);
-
 	}
 
 	@Then("^I search for member \"([^\"]*)\" under \"([^\"]*)\" tab$")
@@ -79,7 +77,6 @@ public class DonationStepDefinations {
 		Locator selectorModal = donationPageObjects.getTextMapping("Select Members", null);
 		assertThat(selectorModal).isVisible();
 		donationPageObjects.Modal_UserSearch.get().fill(memberName);
-		donationPageObjects.MatOption.get().click();
 		Locator selectBtn = donationPageObjects.getButtonMapping("Select", null);
 		elementHelper.click(selectBtn);
 	}
@@ -91,40 +88,32 @@ public class DonationStepDefinations {
 		UserDBModel user = dataProvider.findUserByName(firstName, lastName);
 		Date startDate = dateFormat.parse(DataUtils.firstDayOfCurrentMonth());
 		Date endDate = dateFormat.parse(DataUtils.lastDayOfCurrentMonth());
-		String id = user.getId();
-		List<DonationDBModel> donations = dataProvider.findDonationsBetweenDates(startDate, endDate, id, "REGULAR");
-		for (DonationDBModel donation : donations) {
-			String donationId = donation.getId();
-			dataProvider.deleteDonationById(donationId);
-		}
+		// String id = user.getId();
+		// List<DonationDBModel>
+		// donations=dataProvider.findDonationsBetweenDates(startDate,endDate,id,"REGULAR");
+		// for(DonationDBModel donation:donations) {
+		// String donationId=donation.getId();
+		// dataProvider.deleteDonationById(donationId);
+		// }
 	}
 
-	@Then("^I start listening to network calls$")
+	@Then("I start listening to network calls")
 	public void I_start_listening_to_network_calls() throws Throwable {
 		scenarioContext.getPage().onResponse(response -> {
+
+			System.out.println("[DONATION] " + response.url() + " (" + response.request().resourceType() + ") --> "
+					+ response.status());
 			if (response.url().contains("donation/create")
 					&& response.request().resourceType().equals("xhr")
 					&& response.status() == 201) {
 
 				try {
+					ObjectMapper mapper = new ObjectMapper();
 					JsonNode json = mapper.readTree(response.text());
 					String donationId = json.get("responsePayload").get("id").asText();
 					scenarioContext.set(ContextKeys.DonationId, donationId);
 
 					System.out.println("Captured Donation ID: " + donationId);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			} else if ((response.url().contains("public/signup")
-					|| response.url().contains("public/contact")
-					|| response.url().contains("public/donate"))
-					&& response.status() >= 200 && response.status() < 300) {
-				try {
-					JsonNode json = mapper.readTree(response.text());
-					String requestId = json.get("id").asText();
-					scenarioContext.set(ContextKeys.RequestId, requestId);
-
-					System.out.println("Captured Request ID: " + requestId);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

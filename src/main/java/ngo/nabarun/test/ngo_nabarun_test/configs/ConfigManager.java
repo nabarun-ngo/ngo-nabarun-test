@@ -1,17 +1,19 @@
 package ngo.nabarun.test.ngo_nabarun_test.configs;
 
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import ngo.nabarun.doppler.api.ConfigsApi;
+import ngo.nabarun.doppler.model.Secret;
 import ngo.nabarun.test.ngo_nabarun_test.utils.CommonUtils;
-
 
 public class ConfigManager {
 	private static final Logger logger = LogManager.getLogger(ConfigManager.class);
@@ -21,48 +23,88 @@ public class ConfigManager {
 	private static final String ENVIRONMENT = "ENVIRONMENT";
 	private static final String CONFIG_SOURCE = "CONFIG_SOURCE";
 
-	static {
-        String config_source=System.getenv(CONFIG_SOURCE) == null ? System.getProperty(CONFIG_SOURCE) : System.getenv(CONFIG_SOURCE);
-        String config_env=System.getenv(ENVIRONMENT) == null ? System.getProperty(ENVIRONMENT,"dev") : System.getenv(ENVIRONMENT);
+	private static final Map<String, String> envMap = new java.util.HashMap<>();
 
-        if(config_env == null) {
-			throw new RuntimeException("ENVIRONMENT must be set as argument");
+	static {
+		// Load .env file if exists
+		java.io.File envFile = new java.io.File(".env");
+		if (envFile.exists()) {
+			try (InputStream envStream = new java.io.FileInputStream(envFile)) {
+				java.util.Properties props = new java.util.Properties();
+				props.load(envStream);
+				for (String name : props.stringPropertyNames()) {
+					envMap.put(name, props.getProperty(name));
+				}
+				logger.info("Loaded variables from .env file");
+			} catch (IOException e) {
+				logger.warn("Found .env but failed to read it: " + e.getMessage());
+			}
 		}
 
-		if (config_source != null && config_source.equalsIgnoreCase("doppler")) {
-			String projectName=System.getenv(DOPPLER_PROJECT_NAME) == null ? System.getProperty(DOPPLER_PROJECT_NAME) : System.getenv(DOPPLER_PROJECT_NAME);
-			String token=System.getenv(DOPPLER_SERVICE_TOKEN) == null ? System.getProperty(DOPPLER_SERVICE_TOKEN) : System.getenv(DOPPLER_SERVICE_TOKEN);
-			if(projectName == null) {
-				throw new RuntimeException("DOPPLER_PROJECT_NAME must be set as argument");
-			}
-			if(token == null) {
-				throw new RuntimeException("DOPPLER_SERVICE_TOKEN must be set as argument");
-			}
+		String config_env = getEnvOrProperty(ENVIRONMENT, "dev");
+		String config_source = getEnvOrProperty(CONFIG_SOURCE,
+				config_env.equalsIgnoreCase("stage") ? "doppler" : "file");
+
+		// Initialize config map
+		config = new java.util.HashMap<>();
+
+		// 1. Load common config first (base settings)
+
+		if (config_source.equalsIgnoreCase("doppler")) {
+			// 2. Load from Doppler (overrides common)
+			String projectName = getEnvOrProperty(DOPPLER_PROJECT_NAME, null);
+			String token = getEnvOrProperty(DOPPLER_SERVICE_TOKEN, null);
+
+			if (projectName == null)
+				throw new RuntimeException("DOPPLER_PROJECT_NAME must be set (via .env or system property)");
+			if (token == null)
+				throw new RuntimeException("DOPPLER_SERVICE_TOKEN must be set (via .env or system property)");
+
 			try {
-				DopplerPropertySource source= new  DopplerPropertySource(projectName, config_env, token);
-				config=source.loadProperties();
+				ConfigsApi configApi = new ConfigsApi(projectName, token);
+				List<Secret> secrets = configApi.getSecrets(config_env);
+				config.putAll(secrets.stream().collect(
+						Collectors.toMap(Secret::getKey, Secret::getValue)));
 			} catch (Exception e) {
 				logger.error("Error loading properties from Doppler", e);
-			}
-		} else {
-			String configFilePath = "test_config/test-config-"+config_env+".json";
-			try (InputStream inputStream = ConfigManager.class.getClassLoader().getResourceAsStream(configFilePath)) {
-				if (inputStream == null) {
-					throw new RuntimeException("Configuration file not found: " + configFilePath);
-				}
-				config = CommonUtils.objectMapper.readValue(inputStream, new TypeReference<Map<String, Object>>() {
-				});
-			} catch (IOException e) {
-				logger.error("Failed to load configuration from file", e);
 				throw new RuntimeException("Failed to load configuration", e);
 			}
+		} else {
+			// 2. Load environment specific config (overrides common)
+			String configFilePath = "test_config/test-config-" + config_env + ".json";
+			loadConfigFile("test_config/test-config.json", false);
+			loadConfigFile(configFilePath, true);
 		}
-
 	}
 
+	private static String getEnvOrProperty(String key, String defaultValue) {
+		if (envMap.containsKey(key))
+			return envMap.get(key);
+		return CommonUtils.getEnvProperty(key, defaultValue);
+	}
+
+	private static void loadConfigFile(String path, boolean required) {
+		try (InputStream inputStream = ConfigManager.class.getClassLoader().getResourceAsStream(path)) {
+			if (inputStream == null) {
+				if (required) {
+					throw new RuntimeException("Configuration file not found: " + path
+							+ ". [TIP: Check ENVIRONMENT system property or ensure file exists in test_config/]");
+				}
+				return;
+			}
+			Map<String, Object> newConfig = CommonUtils.getObjectMapper().readValue(inputStream,
+					new TypeReference<Map<String, Object>>() {
+					});
+			config.putAll(newConfig);
+		} catch (IOException e) {
+			logger.error("Failed to load configuration from file: " + path, e);
+			if (required)
+				throw new RuntimeException("Failed to load configuration", e);
+		}
+	}
 
 	static String get(String key) {
-		Object value = System.getProperty(key) != null ? System.getProperty(key) : config.get(key);
+		Object value = CommonUtils.getEnvProperty(key);
 		if (value == null) {
 			throw new IllegalArgumentException("Key not found in configuration: " + key);
 		}
@@ -70,7 +112,7 @@ public class ConfigManager {
 	}
 
 	static <T> T get(String key, Class<T> type) {
-		Object value = System.getProperty(key) != null ? System.getProperty(key) : config.get(key);
+		Object value = CommonUtils.getEnvProperty(key);
 		if (value == null) {
 			throw new IllegalArgumentException("Key not found in configuration: " + key);
 		}

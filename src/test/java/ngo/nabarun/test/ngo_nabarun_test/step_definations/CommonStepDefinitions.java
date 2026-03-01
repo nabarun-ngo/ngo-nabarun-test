@@ -1,16 +1,14 @@
 package ngo.nabarun.test.ngo_nabarun_test.step_definations;
 
 import java.util.List;
-import java.util.Map;
-
 import com.microsoft.playwright.*;
 
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.*;
-import ngo.nabarun.test.ngo_nabarun_test.common.FieldInputModel;
 import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.DataProvider;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
+import ngo.nabarun.test.ngo_nabarun_test.models.common.FieldInputModel;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.CommonPageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ControlLookup;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ControlActions;
@@ -61,8 +59,7 @@ public class CommonStepDefinitions {
 		Page page = scenarioContext.getPage();
 		SelfHealingLocator element = controlLookup.getLookupElement(elementName, elementType, pageName);
 		Page newWindowPage = page.context().waitForPage(element.getLocator()::click);
-		int implicitWait = Configs.IMPLICIT_WAIT;
-		newWindowPage.setDefaultTimeout(implicitWait * 1000);
+		newWindowPage.setDefaultTimeout(Configs.IMPLICIT_WAIT);
 		scenarioContext.setPage(newWindowPage);
 		page.close();
 	}
@@ -121,16 +118,6 @@ public class CommonStepDefinitions {
 	@Then("^I wait for (\\d+) seconds$")
 	public void iWaitForSeconds(int wait) throws Throwable {
 		Thread.sleep(wait * 1000L);
-	}
-
-	@Then("^I wait for following text to display at \"(.+)\" (page)$")
-	public void iWaitForFollowingTextToDisplay(String pageName, String pageType, DataTable table) {
-		List<Map<String, String>> rows = table.asMaps(String.class, String.class);
-		for (Map<String, String> columns : rows) {
-			String content = columns.get("Expected_Content");
-			SelfHealingLocator element = controlLookup.getLookupElement(content, "text", pageName);
-			assertThat(element.getLocator().first()).isVisible();
-		}
 	}
 
 	@Then("^I advance search following fields$")

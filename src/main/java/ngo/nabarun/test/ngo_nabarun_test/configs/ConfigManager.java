@@ -17,23 +17,21 @@ import ngo.nabarun.test.ngo_nabarun_test.utils.CommonUtils;
 
 public class ConfigManager {
 	private static final Logger logger = LogManager.getLogger(ConfigManager.class);
-	private static Map<String, Object> config;
 	private static final String DOPPLER_PROJECT_NAME = "DOPPLER_PROJECT_NAME";
 	private static final String DOPPLER_SERVICE_TOKEN = "DOPPLER_SERVICE_TOKEN";
 	private static final String ENVIRONMENT = "ENVIRONMENT";
 	private static final String CONFIG_SOURCE = "CONFIG_SOURCE";
 
-	private static final Map<String, String> envMap = new java.util.HashMap<>();
-
+	private static final Map<String, Object> configMap = new java.util.HashMap<>();
 	static {
-		// Load .env file if exists
+		// Load .env file if exists to system properties
 		java.io.File envFile = new java.io.File(".env");
 		if (envFile.exists()) {
 			try (InputStream envStream = new java.io.FileInputStream(envFile)) {
 				java.util.Properties props = new java.util.Properties();
 				props.load(envStream);
 				for (String name : props.stringPropertyNames()) {
-					envMap.put(name, props.getProperty(name));
+					System.setProperty(name, props.getProperty(name));
 				}
 				logger.info("Loaded variables from .env file");
 			} catch (IOException e) {
@@ -41,19 +39,13 @@ public class ConfigManager {
 			}
 		}
 
-		String config_env = getEnvOrProperty(ENVIRONMENT, "dev");
-		String config_source = getEnvOrProperty(CONFIG_SOURCE,
-				config_env.equalsIgnoreCase("stage") ? "doppler" : "file");
-
-		// Initialize config map
-		config = new java.util.HashMap<>();
-
-		// 1. Load common config first (base settings)
+		String config_env = CommonUtils.getEnvProperty(ENVIRONMENT, "dev");
+		String config_source = CommonUtils.getEnvProperty(CONFIG_SOURCE,
+				config_env.equalsIgnoreCase("dev") ? "file" : "doppler");
 
 		if (config_source.equalsIgnoreCase("doppler")) {
-			// 2. Load from Doppler (overrides common)
-			String projectName = getEnvOrProperty(DOPPLER_PROJECT_NAME, null);
-			String token = getEnvOrProperty(DOPPLER_SERVICE_TOKEN, null);
+			String projectName = CommonUtils.getEnvProperty(DOPPLER_PROJECT_NAME);
+			String token = CommonUtils.getEnvProperty(DOPPLER_SERVICE_TOKEN);
 
 			if (projectName == null)
 				throw new RuntimeException("DOPPLER_PROJECT_NAME must be set (via .env or system property)");
@@ -63,7 +55,7 @@ public class ConfigManager {
 			try {
 				ConfigsApi configApi = new ConfigsApi(projectName, token);
 				List<Secret> secrets = configApi.getSecrets(config_env);
-				config.putAll(secrets.stream().collect(
+				configMap.putAll(secrets.stream().collect(
 						Collectors.toMap(Secret::getKey, Secret::getValue)));
 			} catch (Exception e) {
 				logger.error("Error loading properties from Doppler", e);
@@ -75,12 +67,6 @@ public class ConfigManager {
 			loadConfigFile("test_config/test-config.json", false);
 			loadConfigFile(configFilePath, true);
 		}
-	}
-
-	private static String getEnvOrProperty(String key, String defaultValue) {
-		if (envMap.containsKey(key))
-			return envMap.get(key);
-		return CommonUtils.getEnvProperty(key, defaultValue);
 	}
 
 	private static void loadConfigFile(String path, boolean required) {
@@ -95,7 +81,7 @@ public class ConfigManager {
 			Map<String, Object> newConfig = CommonUtils.getObjectMapper().readValue(inputStream,
 					new TypeReference<Map<String, Object>>() {
 					});
-			config.putAll(newConfig);
+			configMap.putAll(newConfig);
 		} catch (IOException e) {
 			logger.error("Failed to load configuration from file: " + path, e);
 			if (required)
@@ -103,16 +89,44 @@ public class ConfigManager {
 		}
 	}
 
+	static String get(String key, String defaultValue) {
+		Object value = configMap.get(key);
+		if (value == null) {
+			value = CommonUtils.getEnvProperty(key);
+		}
+		if (value == null) {
+			return defaultValue;
+		}
+		return value.toString();
+	}
+
 	static String get(String key) {
-		Object value = CommonUtils.getEnvProperty(key);
+		Object value = configMap.get(key);
+		if (value == null) {
+			value = CommonUtils.getEnvProperty(key);
+		}
 		if (value == null) {
 			throw new IllegalArgumentException("Key not found in configuration: " + key);
 		}
 		return value.toString();
 	}
 
+	static <T> T get(String key, Class<T> type, T defaultValue) {
+		Object value = configMap.get(key);
+		if (value == null) {
+			value = CommonUtils.getEnvProperty(key);
+		}
+		if (value == null) {
+			return defaultValue;
+		}
+		return type.cast(value);
+	}
+
 	static <T> T get(String key, Class<T> type) {
-		Object value = CommonUtils.getEnvProperty(key);
+		Object value = configMap.get(key);
+		if (value == null) {
+			value = CommonUtils.getEnvProperty(key);
+		}
 		if (value == null) {
 			throw new IllegalArgumentException("Key not found in configuration: " + key);
 		}

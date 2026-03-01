@@ -23,7 +23,8 @@ public class HomePageObjects extends CommonPageObjects {
 		return switch (elementName) {
 			case "Your Email (JoinUs)" -> Join_Email.get();
 			case "Your Mobile Number (JoinUs)" -> Join_Mobile.get();
-			default -> super.getTextBoxMapping(elementName, parentContext, isTextArea);
+			default ->
+				scope(parentContext).getByRole(AriaRole.TEXTBOX, new Locator.GetByRoleOptions().setName(elementName));
 		};
 	}
 

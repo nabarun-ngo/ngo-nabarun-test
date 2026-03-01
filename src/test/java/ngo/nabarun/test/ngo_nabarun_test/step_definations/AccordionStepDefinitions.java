@@ -4,7 +4,7 @@ import com.microsoft.playwright.Locator;
 
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Then;
-import ngo.nabarun.test.ngo_nabarun_test.common.FieldInputModel;
+import ngo.nabarun.test.ngo_nabarun_test.models.common.FieldInputModel;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.CommonPageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ControlLookup;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ControlActions;

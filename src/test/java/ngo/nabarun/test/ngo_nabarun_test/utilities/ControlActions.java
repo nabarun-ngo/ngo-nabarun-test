@@ -258,6 +258,6 @@ public class ControlActions {
         Page page = this.scenarioContext.getPage();
         page.waitForSelector(selector, new Page.WaitForSelectorOptions()
                 .setState(WaitForSelectorState.HIDDEN)
-                .setTimeout(Configs.IMPLICIT_WAIT * 1000));
+                .setTimeout(Configs.GLOBAL_EXPLICIT_WAIT));
     }
 }

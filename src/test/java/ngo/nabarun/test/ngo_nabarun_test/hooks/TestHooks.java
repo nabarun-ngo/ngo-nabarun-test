@@ -17,7 +17,6 @@ import io.cucumber.java.BeforeStep;
 import io.cucumber.java.Scenario;
 import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
-import ngo.nabarun.test.ngo_nabarun_test.utils.CommonUtils;
 
 public class TestHooks {
 
@@ -45,8 +44,7 @@ public class TestHooks {
 			default -> throw new IllegalArgumentException("Unexpected browser: " + browserName);
 		};
 
-		boolean headless = CommonUtils.getEnvProperty("headless", "N").equals("Y");
-		launchOptions.setHeadless(headless);
+		launchOptions.setHeadless(Configs.IS_HEADLESS);
 		launchOptions.setArgs(List.of("--start-maximized"));
 		launchOptions.setSlowMo(500);
 
@@ -54,7 +52,7 @@ public class TestHooks {
 		context = browser.newContext(new Browser.NewContextOptions().setViewportSize(null));
 
 		Page page = context.newPage();
-		page.setDefaultTimeout(Configs.IMPLICIT_WAIT * 1000);
+		page.setDefaultTimeout(Configs.IMPLICIT_WAIT);
 		scenarioContext.setPage(page);
 
 	}

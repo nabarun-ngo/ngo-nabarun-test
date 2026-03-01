@@ -1,7 +1,11 @@
 package ngo.nabarun.test.ngo_nabarun_test.step_definations;
 
 import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.assertions.LocatorAssertions;
 import com.microsoft.playwright.options.AriaRole;
+import com.microsoft.playwright.options.WaitForSelectorState;
+
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Then;
 import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
@@ -11,6 +15,9 @@ import ngo.nabarun.test.ngo_nabarun_test.utilities.ControlActions;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.SelfHealingLocator;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Reusable UI step definitions for all pages.
@@ -35,13 +42,26 @@ public class UIStepDefinitions {
     @Then("I should see text {string} at {string} page")
     public void iShouldSeeTextAtPage(String expectedText, String pageName) {
         SelfHealingLocator element = controlLookup.getLookupElement(expectedText, "text", pageName);
-        assertThat(element.getLocator().first()).isVisible();
+        assertThat(element.getLocator().first()).isVisible(
+                new LocatorAssertions.IsVisibleOptions().setTimeout(Configs.GLOBAL_EXPLICIT_WAIT));
+    }
+
+    @Then("^I wait for following text to display at \"(.+)\" (page)$")
+    public void iWaitForFollowingTextToDisplay(String pageName, String pageType, DataTable table) {
+        List<Map<String, String>> rows = table.asMaps(String.class, String.class);
+        for (Map<String, String> columns : rows) {
+            String content = columns.get("Expected_Content");
+            SelfHealingLocator element = controlLookup.getLookupElement(content, "text", pageName);
+            assertThat(element.getLocator().first()).isVisible(
+                    new LocatorAssertions.IsVisibleOptions().setTimeout(Configs.GLOBAL_EXPLICIT_WAIT));
+        }
     }
 
     @Then("I should not see text {string} at {string} page")
     public void iShouldNotSeeTextAtPage(String text, String pageName) {
         SelfHealingLocator element = controlLookup.getLookupElement(text, "text", pageName);
-        assertThat(element.getLocator().first()).not().isVisible();
+        assertThat(element.getLocator().first()).not().isVisible(
+                new LocatorAssertions.IsVisibleOptions().setTimeout(Configs.GLOBAL_EXPLICIT_WAIT));
     }
 
     // ---------- Dialog / modal (generic) ----------
@@ -63,7 +83,8 @@ public class UIStepDefinitions {
     @Then("The open modal should not be visible")
     public void theOpenModalShouldNotBeVisible() {
         Locator dialog = commonPageObjects.Popup_Container();
-        assertThat(dialog).not().isVisible();
+        assertThat(dialog).not().isVisible(
+                new LocatorAssertions.IsVisibleOptions().setTimeout(Configs.GLOBAL_EXPLICIT_WAIT));
     }
 
     // ---------- Wait ----------
@@ -72,7 +93,7 @@ public class UIStepDefinitions {
     public void iWaitForToBeVisibleAtPage(String elementDescription, String pageName) {
         SelfHealingLocator element = controlLookup.getLookupElement(elementDescription, "text", pageName);
         element.getLocator().first().waitFor(new Locator.WaitForOptions()
-                .setState(com.microsoft.playwright.options.WaitForSelectorState.VISIBLE)
+                .setState(WaitForSelectorState.VISIBLE)
                 .setTimeout(Configs.GLOBAL_EXPLICIT_WAIT));
     }
 }

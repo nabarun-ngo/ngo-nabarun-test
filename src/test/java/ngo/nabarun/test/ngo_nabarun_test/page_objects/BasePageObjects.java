@@ -3,7 +3,7 @@ package ngo.nabarun.test.ngo_nabarun_test.page_objects;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 
-import ngo.nabarun.common.util.CommonUtil;
+import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 
 public class BasePageObjects {
@@ -55,7 +55,7 @@ public class BasePageObjects {
      * (for debugging).
      */
     private static boolean isHighlightEnabled() {
-        return "true".equalsIgnoreCase(CommonUtil.getEnvProperty("DEBUG_HIGHLIGHT", "false"));
+        return Configs.IS_DEBUG_HIGHLIGHT;
     }
 
 }

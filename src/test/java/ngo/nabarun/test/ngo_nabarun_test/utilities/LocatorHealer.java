@@ -9,7 +9,7 @@ import org.apache.logging.log4j.Logger;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.options.WaitForSelectorState;
 
-import ngo.nabarun.test.ngo_nabarun_test.utils.CommonUtils;
+import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
 
 /**
  * Auto-healing locator resolution: tries a list of strategies in order and
@@ -24,8 +24,7 @@ public final class LocatorHealer {
 
 	/** Enable fallback resolution when primary (Playwright role/label) fails. */
 	public static boolean isHealingEnabled() {
-		String v = CommonUtils.getEnvProperty("AUTO_HEAL");
-		return "true".equalsIgnoreCase(v);
+		return Configs.IS_AUTO_HEAL;
 	}
 
 	/**

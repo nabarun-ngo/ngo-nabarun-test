@@ -1,0 +1,4 @@
+{
+	"ROOT_URL": "http://localhost:3000",
+	"POSTGRES_URI": "jdbc:postgresql://localhost:5432/nabarun_dev2"
+}

@@ -9,10 +9,10 @@ Feature: Public facing pages
     Then I click on "Join Us" link at "Home" page
     Then I enter "{RandomFirstName}" on "Your First Name" textbox at "Home" page
     Then I enter "{RandomLastName}" on "Your Last Name" textbox at "Home" page
-    Then I enter "{RandomEmail}" on "Your Email" textbox at "Home" page
+    Then I enter "{RandomEmail}" on "Your Email (JoinUs)" textbox at "Home" page
     Then I enter "{RandomNumber:10}" on "Your Mobile Number (JoinUs)" textbox at "Home" page
     Then I enter "{RandomLocation}" on "Where are you from?" textbox at "Home" page
-    Then I enter "{RandomText}" on "How did you hear about us?" textarea at "Home" page
+    Then I enter "{RandomText:5}" on "How did you hear about us?" textarea at "Home" page
     Then I click on "I agree with the Rules and Regulations of Nabarun" text at "Home" page
     Then I click on "Join Now" button at "Home" page
     Then I wait for following text to display at "Home" page

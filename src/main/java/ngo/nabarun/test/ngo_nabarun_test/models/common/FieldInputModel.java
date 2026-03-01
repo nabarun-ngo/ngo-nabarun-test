@@ -1,4 +1,4 @@
-package ngo.nabarun.test.ngo_nabarun_test.common;
+package ngo.nabarun.test.ngo_nabarun_test.models.common;
 
 public class FieldInputModel {
     public String fieldName;

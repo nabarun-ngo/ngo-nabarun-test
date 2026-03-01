@@ -1,2 +1,89 @@
 mvn clean test -Dcucumber.filter.tags=@donation01
 mvn test -q -Dcucumber.filter.tags=@workflow01 -Dcucumber.execution.dry-run=true
+
+
+// ----- Accordion (FE: app-accordion-list, id="create", id="accordion-row-N",
+	// button_id / button_id_add) -----
+
+	/** Create section panel (stable: id="create" on mat-expansion-panel). */
+	public Locator getAccordionCreateSection(Locator parent) {
+		return findLocator("#create", parent, FindBy.CSS);
+	}
+
+	/**
+	 * Accordion row panel by 1-based row index (stable: id="accordion-row-1",
+	 * "accordion-row-2", ...).
+	 */
+	public Locator getAccordionRowByRowIndex(Locator parent, int rowIndex) {
+		return findLocator("[id='accordion-row-" + rowIndex + "']", parent, FindBy.CSS);
+	}
+
+	/**
+	 * Button in create section (FE uses button_id + "_add", e.g. SAVE_add,
+	 * Create_add).
+	 */
+	public Locator getAccordionButtonInCreateSection(Locator parent, String buttonId) {
+		return findLocator("[id='" + buttonId + "_add']", parent, FindBy.CSS);
+	}
+
+	/** Button in accordion row (FE uses button_id, e.g. UPDATE, VIEW). */
+	public Locator getAccordionButtonInRow(Locator parent, int rowIndex, String buttonId) {
+		Locator row = getAccordionRowByRowIndex(parent, rowIndex);
+		return row.locator("[id='" + buttonId + "']");
+	}
+
+	/**
+	 * Button by button_id within a row locator (use with getAccordionRowByContent).
+	 */
+	public Locator getAccordionButtonInRowLocator(Locator rowLocator, String buttonId) {
+		return rowLocator.locator("[id='" + buttonId + "']");
+	}
+
+	/** Expansion panel header (click to expand/collapse). */
+	public Locator getAccordionPanelHeader(Locator panel) {
+		return panel.locator("mat-expansion-panel-header");
+	}
+
+	/**
+	 * Accordion row that contains the given text (e.g. donation ID, member name).
+	 * Use when you need to find the correct row by content instead of by index.
+	 * Returns the first mat-expansion-panel whose visible text contains searchText.
+	 */
+	public Locator getAccordionRowByContent(Locator parent, String searchText) {
+		Locator scope = scope(parent);
+		Locator rows = scope.locator("mat-expansion-panel");
+		return maybeHighlight(rows.filter(new Locator.FilterOptions().setHasText(searchText)).first());
+	}
+
+	// ----- Alert (FE: app-alert, role="alert", id="alert", #description,
+	// #alertDismiss) -----
+
+	/** First visible alert on page or within parent (stable: role="alert"). */
+	public Locator getAlert(Locator parent) {
+		Locator scope = scope(parent);
+		return maybeHighlight(scope.getByRole(AriaRole.ALERT).first());
+	}
+
+	/** Alert message content (stable: id="description" in app-alert). */
+	public Locator getAlertMessage(Locator parent) {
+		Locator scope = scope(parent);
+		Locator byRole = scope.getByRole(AriaRole.ALERT).first().locator("#description");
+		return maybeHighlight(byRole);
+	}
+
+	/**
+	 * Dismiss button (stable: id="alertDismiss"; only present when
+	 * showDismissButton).
+	 */
+	public Locator getAlertDismissButton(Locator parent) {
+		Locator scope = scope(parent);
+		return maybeHighlight(scope.getByRole(AriaRole.ALERT).first().locator("#alertDismiss"));
+	}
+
+	/**
+	 * Check alert type by FE class: success=bg-green-400, error=bg-red-400,
+	 * warning=bg-yellow-400, info=bg-blue-400.
+	 */
+	public Locator getAlertContainerForType(Locator parent) {
+		return scope(parent).getByRole(AriaRole.ALERT).first();
+	}

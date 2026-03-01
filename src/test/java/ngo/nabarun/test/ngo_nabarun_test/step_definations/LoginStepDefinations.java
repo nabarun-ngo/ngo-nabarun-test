@@ -10,24 +10,25 @@ import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext.ContextKeys;
 import ngo.nabarun.test.ngo_nabarun_test.models.api.User;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.LoginPageObjects;
-import ngo.nabarun.test.ngo_nabarun_test.utilities.ElementHelper;
+import ngo.nabarun.test.ngo_nabarun_test.utilities.ControlActions;
 
 public class LoginStepDefinations {
 
 	private final LoginPageObjects pageObject;
-    private final DataProvider dataProvider;
+	private final DataProvider dataProvider;
 	private final ScenarioContext scenarioContext;
-	private final ElementHelper elementHelper;
-    private final ProfileStepDefinations profileStepDefinations;
+	private final ControlActions controlActions;
+	private final ProfileStepDefinations profileStepDefinations;
 
-    public LoginStepDefinations(ScenarioContext scenarioContext,ElementHelper elementHelper, DataProvider dataProvider,LoginPageObjects pageObject,
+	public LoginStepDefinations(ScenarioContext scenarioContext, ControlActions ca,
+			DataProvider dataProvider, LoginPageObjects pageObject,
 			ProfileStepDefinations profileStepDefinations) {
 		this.pageObject = pageObject;
 		this.dataProvider = dataProvider;
 		this.scenarioContext = scenarioContext;
-		this.elementHelper = elementHelper;
-        this.profileStepDefinations = profileStepDefinations;
-    }
+		this.controlActions = ca;
+		this.profileStepDefinations = profileStepDefinations;
+	}
 
 	@Given("^I login with \"(.+)\" (user|role) using (Password|OTP) option$")
 	public void i_performed_login_with_an_user_having_role(String loginId, String loginIdType, String loginOption)
@@ -51,11 +52,11 @@ public class LoginStepDefinations {
 		}
 
 		if (loginOption.equalsIgnoreCase("Password")) {
-			elementHelper.click(pageObject.ContinueWithPasswordButton.get());
+			controlActions.click(pageObject.ContinueWithPasswordButton.get());
 			pageObject.LoginEmail.get().fill(email);
-			elementHelper.click(pageObject.LoginSubmit.get());
+			controlActions.click(pageObject.LoginSubmit.get());
 			pageObject.LoginPassword.get().fill(password);
-			elementHelper.click(pageObject.LoginSubmit.get());
+			controlActions.click(pageObject.LoginSubmit.get());
 		} else {
 			throw new RuntimeException("LoginOption '" + loginOption + "' is not allowed.");
 		}
@@ -64,38 +65,38 @@ public class LoginStepDefinations {
 	@And("^I handle (user consent|change password|complete profile|all conditional post login) screen if it appeared$")
 	public void iCheckIfUserConsentScreenAppearedOrNot(String screen) throws Throwable {
 		switch (screen.toLowerCase()) {
-		case "user consent":
-			handle_user_consent_screen_if_it_appeared();
-			break;
-		case "change password":
-			handle_change_password_screen_if_it_appeared();
-			break;
-		case "complete profile":
-			handle_complete_profile_screen_if_it_appeared();
-			break;
-		case "all conditional post login":
-			handle_user_consent_screen_if_it_appeared();
-			handle_change_password_screen_if_it_appeared();
-			handle_complete_profile_screen_if_it_appeared();
-			break;
-		default:
-			throw new RuntimeException("Screen '" + screen + "' is not allowed.");
+			case "user consent":
+				handle_user_consent_screen_if_it_appeared();
+				break;
+			case "change password":
+				handle_change_password_screen_if_it_appeared();
+				break;
+			case "complete profile":
+				handle_complete_profile_screen_if_it_appeared();
+				break;
+			case "all conditional post login":
+				handle_user_consent_screen_if_it_appeared();
+				handle_change_password_screen_if_it_appeared();
+				handle_complete_profile_screen_if_it_appeared();
+				break;
+			default:
+				throw new RuntimeException("Screen '" + screen + "' is not allowed.");
 		}
 	}
 
 	private void handle_user_consent_screen_if_it_appeared() throws Exception {
 		// Handling consent screen if it appeared
-		if (elementHelper.isElementPresent(pageObject.AcceptConsentLocator, 5)) {
-			elementHelper.click(pageObject.AcceptConsent.get());
+		if (controlActions.isElementPresent(pageObject.AcceptConsentLocator, 5)) {
+			controlActions.click(pageObject.AcceptConsent.get());
 		}
 	}
 
 	private void handle_change_password_screen_if_it_appeared() throws Exception {
 		// Handling change password screen if it appeared
-		if (elementHelper.isElementPresent(pageObject.PasswordChangedTxtLocator, 15)) {
+		if (controlActions.isElementPresent(pageObject.PasswordChangedTxtLocator, 15)) {
 			pageObject.NewPassword.get().fill(Configs.TEST_DEFAULTPASSWORD);
 			pageObject.ConfirmNewPassword.get().fill(Configs.TEST_DEFAULTPASSWORD);
-			elementHelper.click(pageObject.ChangePasswordSubmit.get());
+			controlActions.click(pageObject.ChangePasswordSubmit.get());
 			Thread.sleep(10000); // wait for the change password to complete
 			scenarioContext.getPage().reload();
 			Thread.sleep(5000);
@@ -108,7 +109,7 @@ public class LoginStepDefinations {
 
 	private void handle_complete_profile_screen_if_it_appeared() throws Exception {
 		// Handling complete profile screen if it appeared
-		if (elementHelper.isElementPresent(pageObject.PageHeader("COMPLETE PROFILE"), 10)) {
+		if (controlActions.isElementPresent(pageObject.PageHeader("COMPLETE PROFILE"), 10)) {
 			profileStepDefinations.fillCompleteProfileForm();
 		}
 	}

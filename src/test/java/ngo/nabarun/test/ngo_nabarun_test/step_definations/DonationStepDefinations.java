@@ -16,7 +16,7 @@ import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext.ContextKeys;
 import ngo.nabarun.test.ngo_nabarun_test.models.db.UserDBModel;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.DonationPageObjects;
-import ngo.nabarun.test.ngo_nabarun_test.utilities.ElementHelper;
+import ngo.nabarun.test.ngo_nabarun_test.utilities.ControlActions;
 import ngo.nabarun.test.ngo_nabarun_test.utils.DataUtils;
 
 public class DonationStepDefinations {
@@ -24,15 +24,15 @@ public class DonationStepDefinations {
 
 	private DonationPageObjects donationPageObjects;
 	private ScenarioContext scenarioContext;
-	private ElementHelper elementHelper;
+	private ControlActions controlActions;
 	private DataProvider dataProvider;
 
-	public DonationStepDefinations(ScenarioContext sc, ElementHelper eh,
+	public DonationStepDefinations(ScenarioContext sc, ControlActions ca,
 			DataProvider dp,
 			DonationPageObjects donationPageObjects) {
 		this.donationPageObjects = donationPageObjects;
 		this.scenarioContext = sc;
-		this.elementHelper = eh;
+		this.controlActions = ca;
 		this.dataProvider = dp;
 	}
 
@@ -55,16 +55,16 @@ public class DonationStepDefinations {
 	@Then("^I search the created donation under \"([^\"]*)\" tab$")
 	public void iSearchTheCreatedDonation(String tab) throws Throwable {
 		String donationId = scenarioContext.get(ContextKeys.DonationId, String.class);
-		elementHelper.scrollToTop();
+		controlActions.scrollToTop();
 		Locator parent = null;
 		if (tab.toLowerCase().contains("member")) {
-			elementHelper.click(donationPageObjects.getButtonMapping("Filter", null));
+			controlActions.click(donationPageObjects.getButtonMapping("Filter", null));
 			parent = donationPageObjects.Popup_Container();
 		} else {
-			elementHelper.click(donationPageObjects.getButtonMapping("Advanced Search", null));
+			controlActions.click(donationPageObjects.getButtonMapping("Advanced Search", null));
 		}
 		donationPageObjects.ADVSearch_DonationId.get().fill(donationId);
-		elementHelper.click(donationPageObjects.getButtonMapping("Search", parent));
+		controlActions.click(donationPageObjects.getButtonMapping("Search", parent));
 
 	}
 
@@ -78,7 +78,7 @@ public class DonationStepDefinations {
 		assertThat(selectorModal).isVisible();
 		donationPageObjects.Modal_UserSearch.get().fill(memberName);
 		Locator selectBtn = donationPageObjects.getButtonMapping("Select", null);
-		elementHelper.click(selectBtn);
+		controlActions.click(selectBtn);
 	}
 
 	@Then("^I check and delete regular donation raised for \"([^\"]*)\" this month$")

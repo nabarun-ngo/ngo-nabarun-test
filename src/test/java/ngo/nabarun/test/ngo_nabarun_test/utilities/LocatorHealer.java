@@ -9,8 +9,11 @@ import org.apache.logging.log4j.Logger;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.options.WaitForSelectorState;
 
+import ngo.nabarun.test.ngo_nabarun_test.utils.CommonUtils;
+
 /**
- * Auto-healing locator resolution: tries a list of strategies in order and returns
+ * Auto-healing locator resolution: tries a list of strategies in order and
+ * returns
  * the first locator that finds a visible element. Enable with system property
  * {@code AUTO_HEAL=true} or env {@code AUTO_HEAL=true}.
  */
@@ -21,18 +24,22 @@ public final class LocatorHealer {
 
 	/** Enable fallback resolution when primary (Playwright role/label) fails. */
 	public static boolean isHealingEnabled() {
-		String v = System.getProperty("AUTO_HEAL", System.getenv("AUTO_HEAL"));
+		String v = CommonUtils.getEnvProperty("AUTO_HEAL");
 		return "true".equalsIgnoreCase(v);
 	}
 
 	/**
-	 * Tries each strategy in order; returns the first locator that becomes visible within
-	 * {@code timeoutMs}. If none succeed, returns the last strategy's locator so the
-	 * subsequent failure message is clear. When healing is enabled and a fallback is used,
+	 * Tries each strategy in order; returns the first locator that becomes visible
+	 * within
+	 * {@code timeoutMs}. If none succeed, returns the last strategy's locator so
+	 * the
+	 * subsequent failure message is clear. When healing is enabled and a fallback
+	 * is used,
 	 * logs a warning so teams can fix the primary locator.
 	 *
-	 * @param strategies list of locator suppliers (e.g. Playwright role first, then XPath)
-	 * @param timeoutMs  max wait per strategy (milliseconds)
+	 * @param strategies  list of locator suppliers (e.g. Playwright role first,
+	 *                    then XPath)
+	 * @param timeoutMs   max wait per strategy (milliseconds)
 	 * @param elementDesc description for logging (e.g. "button 'Submit'")
 	 * @return first locator that is visible, or last locator (may throw on use)
 	 */
@@ -65,7 +72,10 @@ public final class LocatorHealer {
 		return firstVisible(strategies, HEAL_TIMEOUT_MS, elementDesc);
 	}
 
-	/** Escape single quote for use inside XPath single-quoted string (double the quote). */
+	/**
+	 * Escape single quote for use inside XPath single-quoted string (double the
+	 * quote).
+	 */
 	public static String escapeXPathString(String value) {
 		return value == null ? "" : value.replace("'", "''");
 	}

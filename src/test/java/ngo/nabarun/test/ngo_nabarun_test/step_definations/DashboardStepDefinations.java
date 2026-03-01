@@ -5,32 +5,31 @@ import ngo.nabarun.test.ngo_nabarun_test.helpers.DataProvider;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.DashboardPageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.LoginPageObjects;
-import ngo.nabarun.test.ngo_nabarun_test.utilities.ElementHelper;
+import ngo.nabarun.test.ngo_nabarun_test.utilities.ControlActions;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
 public class DashboardStepDefinations {
-	
+
 	private final DashboardPageObjects dashboardPageObjects;
 	private final LoginPageObjects loginPageObjects;
-	private final ElementHelper elementHelper;
+	private final ControlActions controlActions;
 
-
-	public DashboardStepDefinations(ScenarioContext scenarioContext,ElementHelper elementHelper, DataProvider dataProvider,
-			DashboardPageObjects dashboardPageObjects,LoginPageObjects loginPageObjects) {
-		this.dashboardPageObjects=dashboardPageObjects;
-		this.loginPageObjects=loginPageObjects;
-		this.elementHelper=elementHelper;
+	public DashboardStepDefinations(ScenarioContext scenarioContext, ControlActions ca,
+			DataProvider dataProvider,
+			DashboardPageObjects dashboardPageObjects, LoginPageObjects loginPageObjects) {
+		this.dashboardPageObjects = dashboardPageObjects;
+		this.loginPageObjects = loginPageObjects;
+		this.controlActions = ca;
 	}
-
 
 	@Then("^I logout from current session$")
 	public void iLogoutFromCurrentSession() {
-		elementHelper.click(dashboardPageObjects.ProfileIcon.get());
-		elementHelper.click(dashboardPageObjects.LogoutLink.get());
-		elementHelper.click(dashboardPageObjects.LogoutPopupYes.get());
+		controlActions.click(dashboardPageObjects.ProfileIcon.get());
+		controlActions.click(dashboardPageObjects.LogoutLink.get());
+		controlActions.click(dashboardPageObjects.LogoutPopupYes.get());
 
-        assertThat(loginPageObjects.LoginPageHeader.get()).isVisible();
+		assertThat(loginPageObjects.LoginPageHeader.get()).isVisible();
 	}
 
 }

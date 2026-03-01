@@ -17,6 +17,7 @@ import io.cucumber.java.BeforeStep;
 import io.cucumber.java.Scenario;
 import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
+import ngo.nabarun.test.ngo_nabarun_test.utils.CommonUtils;
 
 public class TestHooks {
 
@@ -34,31 +35,29 @@ public class TestHooks {
 
 	@Before()
 	public void beforeScenario(Scenario scenario) {
-	    scenarioContext.reset();
-	    Playwright playwright = Playwright.create();
+		scenarioContext.reset();
+		Playwright playwright = Playwright.create();
 
-	    String browserName = Configs.BROWSER.toLowerCase();
-	    BrowserType.LaunchOptions launchOptions = switch (browserName) {
-	        case "chrome" -> new BrowserType.LaunchOptions().setChannel("chrome");
-	        case "edge" -> new BrowserType.LaunchOptions().setChannel("msedge");
-	        default -> throw new IllegalArgumentException("Unexpected value: " + browserName);
-	    };
+		String browserName = Configs.BROWSER.toLowerCase();
+		BrowserType.LaunchOptions launchOptions = switch (browserName) {
+			case "chrome" -> new BrowserType.LaunchOptions().setChannel("chrome");
+			case "edge" -> new BrowserType.LaunchOptions().setChannel("msedge");
+			default -> throw new IllegalArgumentException("Unexpected browser: " + browserName);
+		};
 
-	    boolean headless = System.getProperty("headless", "N").equals("Y");
-	    launchOptions.setHeadless(headless);
-	    launchOptions.setArgs(List.of("--start-maximized"));
-	    launchOptions.setSlowMo(500);
+		boolean headless = CommonUtils.getEnvProperty("headless", "N").equals("Y");
+		launchOptions.setHeadless(headless);
+		launchOptions.setArgs(List.of("--start-maximized"));
+		launchOptions.setSlowMo(500);
 
-	    browser = playwright.chromium().launch(launchOptions);
-	    context = browser.newContext(new Browser.NewContextOptions().setViewportSize(null));
+		browser = playwright.chromium().launch(launchOptions);
+		context = browser.newContext(new Browser.NewContextOptions().setViewportSize(null));
 
-	    Page page = context.newPage();
-	    page.setDefaultTimeout(Configs.IMPLICIT_WAIT * 1000);
-	    scenarioContext.setPage(page);
+		Page page = context.newPage();
+		page.setDefaultTimeout(Configs.IMPLICIT_WAIT * 1000);
+		scenarioContext.setPage(page);
 
-	    
 	}
-
 
 	@BeforeStep
 	public void beforeStep(Scenario scenario) {
@@ -71,7 +70,7 @@ public class TestHooks {
 
 	@After
 	public void afterScenario(Scenario scenario) throws InterruptedException, IOException {
-        Page page = scenarioContext.getPage();
+		Page page = scenarioContext.getPage();
 		if (scenario.isFailed()) {
 			byte[] screenshot = page.screenshot(new Page.ScreenshotOptions().setType(ScreenshotType.PNG));
 			scenario.attach(screenshot, "image/png", "error_screenshot");

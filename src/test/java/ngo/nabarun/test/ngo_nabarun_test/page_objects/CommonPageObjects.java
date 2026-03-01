@@ -3,101 +3,121 @@ package ngo.nabarun.test.ngo_nabarun_test.page_objects;
 import java.util.function.Supplier;
 
 import com.microsoft.playwright.*;
-
+import com.microsoft.playwright.options.AriaRole;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
+import ngo.nabarun.test.ngo_nabarun_test.utilities.AngularMaterial;
 
-public class CommonPageObjects {
+public class CommonPageObjects extends BasePageObjects implements ICommonPageObject {
 
-	public enum FindBy {
-		TEXT, LABEL, XPATH, CSS, ANY
-	}
-
-	private final ScenarioContext scenarioContext;
+	public final Supplier<Locator> Simple_Search_Input = () -> findLocator("#simple-search", Search_Container(),
+			FindBy.ANY);
+	public final Supplier<Locator> Create_Accordion = () -> findLocator("//mat-expansion-panel[@id='create']");
 
 	public CommonPageObjects(ScenarioContext scenarioContext) {
-		this.scenarioContext = scenarioContext;
+		super(scenarioContext);
 	}
 
-	public String PageLoaderSelector = "//*[normalize-space(text())='Please wait, Things are getting ready...']";
-
+	@Override
 	public Locator PageHeader(String title) {
-		return findLocator("//app-page-title//h1[normalize-space(text())=\"" + title + "\"]");
+		return findLocator("//app-page-title//h1[normalize-space(text())='" + title + "']");
 	}
 
+	@Override
+	public String PageLoaderSelector() {
+		return "//*[normalize-space(text())='Please wait, Things are getting ready...']";
+	}
+
+	@Override
 	public Locator Popup_Container() {
 		return findLocator("//mat-dialog-container");
 	}
 
-	public Locator getAccordion(int i, Locator parent) {
-		return findLocator("//mat-expansion-panel[" + i + "]", parent, FindBy.XPATH);
+	@Override
+	public Locator Search_Container() {
+		return findLocator("app-search-and-advanced-search-form");
 	}
 
-	public final Locator findLocator(String selector, Locator parent, FindBy selectBy) {
-		Page root = scenarioContext.getPage();
-		Locator locator = switch (selectBy) {
-		case TEXT -> parent != null ? parent.getByText(selector) : root.getByText(selector);
-		case LABEL -> parent != null ? parent.getByLabel(selector) : root.getByLabel(selector);
-		case XPATH -> parent != null ? parent.locator("xpath=." + selector) : root.locator("xpath=" + selector);
-		case CSS -> parent != null ? parent.locator("css=" + selector) : root.locator("css=" + selector);
-		case ANY -> parent != null ? parent.locator(selector) : root.locator(selector);
-		};
-		locator.evaluate("el => {" + "  let count = 0;" + "  const blink = () => {"
-				+ "    el.style.outline = (count % 2 === 0) ? '3px solid red' : '';" + "    count++;"
-				+ "    if (count < 6) setTimeout(blink, 250);" + "  };" + "  blink();" + "}");
-		return locator;
+	@Override
+	public Locator getAccordions(Locator parent) {
+		return findLocator("//mat-expansion-panel", parent, FindBy.XPATH);
 	}
 
-	public final Locator findLocator(String selector) {
-		return findLocator(selector, null, FindBy.ANY);
+	@Override
+	public Locator getDropdownMapping(String elementName, Locator parent) {
+		return findLocator("//*[normalize-space(text())='" + elementName + "']/following-sibling::*//mat-select",
+				parent, FindBy.XPATH);
 	}
-	
-	public Supplier<Locator> Accordion_AddIcon = () -> findLocator("//mat-icon[text()='add']");
-	public Supplier<Locator> MatOption = () -> findLocator("//mat-option");
 
-	
+	@Override
+	public Locator getDatePickerMapping(String elementName, Locator parent) {
+		return findLocator(
+				"//*[normalize-space(text())='" + elementName + "']/following-sibling::*//mat-datepicker-toggle",
+				parent, FindBy.XPATH);
+	}
 
+	@Override
+	public Locator getTimePickerMapping(String elementName, Locator parent) {
+		return findLocator(
+				"//*[normalize-space(text())='" + elementName + "']/following-sibling::*//mat-timepicker-toggle",
+				parent, FindBy.XPATH);
+	}
+
+	@Override
 	public Locator getButtonMapping(String elementName, Locator parent) {
 		return switch (elementName) {
-		case "Add Icon" -> Accordion_AddIcon.get();
-		default -> findLocator("//button[normalize-space(string())='" + elementName + "']", parent, FindBy.XPATH);
+			case "Add Icon" -> AngularMaterial.MatIcon(scope(parent), "add");
+			default ->
+				scope(parent).getByRole(AriaRole.BUTTON, new Locator.GetByRoleOptions().setName(elementName));
 		};
 	}
 
+	@Override
 	public Locator getLinkMapping(String elementName, Locator parent) {
-		return findLocator("//a[normalize-space(text())='" + elementName + "']", parent, FindBy.XPATH);
+		return switch (elementName) {
+			default ->
+				super.scope(parent).getByRole(AriaRole.LINK, new Locator.GetByRoleOptions().setName(elementName));
+		};
 	}
 
+	@Override
 	public Locator getTextMapping(String elementName, Locator parent) {
-		return findLocator("//*[normalize-space(text())='" + elementName + "']", parent, FindBy.XPATH);
+		return switch (elementName) {
+			default ->
+				super.scope(parent).getByText(elementName);
+		};
 	}
 
+	@Override
 	public Locator getTextBoxMapping(String elementName, Locator parent, boolean isTextArea) {
 		String selector = "//*[normalize-space(text())='" + elementName + "']/following-sibling::*"
 				+ (isTextArea ? "//textarea" : "//input");
 		return findLocator(selector, parent, FindBy.XPATH);
 	}
 
-	public Locator getDropdownMapping(String elementName, Locator parent) {
-		return findLocator("//*[normalize-space(text())='" + elementName + "']/following-sibling::*//mat-select",
-				parent, FindBy.XPATH);
-	}
-
+	@Override
 	public Locator getRadioMapping(String elementName, Locator parent) {
-		return findLocator("//*[normalize-space(text())='" + elementName + "']/following-sibling::*", parent,
-				FindBy.XPATH);
+		return switch (elementName) {
+			default ->
+				super.scope(parent).getByRole(AriaRole.RADIO, new Locator.GetByRoleOptions().setName(elementName));
+		};
 	}
 
-	public Locator getDatePickerMapping(String elementName, Locator parent) {
-		return findLocator("//*[normalize-space(text())='" + elementName + "']/following-sibling::*", parent,
-				FindBy.XPATH);
-	}
-
+	@Override
 	public Locator getFileInputMapping(String elementName, Locator parent) {
 		return switch (elementName) {
-		case "Upload" -> findLocator("app-file-upload label", parent, FindBy.ANY);
-		default -> findLocator(
-				"//*[normalize-space(text())='" + elementName + "']/following-sibling::*//input[@type='file']", parent,
-				FindBy.XPATH);
+			case "Upload" -> findLocator("app-file-upload label", parent, FindBy.ANY);
+			default ->
+				findLocator(
+						"//*[normalize-space(text())='" + elementName + "']/following-sibling::*//input[@type='file']",
+						parent, FindBy.XPATH);
+		};
+	}
+
+	@Override
+	public Locator getCheckboxMapping(String elementName, Locator parent) {
+		return switch (elementName) {
+			default ->
+				super.scope(parent).getByRole(AriaRole.CHECKBOX, new Locator.GetByRoleOptions().setName(elementName));
 		};
 	}
 }

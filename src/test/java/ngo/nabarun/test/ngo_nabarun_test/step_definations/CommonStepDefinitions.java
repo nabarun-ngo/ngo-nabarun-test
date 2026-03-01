@@ -1,24 +1,20 @@
 package ngo.nabarun.test.ngo_nabarun_test.step_definations;
 
-import java.nio.file.Path;
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
-
-import com.microsoft.playwright.options.WaitForSelectorState;
-
 
 import com.microsoft.playwright.*;
 
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.*;
+import ngo.nabarun.test.ngo_nabarun_test.common.FieldInputModel;
 import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.DataProvider;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.CommonPageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ControlLookup;
-import ngo.nabarun.test.ngo_nabarun_test.utilities.ElementHelper;
-import ngo.nabarun.test.ngo_nabarun_test.utils.CommonUtils;
+import ngo.nabarun.test.ngo_nabarun_test.utilities.ControlActions;
+import ngo.nabarun.test.ngo_nabarun_test.utilities.SelfHealingLocator;
 import ngo.nabarun.test.ngo_nabarun_test.utils.DataUtils;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
@@ -28,130 +24,136 @@ public class CommonStepDefinitions {
 	private final ControlLookup controlLookup;
 	private final ScenarioContext scenarioContext;
 	private final CommonPageObjects commonPageObjects;
-	private final ElementHelper elementHelper;
-	//private DataProvider dataProvider;
-	private static final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+	private final ControlActions controlActions;
+	// private DataProvider dataProvider;
 
-	public CommonStepDefinitions(ScenarioContext sc, ElementHelper eh, DataProvider dp, CommonPageObjects commonPageObjects, ControlLookup controlLookup) {
+	public CommonStepDefinitions(ScenarioContext sc, ControlActions ca, DataProvider dp,
+			CommonPageObjects commonPageObjects, ControlLookup controlLookup) {
 		this.controlLookup = controlLookup;
 		this.commonPageObjects = commonPageObjects;
 		this.scenarioContext = sc;
-		this.elementHelper = eh;
-		//this.dataProvider = dataProvider;
+		this.controlActions = ca;
+		// this.dataProvider = dataProvider;
 	}
 
 	@Given("I have opened to Nabarun's web portal")
 	public void that_i_am_on_nabarun_home_page() {
 		String rootURL = Configs.ROOT_URL;
-        scenarioContext.getPage().navigate(rootURL);
+		System.out.println("Navigating to: " + rootURL);
+		scenarioContext.getPage().navigate(rootURL);
 	}
 
-	@Given("^I (click|click and hold|scroll) on \"(.+)\" (button|link|text|textbox) at \"(.+)\" (page|accordion)$")
-	public void i_clicked_on_button(String actionName, String elementName, String elementType, String pageName,
-			String pageType) {
-		Locator element = controlLookup.getLookupElement(elementName, elementType, pageName, pageType);
+	@Given("^I (click|click and hold|scroll) on \"(.+)\" (button|link|text|textbox) at \"(.+)\" page$")
+	public void i_clicked_on_button(String actionName, String elementName, String elementType, String pageName) {
+		SelfHealingLocator element = controlLookup.getLookupElement(elementName, elementType, pageName);
 
 		switch (actionName) {
-            case "click" -> element.click();
-            case "scroll" -> element.scrollIntoViewIfNeeded();
-            case "click and hold" -> {
-                element.hover();
-            }
-            default -> throw new IllegalStateException("Invalid action : " + actionName);
-        }
+			case "click" -> element.click();
+			case "scroll" -> element.scrollIntoViewIfNeeded();
+			case "click and hold" -> element.hover();
+			default -> throw new IllegalStateException("Invalid action : " + actionName);
+		}
 	}
 
-    @Given("^I click on \"(.+)\" (button|link|text|textbox) at \"(.+)\" (page|accordion) and wait for new window to load$")
-    public void i_clicked_wait_for_new_page(String elementName, String elementType, String pageName,
-                                    String pageType) {
-        Page page = scenarioContext.getPage();
-        Locator element = controlLookup.getLookupElement(elementName, elementType, pageName, pageType);
-        Page newWindowPage = page.context().waitForPage(element::click);
-        int implicitWait = Configs.IMPLICIT_WAIT;
-        newWindowPage.setDefaultTimeout(implicitWait * 1000);
-        scenarioContext.setPage(newWindowPage);
-        page.close();
-    }
+	@Given("^I click on \"(.+)\" (button|link|text|textbox) at \"(.+)\" (page) and wait for new window to load$")
+	public void i_clicked_wait_for_new_page(String elementName, String elementType, String pageName,
+			String pageType) {
+		Page page = scenarioContext.getPage();
+		SelfHealingLocator element = controlLookup.getLookupElement(elementName, elementType, pageName);
+		Page newWindowPage = page.context().waitForPage(element.getLocator()::click);
+		int implicitWait = Configs.IMPLICIT_WAIT;
+		newWindowPage.setDefaultTimeout(implicitWait * 1000);
+		scenarioContext.setPage(newWindowPage);
+		page.close();
+	}
 
-	@Then("^I (enter|select|click|upload) \"([^\"]*)\" on \"([^\"]*)\" (textbox|dropdown|radio|datepicker|textarea|fileinput) at \"([^\"]*)\" (page|accordion)$")
+	@When("^I (enter|select|click|upload) \"([^\"]*)\" on \"([^\"]*)\" (textbox|dropdown|radio|datepicker|textarea|fileinput|multiselect) at \"([^\"]*)\" (page)$")
 	public void iEnterOnTextboxAtAccordion(String actionName, String rawValue, String elementName, String elementType,
 			String pageName, String pageType) throws Throwable {
-		Locator element = controlLookup.getLookupElement(elementName, elementType, pageName, pageType);
+		String effectiveType = "multiselect".equalsIgnoreCase(elementType) ? "dropdown" : elementType;
+		SelfHealingLocator element = controlLookup.getLookupElement(elementName, effectiveType, pageName);
 		String value = DataUtils.replacePlaceholders(rawValue);
-		switch (actionName.toUpperCase()) {
-            case "ENTER" -> {
-                element.clear();
-                element.fill(value);
-            }
-            case "SELECT" -> {
-                switch (elementType.toLowerCase()) {
-                    case "dropdown" -> elementHelper.selectMatOption(element, value);
-                    case "datepicker" -> elementHelper.selectMatDate(element, sdf.parse(value));
-                }
-            }
-            case "CLICK" -> elementHelper.clickRadioOption(element, value);
-            case "UPLOAD" -> {
-                String filePath = CommonUtils.getFileFromResources(value);                
-                FileChooser fileChooser = scenarioContext.getPage().waitForFileChooser(() -> {
-                    element.click();
-                });
-                fileChooser.setFiles(Path.of(filePath));
-            }
-            default -> throw new IllegalStateException("Invalid action : " + actionName);
-        }
+		controlActions.executeAction(actionName, element.getLocator(), elementType, value);
 	}
 
-    @Then("I must be landed to {string} screen")
+	@Then("^I (check|uncheck) \"([^\"]*)\" checkbox at \"([^\"]*)\" (page)$")
+	public void iCheckOrUncheckCheckbox(String checkOrUncheck, String elementName, String pageName, String pageType) {
+		SelfHealingLocator element = controlLookup.getLookupElement(elementName, "checkbox", pageName);
+		if ("check".equalsIgnoreCase(checkOrUncheck)) {
+			element.getLocator().check();
+		} else {
+			element.getLocator().uncheck();
+		}
+	}
+
+	@Then("^I enter \"([^\"]*)\" on \"([^\"]*)\" timepicker at \"([^\"]*)\" (page)$")
+	public void iEnterOnTimepicker(String rawValue, String elementName, String pageName, String pageType)
+			throws Throwable {
+		String value = DataUtils.replacePlaceholders(rawValue);
+		SelfHealingLocator element = controlLookup.getLookupElement(elementName, "timepicker", pageName);
+		Locator container = element.getLocator();
+		container.click();
+		Locator input = container.locator("input");
+		if (input.count() > 0) {
+			input.first().fill(value);
+		} else {
+			element.fill(value);
+		}
+	}
+
+	@Then("I must be landed to {string} screen")
 	public void i_must_be_landed_to_screen(String screenName) {
-    	Locator header = commonPageObjects.PageHeader(screenName);
+		Locator header = commonPageObjects.PageHeader(screenName);
 		assertThat(header).isVisible();
-    }
+	}
 
 	@Then("I wait for loading to complete")
 	public void i_wait_for_loading_to_complete() {
-	    // Wait for the loader to disappear using Playwright
-        Page page = scenarioContext.getPage();
-        page.waitForSelector(commonPageObjects.PageLoaderSelector, new Page.WaitForSelectorOptions()
-	        .setState(WaitForSelectorState.HIDDEN)
-	        .setTimeout(60000));
+		this.controlActions.waitUntilDisappear(commonPageObjects.PageLoaderSelector());
 	}
 
-	@Then("^the \"(.+)\" (button|section) should be displayed at \"(.+)\" page$")
-	public void should_be_displayed(String elementName, String elementType, String pageName) {
-        Locator element = controlLookup.getLookupElement(elementName, elementType, pageName, "page");
-        assertThat(element).isVisible();
+	@Then("^the \"(.+)\" (button|section|checkbox) should be displayed at \"(.+)\" (page)$")
+	public void should_be_displayed(String elementName, String elementType, String pageName, String pageType) {
+		SelfHealingLocator element = controlLookup.getLookupElement(elementName, elementType, pageName);
+		assertThat(element.getLocator()).isVisible();
 	}
 
 	@Then("^I wait for (\\d+) seconds$")
 	public void iWaitForSeconds(int wait) throws Throwable {
-		Thread.sleep(wait* 1000L);
+		Thread.sleep(wait * 1000L);
 	}
 
-	@Then("^I opened the accordion of index (\\d+) at \"([^\"]*)\" (page|accordion)$")
-	public void iOpenedTheAccordionAtIndex(int index,String pageName,String pageType) {
-		Locator parent = null;
-		if(pageType.equalsIgnoreCase("accordion")) {
-			parent= controlLookup.getAccordionMapping(pageName);
+	@Then("^I wait for following text to display at \"(.+)\" (page)$")
+	public void iWaitForFollowingTextToDisplay(String pageName, String pageType, DataTable table) {
+		List<Map<String, String>> rows = table.asMaps(String.class, String.class);
+		for (Map<String, String> columns : rows) {
+			String content = columns.get("Expected_Content");
+			SelfHealingLocator element = controlLookup.getLookupElement(content, "text", pageName);
+			assertThat(element.getLocator().first()).isVisible();
 		}
-        Locator elm = commonPageObjects.getAccordion(index, parent);
-        elm.click();
-
-    }
-	
-	@Then("^I map \"([^\"]*)\" element as \"([^\"]*)\" accordion$")
-	public void iMapCreateDonationAccordionAsAccordion(String selector, String accordionName) {
-        Locator element = commonPageObjects.findLocator(selector);
-		controlLookup.setAccordionMapping(accordionName, element);
 	}
 
-	@Then("^I wait for following text to display at \"(.+)\" (page|accordion)$")
-	public void iWaitForFollowingTextToDisplay(String pageName,String pageType,DataTable table) {
-	    List<Map<String, String>> rows = table.asMaps(String.class, String.class);
-	    for (Map<String, String> columns : rows) {
-	        String content = columns.get("Expected_Content");
-			Locator element = controlLookup.getLookupElement(content, "text", pageName, pageType);
-            assertThat(element.first()).isVisible();
-	    }
+	@Then("^I advance search following fields$")
+	public void iFindTheCorrectAccordionUsingAdvancedSearch(DataTable table) {
+		Locator parent = this.commonPageObjects.Search_Container();
+		List<FieldInputModel> fieldInputModels = table.asList(FieldInputModel.class);
+
+		for (FieldInputModel fieldInputModel : fieldInputModels) {
+			String fieldName = fieldInputModel.fieldName;
+			String fieldType = fieldInputModel.fieldType;
+			String actionType = fieldInputModel.fieldAction;
+			String value = fieldInputModel.fieldValue;
+			SelfHealingLocator element = controlLookup.getLookupElement(fieldName, fieldType, parent);
+			assertThat(element.getLocator()).isVisible();
+			controlActions.executeAction(actionType, element.getLocator(), fieldType, value);
+		}
+
 	}
-	
+
+	@Then("^I perform search with \"(.+)\"")
+	public void iFindTheCorrectAccordionUsingSearch(String searchText) {
+		Locator searchField = this.commonPageObjects.Simple_Search_Input.get();
+		searchField.fill(searchText);
+	}
+
 }

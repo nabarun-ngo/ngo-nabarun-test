@@ -60,7 +60,7 @@ public class TestHooks {
 
 		launchOptions.setHeadless(Configs.IS_HEADLESS);
 		launchOptions.setArgs(List.of("--start-maximized"));
-		launchOptions.setSlowMo(500);
+		// launchOptions.setSlowMo(500);
 
 		logger.info("Launching browser: " + browserName + " in " + (Configs.IS_HEADLESS ? "headless" : "headed")
 				+ " mode.");

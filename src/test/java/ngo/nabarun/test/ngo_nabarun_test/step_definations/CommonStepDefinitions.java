@@ -119,7 +119,7 @@ public class CommonStepDefinitions {
 		Thread.sleep(wait * 1000L);
 	}
 
-	@Then("^I advance search following fields$")
+	@Then("^I perform advance search with the following fields$")
 	public void iFindTheCorrectAccordionUsingAdvancedSearch(DataTable table) {
 		Locator parent = this.commonPageObjects.Search_Container();
 		List<FieldInputModel> fieldInputModels = table.asList(FieldInputModel.class);

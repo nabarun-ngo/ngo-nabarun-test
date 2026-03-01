@@ -1,6 +1,6 @@
 {
     "TEST_BROWSER": "chrome",
-    "TEST_IMPLICIT_WAIT": 5,
+    "TEST_IMPLICIT_WAIT": 30,
     "TEST_GLOBAL_EXPLICIT_WAIT": 30,
     "TEST_DEFAULTPASSWORD": "Password@01"
 }

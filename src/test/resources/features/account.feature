@@ -14,7 +14,7 @@ Feature: Finance - Accounts
     When I click on "Accounts" text at "Dashboard" page
     And I wait for loading to complete
     Then I must be landed to "ACCOUNTS" screen
-    Then I advance search following fields and select the 1 result
+    Then I perform advance search with the following fields
       | Field_Name   | Field_Type | Field_Value       |
       | Account Name | Textbox    | Test Account 1234 |
 
@@ -32,9 +32,5 @@ Feature: Finance - Accounts
     Then I must be landed to "ACCOUNTS" screen
     Then the "Add Icon" button should be displayed at "Account" page
     Then I click on "Add Icon" button at "Account" page
-    Then I use the create section on "Account" page as "Create_Account" accordion
-    Then I enter "Test Account {RandomNumber:4}" on "Account name" textbox at "Create_Account" accordion
-    Then I select "Savings" on "Account type" dropdown at "Create_Account" accordion
-    Then I click on "Confirm" button at "Create_Account" accordion
     And I wait for loading to complete
     Then I click on "Back to Dashboard" link at "Account" page

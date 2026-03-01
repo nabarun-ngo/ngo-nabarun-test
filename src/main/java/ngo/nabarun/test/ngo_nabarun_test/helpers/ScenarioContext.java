@@ -7,9 +7,10 @@ import com.microsoft.playwright.Page;
 
 public class ScenarioContext {
 	private final Map<ContextKeys, Object> context = new HashMap<>();
-    private Page page;
+	private final Map<String, Object> customValues = new HashMap<>();
+	private Page page;
 
-    public void set(ContextKeys key, Object value) {
+	public void set(ContextKeys key, Object value) {
 		context.put(key, value);
 	}
 
@@ -17,17 +18,31 @@ public class ScenarioContext {
 		return type.cast(context.get(key));
 	}
 
+	public void setCustomValue(String key, Object value) {
+		customValues.put(key, value);
+	}
+
+	public <T> T getCustomValue(String key, Class<T> type) {
+		return type.cast(customValues.get(key));
+	}
+
 	public boolean containsKey(ContextKeys key) {
 		return context.containsKey(key);
 	}
 
+	public boolean containsCustomKey(String key) {
+		return customValues.containsKey(key);
+	}
+
 	public void reset() {
 		context.clear();
+		customValues.clear();
 		page = null;
 	}
 
 	public enum ContextKeys {
-		Last_Window_Handle, Current_Window_Handle, Login_Option, DonationId, RequestId, New_User_Email, Login_Id, Login_Id_Type
+		Last_Window_Handle, Current_Window_Handle, Login_Option, DonationId, RequestId, New_User_Email, Login_Id,
+		Login_Id_Type
 
 	}
 

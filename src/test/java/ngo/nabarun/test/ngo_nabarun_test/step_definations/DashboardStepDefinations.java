@@ -1,6 +1,7 @@
 package ngo.nabarun.test.ngo_nabarun_test.step_definations;
 
 import io.cucumber.java.en.Then;
+import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.DataProvider;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.DashboardPageObjects;
@@ -8,6 +9,8 @@ import ngo.nabarun.test.ngo_nabarun_test.page_objects.LoginPageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ControlActions;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
+
+import com.microsoft.playwright.assertions.LocatorAssertions;
 
 public class DashboardStepDefinations {
 
@@ -29,7 +32,8 @@ public class DashboardStepDefinations {
 		controlActions.click(dashboardPageObjects.LogoutLink.get());
 		controlActions.click(dashboardPageObjects.LogoutPopupYes.get());
 
-		assertThat(loginPageObjects.LoginPageHeader.get()).isVisible();
+		assertThat(loginPageObjects.LoginPageHeader.get()).isVisible(
+				new LocatorAssertions.IsVisibleOptions().setTimeout(Configs.GLOBAL_EXPLICIT_WAIT));
 	}
 
 }

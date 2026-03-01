@@ -1,14 +1,18 @@
 package ngo.nabarun.test.ngo_nabarun_test.step_definations;
 
 import java.util.List;
+import java.util.Map;
+
 import com.microsoft.playwright.*;
+import com.microsoft.playwright.assertions.LocatorAssertions;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.*;
 import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.DataProvider;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
-import ngo.nabarun.test.ngo_nabarun_test.models.common.FieldInputModel;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.CommonPageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ControlLookup;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ControlActions;
@@ -43,13 +47,7 @@ public class CommonStepDefinitions {
 	@Given("^I (click|click and hold|scroll) on \"(.+)\" (button|link|text|textbox) at \"(.+)\" page$")
 	public void i_clicked_on_button(String actionName, String elementName, String elementType, String pageName) {
 		SelfHealingLocator element = controlLookup.getLookupElement(elementName, elementType, pageName);
-
-		switch (actionName) {
-			case "click" -> element.click();
-			case "scroll" -> element.scrollIntoViewIfNeeded();
-			case "click and hold" -> element.hover();
-			default -> throw new IllegalStateException("Invalid action : " + actionName);
-		}
+		controlActions.executeAction(actionName, element.getLocator(), elementType, "");
 	}
 
 	@Given("^I click on \"(.+)\" (button|link|text|textbox) at \"(.+)\" (page) and wait for new window to load$")
@@ -82,25 +80,11 @@ public class CommonStepDefinitions {
 		}
 	}
 
-	@Then("^I enter \"([^\"]*)\" on \"([^\"]*)\" timepicker at \"([^\"]*)\" (page)$")
-	public void iEnterOnTimepicker(String rawValue, String elementName, String pageName, String pageType)
-			throws Throwable {
-		String value = DataUtils.replacePlaceholders(rawValue);
-		SelfHealingLocator element = controlLookup.getLookupElement(elementName, "timepicker", pageName);
-		Locator container = element.getLocator();
-		container.click();
-		Locator input = container.locator("input");
-		if (input.count() > 0) {
-			input.first().fill(value);
-		} else {
-			element.fill(value);
-		}
-	}
-
 	@Then("I must be landed to {string} screen")
 	public void i_must_be_landed_to_screen(String screenName) {
 		Locator header = commonPageObjects.PageHeader(screenName);
-		assertThat(header).isVisible();
+		assertThat(header).isVisible(
+				new LocatorAssertions.IsVisibleOptions().setTimeout(Configs.GLOBAL_EXPLICIT_WAIT));
 	}
 
 	@Then("I wait for loading to complete")
@@ -111,7 +95,8 @@ public class CommonStepDefinitions {
 	@Then("^the \"(.+)\" (button|section|checkbox) should be displayed at \"(.+)\" (page)$")
 	public void should_be_displayed(String elementName, String elementType, String pageName, String pageType) {
 		SelfHealingLocator element = controlLookup.getLookupElement(elementName, elementType, pageName);
-		assertThat(element.getLocator()).isVisible();
+		assertThat(element.getLocator()).isVisible(
+				new LocatorAssertions.IsVisibleOptions().setTimeout(Configs.GLOBAL_EXPLICIT_WAIT));
 	}
 
 	@Then("^I wait for (\\d+) seconds$")
@@ -122,24 +107,59 @@ public class CommonStepDefinitions {
 	@Then("^I perform advance search with the following fields$")
 	public void iFindTheCorrectAccordionUsingAdvancedSearch(DataTable table) {
 		Locator parent = this.commonPageObjects.Search_Container();
-		List<FieldInputModel> fieldInputModels = table.asList(FieldInputModel.class);
-
-		for (FieldInputModel fieldInputModel : fieldInputModels) {
-			String fieldName = fieldInputModel.fieldName;
-			String fieldType = fieldInputModel.fieldType;
-			String actionType = fieldInputModel.fieldAction;
-			String value = fieldInputModel.fieldValue;
+		List<Map<String, String>> fieldInputModels = table.asMaps(String.class, String.class);
+		for (Map<String, String> fieldInputModel : fieldInputModels) {
+			String fieldName = fieldInputModel.get("Field_Name");
+			String fieldType = fieldInputModel.get("Field_Type");
+			String actionType = fieldInputModel.get("Field_Action");
+			String value = fieldInputModel.get("Field_Value");
 			SelfHealingLocator element = controlLookup.getLookupElement(fieldName, fieldType, parent);
-			assertThat(element.getLocator()).isVisible();
+			assertThat(element.getLocator()).isVisible(
+					new LocatorAssertions.IsVisibleOptions().setTimeout(Configs.GLOBAL_EXPLICIT_WAIT));
 			controlActions.executeAction(actionType, element.getLocator(), fieldType, value);
 		}
-
+		commonPageObjects.Adv_Search_Submit.get().click();
 	}
 
 	@Then("^I perform search with \"(.+)\"")
 	public void iFindTheCorrectAccordionUsingSearch(String searchText) {
 		Locator searchField = this.commonPageObjects.Simple_Search_Input.get();
 		searchField.fill(searchText);
+	}
+
+	@Given("^I click on \"(.+)\" (button|link|text|textbox) at \"(.+)\" page and collect \"(.+)\" from response of \"(.+)\" and store as \"(.+)\"$")
+	public void i_click_and_collect(String elementName, String elementType, String pageName, String jsonPath,
+			String urlPattern, String storeKey) {
+		Page page = scenarioContext.getPage();
+		SelfHealingLocator element = controlLookup.getLookupElement(elementName, elementType, pageName);
+		Response response = page.waitForResponse(res -> res.url().contains(urlPattern), () -> {
+			element.click();
+		});
+		String responseText = response.text();
+		String value = extractValueByPath(responseText, jsonPath);
+		scenarioContext.setCustomValue(storeKey, value);
+	}
+
+	private String extractValueByPath(String json, String path) {
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode node = mapper.readTree(json);
+			String[] parts = path.split("\\.");
+			for (String part : parts) {
+				if (part.contains("[") && part.contains("]")) {
+					String fieldName = part.substring(0, part.indexOf("["));
+					int index = Integer.parseInt(part.substring(part.indexOf("[") + 1, part.indexOf("]")));
+					node = fieldName.isEmpty() ? node.get(index) : node.get(fieldName).get(index);
+				} else {
+					node = node.get(part);
+				}
+				if (node == null || node.isMissingNode())
+					throw new RuntimeException("Path not found: " + path + " at part: " + part);
+			}
+			return node.isValueNode() ? node.asText() : node.toString();
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to extract value from response: " + e.getMessage(), e);
+		}
 	}
 
 }

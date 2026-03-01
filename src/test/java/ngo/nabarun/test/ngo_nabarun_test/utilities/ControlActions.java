@@ -14,6 +14,8 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
@@ -46,18 +48,19 @@ public class ControlActions {
      * @param value       The value to provide (if applicable)
      * @throws Exception if the action cannot be performed or is unknown
      */
-    public void executeAction(String actionName, Locator locator, String elementType, String value) {
-        logger.debug("Executing Action: {} on Element Type: {} with Value: {}", actionName, elementType, value);
+    public void executeAction(String actionName, Locator locator, String elementType, String fieldValue) {
+        String resolvedValue = resolveValue(fieldValue);
+        logger.debug("Executing Action: {} on Element Type: {} with Value: {}", actionName, elementType, resolvedValue);
         switch (actionName.toUpperCase()) {
             case "ENTER" -> {
                 locator.clear();
-                locator.fill(value);
+                locator.fill(resolvedValue);
             }
             case "SELECT" -> {
                 switch (elementType.toLowerCase()) {
-                    case "dropdown" -> selectMatOption(locator, value);
-                    case "multiselect", "dropdown-multi" -> selectMatOptions(locator, value);
-                    case "datepicker" -> selectMatDate(locator, value);
+                    case "dropdown" -> selectMatOption(locator, resolvedValue);
+                    case "multiselect", "dropdown-multi" -> selectMatOptions(locator, resolvedValue);
+                    case "datepicker" -> selectMatDate(locator, resolvedValue);
                     default -> {
                         logger.error("Cannot SELECT on unknown element type: {}", elementType);
                         throw new IllegalArgumentException("Cannot SELECT on element type: " + elementType);
@@ -66,17 +69,39 @@ public class ControlActions {
             }
             case "CLICK" -> {
                 if ("radio".equalsIgnoreCase(elementType)) {
-                    clickRadioOption(locator, value);
+                    clickRadioOption(locator, resolvedValue);
                 } else {
                     locator.click();
                 }
             }
-            case "UPLOAD" -> uploadFileByFileChooser(locator, value);
+            case "UPLOAD" -> uploadFileByFileChooser(locator, resolvedValue);
+            case "SCROLL" -> locator.scrollIntoViewIfNeeded();
+            case "CLICK AND HOLD" -> locator.hover();
             default -> {
                 logger.error("Unknown high-level action requested: {}", actionName);
                 throw new UnsupportedOperationException("Unknown action: " + actionName);
             }
         }
+    }
+
+    private String resolveValue(String input) {
+        if (input == null || !input.contains("{")) {
+            return input;
+        }
+        Pattern pattern = Pattern.compile("\\{\\s*(.*?)\\s*\\}");
+        Matcher matcher = pattern.matcher(input);
+        StringBuilder sb = new StringBuilder();
+        while (matcher.find()) {
+            String key = matcher.group(1).trim();
+            if (scenarioContext.containsCustomKey(key)) {
+                String val = scenarioContext.getCustomValue(key, String.class);
+                matcher.appendReplacement(sb, Matcher.quoteReplacement(val));
+            } else {
+                matcher.appendReplacement(sb, Matcher.quoteReplacement(matcher.group()));
+            }
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
     }
 
     /*

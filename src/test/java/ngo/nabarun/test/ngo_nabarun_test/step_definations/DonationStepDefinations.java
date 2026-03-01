@@ -7,8 +7,10 @@ import java.util.regex.Pattern;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.assertions.LocatorAssertions;
 
 import io.cucumber.java.en.Then;
+import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.DataProvider;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext.ContextKeys;
@@ -72,7 +74,8 @@ public class DonationStepDefinations {
 	@Then("^I search for member \"([^\"]*)\" under \"([^\"]*)\" tab$")
 	public void iSearchForMemberUnderTab(String memberName, String tab) throws Throwable {
 		Locator selectorModal = donationPageObjects.getTextMapping("Select Members", null);
-		assertThat(selectorModal).isVisible();
+		assertThat(selectorModal).isVisible(
+				new LocatorAssertions.IsVisibleOptions().setTimeout(Configs.GLOBAL_EXPLICIT_WAIT));
 		donationPageObjects.Modal_UserSearch.get().fill(memberName);
 		Locator selectBtn = donationPageObjects.getButtonMapping("Select", null);
 		controlActions.click(selectBtn);

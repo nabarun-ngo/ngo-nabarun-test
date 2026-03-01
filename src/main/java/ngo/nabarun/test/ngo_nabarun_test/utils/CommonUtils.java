@@ -39,4 +39,12 @@ public class CommonUtils extends CommonUtil {
 		return new File(resource.getFile()).getAbsolutePath();
 	}
 
+	public static void sleep(int i) {
+		try {
+			Thread.sleep(i * 1000);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 }

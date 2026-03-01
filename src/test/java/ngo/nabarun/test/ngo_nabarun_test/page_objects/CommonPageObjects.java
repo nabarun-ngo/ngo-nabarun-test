@@ -9,6 +9,8 @@ import ngo.nabarun.test.ngo_nabarun_test.utilities.AngularMaterial;
 
 public class CommonPageObjects extends BasePageObjects implements ICommonPageObject {
 
+	public final Supplier<Locator> Adv_Search_Submit = () -> findLocator("//button[normalize-space(text())='Search']",
+			Search_Container(), FindBy.XPATH);
 	public final Supplier<Locator> Simple_Search_Input = () -> findLocator("#simple-search", Search_Container(),
 			FindBy.ANY);
 	public final Supplier<Locator> Create_Accordion = () -> findLocator("//mat-expansion-panel[@id='create']");
@@ -19,7 +21,7 @@ public class CommonPageObjects extends BasePageObjects implements ICommonPageObj
 
 	@Override
 	public Locator PageHeader(String title) {
-		return findLocator("//app-page-title//h1[normalize-space(text())='" + title + "']");
+		return findLocator("//app-page-title//h1[normalize-space(text())=\"" + title + "\"]");
 	}
 
 	@Override
@@ -38,8 +40,11 @@ public class CommonPageObjects extends BasePageObjects implements ICommonPageObj
 	}
 
 	@Override
-	public Locator getAccordions(Locator parent) {
-		return findLocator("//mat-expansion-panel", parent, FindBy.XPATH);
+	public Locator getAccordions(Locator parent, int index) {
+		if (index == -1) {
+			return scope(parent).locator("//mat-expansion-panel");
+		}
+		return findLocator("(//mat-expansion-panel)" + "[" + index + "]", parent, FindBy.XPATH);
 	}
 
 	@Override

@@ -19,12 +19,15 @@ import java.util.stream.Collectors;
 import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 import ngo.nabarun.test.ngo_nabarun_test.utils.CommonUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Manages UI interactions and complex orchestration of actions.
  * Centralizes common Playwright patterns and provides high-level user actions.
  */
 public class ControlActions {
+    private static final Logger logger = LogManager.getLogger(ControlActions.class);
     private final ScenarioContext scenarioContext;
     private static final SimpleDateFormat DEFAULT_SDF = new SimpleDateFormat("dd/MM/yyyy");
 
@@ -44,6 +47,7 @@ public class ControlActions {
      * @throws Exception if the action cannot be performed or is unknown
      */
     public void executeAction(String actionName, Locator locator, String elementType, String value) {
+        logger.debug("Executing Action: {} on Element Type: {} with Value: {}", actionName, elementType, value);
         switch (actionName.toUpperCase()) {
             case "ENTER" -> {
                 locator.clear();
@@ -54,7 +58,10 @@ public class ControlActions {
                     case "dropdown" -> selectMatOption(locator, value);
                     case "multiselect", "dropdown-multi" -> selectMatOptions(locator, value);
                     case "datepicker" -> selectMatDate(locator, value);
-                    default -> throw new IllegalArgumentException("Cannot SELECT on element type: " + elementType);
+                    default -> {
+                        logger.error("Cannot SELECT on unknown element type: {}", elementType);
+                        throw new IllegalArgumentException("Cannot SELECT on element type: " + elementType);
+                    }
                 }
             }
             case "CLICK" -> {
@@ -65,7 +72,10 @@ public class ControlActions {
                 }
             }
             case "UPLOAD" -> uploadFileByFileChooser(locator, value);
-            default -> throw new UnsupportedOperationException("Unknown action: " + actionName);
+            default -> {
+                logger.error("Unknown high-level action requested: {}", actionName);
+                throw new UnsupportedOperationException("Unknown action: " + actionName);
+            }
         }
     }
 
@@ -216,6 +226,7 @@ public class ControlActions {
      * Basic click action on a locator.
      */
     public void click(Locator locator) {
+        logger.debug("Performing click operation.");
         locator.click();
     }
 

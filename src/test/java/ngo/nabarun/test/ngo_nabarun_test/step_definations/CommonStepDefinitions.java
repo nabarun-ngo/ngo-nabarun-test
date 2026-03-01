@@ -37,7 +37,6 @@ public class CommonStepDefinitions {
 	@Given("I have opened to Nabarun's web portal")
 	public void that_i_am_on_nabarun_home_page() {
 		String rootURL = Configs.ROOT_URL;
-		System.out.println("Navigating to: " + rootURL);
 		scenarioContext.getPage().navigate(rootURL);
 	}
 

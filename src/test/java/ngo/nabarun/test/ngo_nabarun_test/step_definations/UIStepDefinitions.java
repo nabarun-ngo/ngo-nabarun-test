@@ -13,6 +13,8 @@ import ngo.nabarun.test.ngo_nabarun_test.page_objects.CommonPageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ControlLookup;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ControlActions;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.SelfHealingLocator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
@@ -25,7 +27,7 @@ import java.util.Map;
  * Supports: visibility assertions, generic dialog/modal actions, navigation.
  */
 public class UIStepDefinitions {
-
+    private static final Logger logger = LogManager.getLogger(UIStepDefinitions.class);
     private final ControlLookup controlLookup;
     private final CommonPageObjects commonPageObjects;
     private final ControlActions controlActions;
@@ -41,6 +43,7 @@ public class UIStepDefinitions {
 
     @Then("I should see text {string} at {string} page")
     public void iShouldSeeTextAtPage(String expectedText, String pageName) {
+        logger.debug("Assertion: Verifying that text '{}' is visible on page '{}'", expectedText, pageName);
         SelfHealingLocator element = controlLookup.getLookupElement(expectedText, "text", pageName);
         assertThat(element.getLocator().first()).isVisible(
                 new LocatorAssertions.IsVisibleOptions().setTimeout(Configs.GLOBAL_EXPLICIT_WAIT));
@@ -48,9 +51,11 @@ public class UIStepDefinitions {
 
     @Then("^I wait for following text to display at \"(.+)\" (page)$")
     public void iWaitForFollowingTextToDisplay(String pageName, String pageType, DataTable table) {
+        logger.debug("Step: Waiting for multiple texts to be visible on page '{}'", pageName);
         List<Map<String, String>> rows = table.asMaps(String.class, String.class);
         for (Map<String, String> columns : rows) {
             String content = columns.get("Expected_Content");
+            logger.debug("Waiting for text: '{}'", content);
             SelfHealingLocator element = controlLookup.getLookupElement(content, "text", pageName);
             assertThat(element.getLocator().first()).isVisible(
                     new LocatorAssertions.IsVisibleOptions().setTimeout(Configs.GLOBAL_EXPLICIT_WAIT));
@@ -68,6 +73,7 @@ public class UIStepDefinitions {
 
     @Then("I click on {string} button in the open modal")
     public void iClickOnButtonInTheOpenModal(String buttonText) {
+        logger.debug("Step: Clicking on '{}' button in the open modal.", buttonText);
         Locator dialog = commonPageObjects.Popup_Container();
         Locator button = dialog.getByRole(AriaRole.BUTTON, new Locator.GetByRoleOptions().setName(buttonText));
         button.waitFor();

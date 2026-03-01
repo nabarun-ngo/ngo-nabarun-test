@@ -23,19 +23,34 @@ public class DevToolsUtility {
 	/**
 	 * Enables network logging to capture requests and responses.
 	 */
-	public void enableNetworkLogging() {
-		scenarioContext.getPage().onRequest(request -> {
-			logger.info("Request: " + request.url());
-			requestMap.put(request.url(), request);
-		});
+	public void enableNetworkLogging(boolean onlyErrors) {
+		logger.info("Enabling network logging for the current page.");
 		scenarioContext.getPage().onResponse(response -> {
-			logger.info("Response: " + response.url() + " Status: " + response.status());
+			if (onlyErrors && response.status() < 400) {
+				return;
+			}
+			String text = String.format("Network Log | Method: %s | URL: %s | Status: %s | Response: %s",
+					response.request().method(),
+					response.url(), response.status(), response.text());
+			if (response.status() >= 400) {
+				logger.error(text);
+			} else {
+				logger.info(text);
+			}
 		});
 	}
 
-	public void enableConsoleLogging() {
+	public void enableConsoleLogging(boolean includeInfo) {
+		logger.info("Enabling console logging for the current page.");
 		scenarioContext.getPage().onConsoleMessage(msg -> {
-			logger.info("Console: " + msg.text());
+			String logMessage = String.format("Browser Console [%s]: %s", msg.type(), msg.text());
+			if (msg.type().equals("error")) {
+				logger.error(logMessage);
+			} else if (msg.type().equals("warning")) {
+				logger.warn(logMessage);
+			} else if (includeInfo) {
+				logger.info(logMessage);
+			}
 		});
 	}
 

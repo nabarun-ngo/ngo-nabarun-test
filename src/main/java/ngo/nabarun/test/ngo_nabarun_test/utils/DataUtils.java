@@ -129,7 +129,7 @@ public class DataUtils {
 		input = replaceSimplePlaceholder(input, "RandomAnimal", faker.animal().name());
 		input = replaceSimplePlaceholder(input, "RandomCreditCardNumber", faker.business().creditCardNumber());
 
-		input = replaceSimplePlaceholder(input, "RandomWord", faker.lorem().sentence(5));
+		input = replaceSimplePlaceholder(input, "RandomWord", faker.lorem().word());
 		input = replaceSimplePlaceholder(input, "SystemDate", DEFAULT_DATE_FORMAT.format(new Date()));
 		input = replaceSimplePlaceholder(input, "SystemTime", DEFAULT_TIME_FORMAT.format(new Date()));
 		input = replaceSimplePlaceholder(input, "FirstOfCurrentMonth", firstDayOfCurrentMonth());

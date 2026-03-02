@@ -102,21 +102,67 @@ public class ControlActions {
      * Selects a single option from a Mat-Select dropdown.
      */
     public void selectMatOption(Locator selectEl, String value) {
-        selectEl.waitFor();
-        selectEl.click();
+        logger.info("Attempting to select Mat-Option: '{}'", value);
+        selectEl.scrollIntoViewIfNeeded();
+        selectEl.waitFor(
+                new Locator.WaitForOptions().setState(com.microsoft.playwright.options.WaitForSelectorState.VISIBLE));
 
         Page page = this.scenarioContext.getPage();
-        Locator optionsLocator = AngularMaterial.MatActiveOptions(page);
+        boolean opened = false;
 
-        List<Locator> options = optionsLocator.all();
-        for (Locator option : options) {
-            String text = option.textContent().toLowerCase().trim();
-            if (text.contains(value.toLowerCase().trim())) {
-                option.click();
-                return;
+        // Retry loop for opening the dropdown if it fails to appear
+        for (int i = 0; i < 3; i++) {
+            selectEl.click();
+            try {
+                // Wait for any option to become visible as a sign that the dropdown is open
+                page.locator("mat-option, [role='option']").first().waitFor(new Locator.WaitForOptions()
+                        .setState(com.microsoft.playwright.options.WaitForSelectorState.VISIBLE)
+                        .setTimeout(3000));
+                opened = true;
+                break;
+            } catch (Exception e) {
+                logger.warn("Dropdown overlay did not appear, retrying click... ({}/3)", i + 1);
             }
         }
-        throw new UnsupportedOperationException("Option not found: " + value);
+
+        if (!opened) {
+            throw new RuntimeException("Failed to open dropdown after 3 attempts.");
+        }
+
+        // Give a tiny moment for the layout to stabilize
+        page.waitForTimeout(300);
+
+        // We use Playwright's getByText on the common option roles.
+        // This is usually more robust than manual regex filtering for Material
+        // components.
+        Locator targetOption = page.locator("mat-option, [role='option']")
+                .getByText(value, new Locator.GetByTextOptions().setExact(false))
+                .first();
+
+        try {
+            // Using a shorter timeout for the primary attempt to allow for fallback if
+            // needed
+            targetOption.waitFor(new Locator.WaitForOptions()
+                    .setState(com.microsoft.playwright.options.WaitForSelectorState.ATTACHED)
+                    .setTimeout(5000));
+
+            targetOption.scrollIntoViewIfNeeded();
+            targetOption.click(new Locator.ClickOptions().setForce(true));
+            logger.info("Successfully selected option: '{}'", value);
+        } catch (Exception e) {
+            // Fallback: iterate and find by text content if getByText failed
+            List<Locator> allOptions = page.locator("mat-option, [role='option']").all();
+            for (Locator opt : allOptions) {
+                if (opt.textContent().toLowerCase().contains(value.toLowerCase().trim())) {
+                    opt.scrollIntoViewIfNeeded();
+                    opt.click(new Locator.ClickOptions().setForce(true));
+                    logger.info("Selected option '{}' via fallback iteration.", value);
+                    return;
+                }
+            }
+            throw new UnsupportedOperationException("Option '" + value + "' not found among options: " +
+                    allOptions.stream().map(Locator::textContent).collect(java.util.stream.Collectors.toList()), e);
+        }
     }
 
     /**
@@ -131,21 +177,34 @@ public class ControlActions {
         if (values.isEmpty())
             return;
 
-        selectEl.waitFor();
+        selectEl.scrollIntoViewIfNeeded();
+        selectEl.waitFor(
+                new Locator.WaitForOptions().setState(com.microsoft.playwright.options.WaitForSelectorState.VISIBLE));
         selectEl.click();
+
+        // Give a brief moment for Material animation/panel to attach
+        this.scenarioContext.getPage().waitForTimeout(500);
 
         Page page = this.scenarioContext.getPage();
         Locator optionsLocator = AngularMaterial.MatActiveOptions(page);
 
         for (String val : values) {
-            List<Locator> options = optionsLocator.all();
-            for (Locator option : options) {
-                if (option.textContent().toLowerCase().trim().contains(val.toLowerCase().trim())) {
-                    option.click();
-                    break;
-                }
+            Locator targetOption = optionsLocator.filter(new Locator.FilterOptions().setHasText(
+                    java.util.regex.Pattern.compile(java.util.regex.Pattern.quote(val.trim()),
+                            java.util.regex.Pattern.CASE_INSENSITIVE)))
+                    .locator("visible=true")
+                    .first();
+            try {
+                targetOption.waitFor(new Locator.WaitForOptions()
+                        .setState(com.microsoft.playwright.options.WaitForSelectorState.VISIBLE)
+                        .setTimeout(Configs.GLOBAL_EXPLICIT_WAIT));
+                targetOption.click(new Locator.ClickOptions().setForce(true));
+            } catch (Exception e) {
+                logger.warn("Option '{}' not found or visible in multi-select dropdown.", val);
             }
         }
+        // Closing dropdown if it stays open (common for multi-select)
+        page.keyboard().press("Escape");
     }
 
     /**
@@ -181,18 +240,29 @@ public class ControlActions {
         int day = cal.get(Calendar.DATE);
         String monthCode = getMonthCode(cal.get(Calendar.MONTH));
 
-        AngularMaterial.MatDatePickerPeriodButton(page).click();
+        Locator periodButton = AngularMaterial.MatDatePickerPeriodButton(page);
+        periodButton.waitFor(
+                new Locator.WaitForOptions().setState(com.microsoft.playwright.options.WaitForSelectorState.VISIBLE));
+        periodButton.click();
 
-        List<Locator> dateCheck = AngularMaterial.MatCalendarCell(page, String.valueOf(year)).all();
+        Locator yearCell = AngularMaterial.MatCalendarCell(page, String.valueOf(year));
 
-        while (dateCheck.isEmpty()) {
+        // Wait for years to be visible, might need to navigate
+        while (!yearCell.isVisible()) {
             AngularMaterial.MatDatePickerPreviousButton(page).click();
-            dateCheck = AngularMaterial.MatCalendarCell(page, String.valueOf(year)).all();
         }
 
-        AngularMaterial.MatCalendarCell(page, String.valueOf(year)).click();
-        AngularMaterial.MatCalendarCell(page, monthCode).click();
-        AngularMaterial.MatCalendarCell(page, String.valueOf(day)).click();
+        yearCell.click();
+
+        Locator monthCell = AngularMaterial.MatCalendarCell(page, monthCode);
+        monthCell.waitFor(
+                new Locator.WaitForOptions().setState(com.microsoft.playwright.options.WaitForSelectorState.VISIBLE));
+        monthCell.click();
+
+        Locator dayCell = AngularMaterial.MatCalendarCell(page, String.valueOf(day));
+        dayCell.waitFor(
+                new Locator.WaitForOptions().setState(com.microsoft.playwright.options.WaitForSelectorState.VISIBLE));
+        dayCell.click();
     }
 
     /**

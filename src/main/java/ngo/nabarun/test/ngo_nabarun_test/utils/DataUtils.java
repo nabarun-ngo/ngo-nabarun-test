@@ -1,5 +1,7 @@
 package ngo.nabarun.test.ngo_nabarun_test.utils;
 
+import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
+
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -11,6 +13,8 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
 
 /**
@@ -273,6 +277,68 @@ public class DataUtils {
 		Calendar calendar = Calendar.getInstance();
 		calendar.add(Calendar.DAY_OF_MONTH, daysOffset);
 		return calendar.getTime();
+	}
+
+	/**
+	 * Resolves custom variables stored in ScenarioContext.
+	 * 
+	 * @param input   The string containing variables (e.g., "{myVariable}")
+	 * @param context The ScenarioContext to look up variables
+	 * @return The resolved string
+	 */
+	public static String resolveVariables(String input, ScenarioContext context) {
+		if (input == null || !input.contains("{") || context == null) {
+			return input;
+		}
+		Pattern pattern = Pattern.compile("\\{\\s*([^}]*?)\\s*\\}");
+		Matcher matcher = pattern.matcher(input);
+		StringBuilder sb = new StringBuilder();
+		while (matcher.find()) {
+			String key = matcher.group(1).trim();
+			if (context.containsCustomKey(key)) {
+				String val = context.getCustomValue(key, String.class);
+				matcher.appendReplacement(sb, Matcher.quoteReplacement(val));
+			} else {
+				matcher.appendReplacement(sb, Matcher.quoteReplacement(matcher.group()));
+			}
+		}
+		matcher.appendTail(sb);
+		return sb.toString();
+	}
+
+	/**
+	 * Fully resolves data by first replacing system placeholders and then resolving
+	 * context variables.
+	 * 
+	 * @param input   The raw input string
+	 * @param context The ScenarioContext for variable lookup
+	 * @return The fully resolved string
+	 */
+	public static String resolveData(String input, ScenarioContext context) {
+		String step1 = replacePlaceholders(input);
+		return resolveVariables(step1, context);
+	}
+
+	public static String extractValueByPath(String json, String path) {
+		try {
+			ObjectMapper mapper = CommonUtils.getObjectMapper();
+			JsonNode node = mapper.readTree(json);
+			String[] parts = path.split("\\.");
+			for (String part : parts) {
+				if (part.contains("[") && part.contains("]")) {
+					String fieldName = part.substring(0, part.indexOf("["));
+					int index = Integer.parseInt(part.substring(part.indexOf("[") + 1, part.indexOf("]")));
+					node = fieldName.isEmpty() ? node.get(index) : node.get(fieldName).get(index);
+				} else {
+					node = node.get(part);
+				}
+				if (node == null || node.isMissingNode())
+					throw new RuntimeException("Path not found: " + path + " at part: " + part);
+			}
+			return node.isValueNode() ? node.asText() : node.toString();
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to extract value from response: " + e.getMessage(), e);
+		}
 	}
 
 }

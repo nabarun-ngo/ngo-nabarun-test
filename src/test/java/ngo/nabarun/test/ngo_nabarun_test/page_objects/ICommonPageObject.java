@@ -34,4 +34,6 @@ public interface ICommonPageObject {
 
     Locator getCheckboxMapping(String elementName, Locator parent);
 
+    Locator getFormMapping(String formName, Locator parent);
+
 }

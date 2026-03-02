@@ -13,6 +13,8 @@ import ngo.nabarun.test.ngo_nabarun_test.page_objects.CommonPageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ControlLookup;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ControlActions;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.SelfHealingLocator;
+import ngo.nabarun.test.ngo_nabarun_test.utils.DataUtils;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -31,18 +33,21 @@ public class UIStepDefinitions {
     private final ControlLookup controlLookup;
     private final CommonPageObjects commonPageObjects;
     private final ControlActions controlActions;
+    private final ScenarioContext scenarioContext;
 
     public UIStepDefinitions(ScenarioContext scenarioContext, ControlActions ca,
             CommonPageObjects commonPageObjects, ControlLookup controlLookup) {
         this.controlActions = ca;
         this.commonPageObjects = commonPageObjects;
         this.controlLookup = controlLookup;
+        this.scenarioContext = scenarioContext;
     }
 
     // ---------- Visibility (should see / should not see) ----------
 
     @Then("I should see text {string} at {string} page")
     public void iShouldSeeTextAtPage(String expectedText, String pageName) {
+        expectedText = DataUtils.resolveData(expectedText, scenarioContext);
         logger.debug("Assertion: Verifying that text '{}' is visible on page '{}'", expectedText, pageName);
         SelfHealingLocator element = controlLookup.getLookupElement(expectedText, "text", pageName);
         assertThat(element.getLocator().first()).isVisible(

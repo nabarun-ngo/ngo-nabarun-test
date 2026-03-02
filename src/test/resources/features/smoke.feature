@@ -2,14 +2,16 @@ Feature: Public facing pages
   This fearure covers all scenarios for public facing pages
 
   Background:
-    Given I have opened to Nabarun's web portal
+    Given I have opened to Nabarun's public portal
+  #Th
 
   @regression @smoke @public01
   Scenario Outline: Public - Create and fullfill Join Request - Happy Path
     Then I click on "Join Us" link at "Home" page
+    Then I store "{RandomEmail}" value as "NewUserEmail" variable
     Then I enter "{RandomFirstName}" on "Your First Name" textbox at "Home" page
     Then I enter "{RandomLastName}" on "Your Last Name" textbox at "Home" page
-    Then I enter "{RandomEmail}" on "Your Email (JoinUs)" textbox at "Home" page
+    Then I enter "{NewUserEmail}" on "Your Email (JoinUs)" textbox at "Home" page
     Then I enter "{RandomNumber:10}" on "Your Mobile Number (JoinUs)" textbox at "Home" page
     Then I enter "{RandomLocation}" on "Where are you from?" textbox at "Home" page
     Then I enter "From my Friend" on "How did you hear about us?" textarea at "Home" page
@@ -81,4 +83,34 @@ Feature: Public facing pages
       | Workflow ID | textbox    | enter        | {JoinRequestId} |
     Then The accordions should have exactly 1 rows
     Then I logout from current session
+    Then I change "{NewUserEmail}" user's password to default password
+    Then I login with "{NewUserEmail}" user using Password option
+    Then I should see text "Check your email" at "Login" page
+    Then I should see text "Please enter the 4-digit verification code that was sent to {NewUserEmail}. The code is valid for 10 minutes." at "Login" page
+    Then I change "{NewUserEmail}" user's email as verified
+    Then I open Nabarun's internal portal
+    Then I click on "Login with Password" button at "Login" page
+    Then I handle change password screen
+    Then I handle user consent screen
+    Then I wait for 5 seconds
+    Then I refresh the current page
+    Then I wait for 5 seconds
+    Then I login with "{NewUserEmail}" user using Password option
+    Then I fillup the "Complete Profile" form with the following fields at "Profile" page
+      | Field_Name                                | Field_Type | Field_Action | Field_Value           |
+      | Title                                     | dropdown   | select       | Mr                    |
+      | Middle Name                               | textbox    | enter        | Kumar                 |
+      | Gender                                    | dropdown   | select       | Male                  |
+      | Date of Birth                             | datepicker | select       |            27/02/1995 |
+      | Permanent Address same as Present Address | checkbox   | click        |                       |
+      | Address Line 1                            | textbox    | enter        | {RandomStreetAddress} |
+      | Address Line 2                            | textbox    | enter        | {RandomStreetAddress} |
+      | Address Line 3                            | textbox    | enter        | {RandomStreetAddress} |
+      | Hometown                                  | textbox    | enter        | {RandomCity}          |
+      | Country                                   | dropdown   | select       | India                 |
+      | State                                     | dropdown   | select       | West Bengal           |
+      | District                                  | dropdown   | select       | North 24 Parganas     |
+      | Pin code                                  | textbox    | enter        |                700110 |
+    Then I click on "Update" button at "Profile" page
+    Then I must be landed to "WELCOME TO NABARUN'S SECURED DASHBOARD" screen
     Then I wait for 10 seconds

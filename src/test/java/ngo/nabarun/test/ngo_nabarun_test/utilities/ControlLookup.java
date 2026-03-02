@@ -104,4 +104,12 @@ public class ControlLookup {
 				scenarioContext.getPage(), parent, locator, elementType, elementName);
 	}
 
+	public Locator getLookupForm(String formName, String pageName) {
+		CommonPageObjects pageObj = pageName == null ? commonPageObjects : pageRegistry.get(pageName.toLowerCase());
+		if (pageObj == null) {
+			throw new RuntimeException("Unknown page: " + pageName + ". Register it in ControlLookup#register().");
+		}
+		return pageObj.getFormMapping(formName, null);
+	}
+
 }

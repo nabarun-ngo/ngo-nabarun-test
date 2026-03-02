@@ -65,7 +65,9 @@ public class TestHooks {
 		logger.info("Launching browser: " + browserName + " in " + (Configs.IS_HEADLESS ? "headless" : "headed")
 				+ " mode.");
 		browser = playwright.chromium().launch(launchOptions);
-		context = browser.newContext(new Browser.NewContextOptions().setViewportSize(null));
+		context = browser.newContext(new Browser.NewContextOptions()
+				.setPermissions(List.of("notifications"))
+				.setViewportSize(null));
 
 		Page page = context.newPage();
 		logger.info("New page created and timeout set to " + Configs.IMPLICIT_WAIT + "ms");

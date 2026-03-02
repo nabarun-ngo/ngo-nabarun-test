@@ -29,7 +29,7 @@ public class EventListener implements ConcurrentEventListener {
     private final EventHandler<TestStepStarted> stepStartedHandler = event -> {
         if (event.getTestStep() instanceof PickleStepTestStep pickleStep) {
             String stepName = pickleStep.getStep().getText();
-            logger.info("Executing Step: " + stepName);
+            logger.info("Step: " + stepName);
         }
     };
 

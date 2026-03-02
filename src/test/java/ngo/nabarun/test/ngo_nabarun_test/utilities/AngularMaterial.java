@@ -10,7 +10,8 @@ import com.microsoft.playwright.Page;
 public class AngularMaterial {
 
     // Mat-Select / Mat-Option related
-    private static final String OVERLAY_PANE_OPTION = ".cdk-overlay-pane mat-option";
+    // private static final String OVERLAY_PANE_OPTION = ".cdk-overlay-pane
+    // mat-option";
     private static final String GENERIC_MAT_OPTION = "mat-option";
 
     // Mat-DatePicker related
@@ -37,9 +38,11 @@ public class AngularMaterial {
         if (page == null) {
             throw new RuntimeException("cannot find active options. The Page is null");
         }
-        return page.locator(OVERLAY_PANE_OPTION).count() > 0
-                ? page.locator(OVERLAY_PANE_OPTION)
-                : page.locator(GENERIC_MAT_OPTION);
+        return /*
+                * page.locator(OVERLAY_PANE_OPTION).count() > 0
+                * ? page.locator(OVERLAY_PANE_OPTION)
+                */
+        page.locator(GENERIC_MAT_OPTION);
     }
 
     public static Locator MatDatePickerToggle(Locator parent) {

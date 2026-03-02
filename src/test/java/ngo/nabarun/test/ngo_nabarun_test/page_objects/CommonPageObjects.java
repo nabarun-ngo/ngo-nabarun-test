@@ -56,7 +56,7 @@ public class CommonPageObjects extends BasePageObjects implements ICommonPageObj
 	@Override
 	public Locator getDatePickerMapping(String elementName, Locator parent) {
 		return findLocator(
-				"//*[normalize-space(text())='" + elementName + "']/following-sibling::*//mat-datepicker-toggle",
+				"//*[normalize-space(text())='" + elementName + "']/following-sibling::*",
 				parent, FindBy.XPATH);
 	}
 
@@ -124,5 +124,10 @@ public class CommonPageObjects extends BasePageObjects implements ICommonPageObj
 			default ->
 				super.scope(parent).getByRole(AriaRole.CHECKBOX, new Locator.GetByRoleOptions().setName(elementName));
 		};
+	}
+
+	@Override
+	public Locator getFormMapping(String formName, Locator parent) {
+		return super.scope(parent);
 	}
 }

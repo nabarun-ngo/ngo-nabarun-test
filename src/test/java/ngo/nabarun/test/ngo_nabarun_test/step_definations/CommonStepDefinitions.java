@@ -5,8 +5,6 @@ import java.util.Map;
 
 import com.microsoft.playwright.*;
 import com.microsoft.playwright.assertions.LocatorAssertions;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.*;
@@ -38,10 +36,16 @@ public class CommonStepDefinitions {
 		// this.dataProvider = dataProvider;
 	}
 
-	@Given("I have opened to Nabarun's web portal")
-	public void that_i_am_on_nabarun_home_page() {
-		String rootURL = Configs.ROOT_URL;
-		scenarioContext.getPage().navigate(rootURL);
+	@Given("^I have opened to Nabarun's (public|internal) portal$")
+	@Then("^I open Nabarun's (public|internal) portal$")
+	public void that_i_am_on_nabarun_home_page(String portalType) {
+
+		String url = switch (portalType) {
+			case "public" -> Configs.ROOT_URL;
+			case "internal" -> Configs.APP_URL;
+			default -> throw new IllegalArgumentException("Invalid portal type: " + portalType);
+		};
+		scenarioContext.getPage().navigate(url);
 	}
 
 	@Given("^I (click|click and hold|scroll) on \"(.+)\" (button|link|text|textbox) at \"(.+)\" page$")
@@ -66,8 +70,7 @@ public class CommonStepDefinitions {
 			String pageName, String pageType) throws Throwable {
 		String effectiveType = "multiselect".equalsIgnoreCase(elementType) ? "dropdown" : elementType;
 		SelfHealingLocator element = controlLookup.getLookupElement(elementName, effectiveType, pageName);
-		String value = DataUtils.replacePlaceholders(rawValue);
-		controlActions.executeAction(actionName, element.getLocator(), elementType, value);
+		controlActions.executeAction(actionName, element.getLocator(), elementType, rawValue);
 	}
 
 	@Then("^I (check|uncheck) \"([^\"]*)\" checkbox at \"([^\"]*)\" (page)$")
@@ -87,9 +90,24 @@ public class CommonStepDefinitions {
 				new LocatorAssertions.IsVisibleOptions().setTimeout(Configs.GLOBAL_EXPLICIT_WAIT));
 	}
 
+	@Then("I store {string} value as {string} variable")
+	public void i_store_as_variable(String variableValue, String variableName) {
+		variableValue = DataUtils.resolveData(variableValue, scenarioContext);
+		scenarioContext.setCustomValue(variableName, variableValue);
+	}
+
 	@Then("I wait for loading to complete")
 	public void i_wait_for_loading_to_complete() {
 		this.controlActions.waitUntilDisappear(commonPageObjects.PageLoaderSelector());
+	}
+
+	@Then("^I (refresh|hard refresh) the current page$")
+	public void i_refresh_the_current_page(String action) {
+		if (action.equalsIgnoreCase("refresh")) {
+			scenarioContext.getPage().reload();
+		} else {
+			scenarioContext.getPage().keyboard().press("Control+F5");
+		}
 	}
 
 	@Then("^the \"(.+)\" (button|section|checkbox) should be displayed at \"(.+)\" (page)$")
@@ -104,9 +122,20 @@ public class CommonStepDefinitions {
 		Thread.sleep(wait * 1000L);
 	}
 
+	@Then("^I fillup the \"(.+)\" form with the following fields at \"(.+)\" page$")
+	public void iFillupTheFormWithTheFollowingFields(String formName, String pageName, DataTable table) {
+		Locator parent = controlLookup.getLookupForm(formName, pageName);
+		fillForm(table, parent);
+	}
+
 	@Then("^I perform advance search with the following fields$")
 	public void iFindTheCorrectAccordionUsingAdvancedSearch(DataTable table) {
 		Locator parent = this.commonPageObjects.Search_Container();
+		fillForm(table, parent);
+		commonPageObjects.Adv_Search_Submit.get().click();
+	}
+
+	private void fillForm(DataTable table, Locator parent) {
 		List<Map<String, String>> fieldInputModels = table.asMaps(String.class, String.class);
 		for (Map<String, String> fieldInputModel : fieldInputModels) {
 			String fieldName = fieldInputModel.get("Field_Name");
@@ -118,7 +147,6 @@ public class CommonStepDefinitions {
 					new LocatorAssertions.IsVisibleOptions().setTimeout(Configs.GLOBAL_EXPLICIT_WAIT));
 			controlActions.executeAction(actionType, element.getLocator(), fieldType, value);
 		}
-		commonPageObjects.Adv_Search_Submit.get().click();
 	}
 
 	@Then("^I perform search with \"(.+)\"")
@@ -136,30 +164,8 @@ public class CommonStepDefinitions {
 			element.click();
 		});
 		String responseText = response.text();
-		String value = extractValueByPath(responseText, jsonPath);
+		String value = DataUtils.extractValueByPath(responseText, jsonPath);
 		scenarioContext.setCustomValue(storeKey, value);
-	}
-
-	private String extractValueByPath(String json, String path) {
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			JsonNode node = mapper.readTree(json);
-			String[] parts = path.split("\\.");
-			for (String part : parts) {
-				if (part.contains("[") && part.contains("]")) {
-					String fieldName = part.substring(0, part.indexOf("["));
-					int index = Integer.parseInt(part.substring(part.indexOf("[") + 1, part.indexOf("]")));
-					node = fieldName.isEmpty() ? node.get(index) : node.get(fieldName).get(index);
-				} else {
-					node = node.get(part);
-				}
-				if (node == null || node.isMissingNode())
-					throw new RuntimeException("Path not found: " + path + " at part: " + part);
-			}
-			return node.isValueNode() ? node.asText() : node.toString();
-		} catch (Exception e) {
-			throw new RuntimeException("Failed to extract value from response: " + e.getMessage(), e);
-		}
 	}
 
 }

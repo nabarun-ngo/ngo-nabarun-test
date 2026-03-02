@@ -14,13 +14,13 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 import ngo.nabarun.test.ngo_nabarun_test.utils.CommonUtils;
+import ngo.nabarun.test.ngo_nabarun_test.utils.DataUtils;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -49,7 +49,7 @@ public class ControlActions {
      * @throws Exception if the action cannot be performed or is unknown
      */
     public void executeAction(String actionName, Locator locator, String elementType, String fieldValue) {
-        String resolvedValue = resolveValue(fieldValue);
+        String resolvedValue = DataUtils.resolveData(fieldValue, scenarioContext);
         logger.debug("Executing Action: {} on Element Type: {} with Value: {}", actionName, elementType, resolvedValue);
         switch (actionName.toUpperCase()) {
             case "ENTER" -> {
@@ -82,26 +82,6 @@ public class ControlActions {
                 throw new UnsupportedOperationException("Unknown action: " + actionName);
             }
         }
-    }
-
-    private String resolveValue(String input) {
-        if (input == null || !input.contains("{")) {
-            return input;
-        }
-        Pattern pattern = Pattern.compile("\\{\\s*(.*?)\\s*\\}");
-        Matcher matcher = pattern.matcher(input);
-        StringBuilder sb = new StringBuilder();
-        while (matcher.find()) {
-            String key = matcher.group(1).trim();
-            if (scenarioContext.containsCustomKey(key)) {
-                String val = scenarioContext.getCustomValue(key, String.class);
-                matcher.appendReplacement(sb, Matcher.quoteReplacement(val));
-            } else {
-                matcher.appendReplacement(sb, Matcher.quoteReplacement(matcher.group()));
-            }
-        }
-        matcher.appendTail(sb);
-        return sb.toString();
     }
 
     /*

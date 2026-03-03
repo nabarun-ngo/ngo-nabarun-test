@@ -3,6 +3,8 @@ package ngo.nabarun.test.ngo_nabarun_test.page_objects;
 import java.util.function.Supplier;
 
 import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.options.AriaRole;
+
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 
 public class HomePageObjects extends CommonPageObjects {
@@ -22,8 +24,7 @@ public class HomePageObjects extends CommonPageObjects {
 			case "Your Email (JoinUs)" -> Join_Email.get();
 			case "Your Mobile Number (JoinUs)" -> Join_Mobile.get();
 			default ->
-				findLocator("//*[normalize-space(text())='" + elementName + "']/parent::label/following-sibling::*",
-						parentContext, FindBy.XPATH);
+				scope(parentContext).getByRole(AriaRole.TEXTBOX, new Locator.GetByRoleOptions().setName(elementName));
 		};
 	}
 
@@ -33,6 +34,15 @@ public class HomePageObjects extends CommonPageObjects {
 			case "I agree with the Rules and Regulations of Nabarun" -> findLocator("#acceptance");
 			case "Your Mobile Number (JoinUs)" -> Join_Mobile.get();
 			default -> super.getTextMapping(elementName, parent);
+		};
+	}
+
+	@Override
+	public Locator getLinkMapping(String elementName, Locator parent) {
+		return switch (elementName) {
+			case "Join Us" ->
+				findLocator("nav").getByRole(AriaRole.LINK, new Locator.GetByRoleOptions().setName(elementName));
+			default -> super.getLinkMapping(elementName, parent);
 		};
 	}
 

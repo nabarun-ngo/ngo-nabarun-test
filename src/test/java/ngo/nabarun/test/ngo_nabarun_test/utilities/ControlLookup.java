@@ -3,8 +3,10 @@ package ngo.nabarun.test.ngo_nabarun_test.utilities;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.microsoft.playwright.*;
+import com.microsoft.playwright.Locator;
 
+import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
+import ngo.nabarun.test.ngo_nabarun_test.page_objects.AccountsPageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.CommonPageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.DashboardPageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.DonationPageObjects;
@@ -13,172 +15,106 @@ import ngo.nabarun.test.ngo_nabarun_test.page_objects.LoginPageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.ProfilePageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.WorkflowPageObjects;
 
+/**
+ * Central lookup for UI elements by page and element name.
+ * Uses a page registry so adding a new page only requires registering it here
+ * (one place).
+ * When {@code SELF_HEALING=true}, returned locators are wrapped in
+ * {@link SelfHealingLocator}
+ * for Healenium-like runtime healing on action failure.
+ */
 public class ControlLookup {
 
-	private final Map<String, Locator> accordionMapping = new HashMap<>();
-	private final LoginPageObjects loginPageObjects;
-	private final HomePageObjects homePageObjects;
-	private final DonationPageObjects donationPageObjects;
-	private final DashboardPageObjects dashboardPageObjects;
+	private final ScenarioContext scenarioContext;
 	private final CommonPageObjects commonPageObjects;
-	private final WorkflowPageObjects workflowPageObjects;
-	private final ProfilePageObjects profilePageObjects;
+	private final Map<String, CommonPageObjects> pageRegistry = new HashMap<>();
 
-	public ControlLookup(CommonPageObjects commonPageObjects, LoginPageObjects loginPageObjects,
-			HomePageObjects homePageObjects, DonationPageObjects donationPageObjects,
-			DashboardPageObjects dashboardPageObjects,WorkflowPageObjects workflowPageObjects,ProfilePageObjects profilePageObjects) {
+	public ControlLookup(ScenarioContext scenarioContext, CommonPageObjects commonPageObjects,
+			LoginPageObjects loginPageObjects, HomePageObjects homePageObjects,
+			DonationPageObjects donationPageObjects, DashboardPageObjects dashboardPageObjects,
+			WorkflowPageObjects workflowPageObjects, ProfilePageObjects profilePageObjects,
+			AccountsPageObjects accountsPageObjects) {
+		this.scenarioContext = scenarioContext;
 		this.commonPageObjects = commonPageObjects;
-		this.loginPageObjects = loginPageObjects;
-		this.homePageObjects = homePageObjects;
-		this.donationPageObjects = donationPageObjects;
-		this.dashboardPageObjects = dashboardPageObjects;
-		this.workflowPageObjects=workflowPageObjects;
-		this.profilePageObjects=profilePageObjects;
+		register("login", loginPageObjects);
+		register("home", homePageObjects);
+		register("dashboard", dashboardPageObjects);
+		register("donation", donationPageObjects);
+		register("tasks", workflowPageObjects);
+		register("requests", workflowPageObjects);
+		register("profile", profilePageObjects);
+		register("members", profilePageObjects);
+		register("accounts", accountsPageObjects);
+		register("transactions", accountsPageObjects);
 	}
 
-	private static final String LOGIN_PAGE = "login";
-	private static final String HOME_PAGE = "home";
-	private static final String DASHBOARD_PAGE = "dashboard";
-	private static final String DONATION_PAGE = "donation";
-	private static final String ACCORDION = "accordion";
-	private static final String WORKLIST_PAGE = "tasks";
-	private static final String REQUEST_PAGE = "request";
-	private static final String PROFILE_PAGE = "profile";
+	/**
+	 * Register a page so steps can use "at \"PageName\" page". Add new pages here.
+	 */
+	private void register(String pageName, CommonPageObjects pageObjects) {
+		pageRegistry.put(pageName.toLowerCase(), pageObjects);
+	}
 
-	
-
-	public Locator getLookupElement(String elementName, String elementType, String pageName, String pageType) {
-		Locator parent = null;
-		if (pageType.equalsIgnoreCase("accordion")) {
-			parent = accordionMapping.get(pageName);
-			pageName = ACCORDION;
+	/**
+	 * Returns a self-healing locator wrapper. Use
+	 * {@link SelfHealingLocator#getLocator()} when
+	 * you need a raw {@link Locator} (e.g. for ControlActions or assertions).
+	 */
+	public SelfHealingLocator getLookupElement(String elementName, String elementType, String pageName) {
+		if (pageName == null) {
+			throw new RuntimeException("PageName cannot be null");
 		}
-		return switch (elementType.toLowerCase()) {
-		case "button" -> getButtonLookUp(pageName, elementName, parent);
-		case "link" -> getLinkLookUp(pageName, elementName, parent);
-		case "text" -> getTextLookUp(pageName, elementName, parent);
-		case "textbox" -> getTextBoxLookUp(pageName, elementName, parent, false);
-		case "dropdown" -> getDropdownLookUp(pageName, elementName, parent);
-		case "radio" -> getRadioLookUp(pageName, elementName, parent);
-		case "datepicker" -> getDatePickerLookUp(pageName, elementName, parent);
-		case "textarea" -> getTextBoxLookUp(pageName, elementName, parent, true);
-		case "fileinput" -> getFileInputLookUp(pageName, elementName, parent);
-		default -> throw new IllegalArgumentException("Unknown element type: " + elementType);
+		return getLookupElement(elementName, elementType, pageName, null);
+	}
+
+	/**
+	 * Returns a self-healing locator wrapper. Use
+	 * {@link SelfHealingLocator#getLocator()} when
+	 * you need a raw {@link Locator} (e.g. for ControlActions or assertions).
+	 */
+	public SelfHealingLocator getLookupElement(String elementName, String elementType, Locator parent) {
+		if (parent == null) {
+			throw new RuntimeException("Parent cannot be null");
+		}
+		return getLookupElement(elementName, elementType, null, parent);
+	}
+
+	/**
+	 * Returns a self-healing locator wrapper. Use
+	 * {@link SelfHealingLocator#getLocator()} when
+	 * you need a raw {@link Locator} (e.g. for ControlActions or assertions).
+	 */
+	private SelfHealingLocator getLookupElement(String elementName, String elementType, String pageName,
+			Locator parent) {
+		CommonPageObjects pageObj = pageName == null ? commonPageObjects : pageRegistry.get(pageName.toLowerCase());
+		if (pageObj == null) {
+			throw new RuntimeException("Unknown page: " + pageName + ". Register it in ControlLookup#register().");
+		}
+		Locator locator = switch (elementType.toLowerCase()) {
+			case "button" -> pageObj.getButtonMapping(elementName, parent);
+			case "link" -> pageObj.getLinkMapping(elementName, parent);
+			case "text" -> pageObj.getTextMapping(elementName, parent);
+			case "section" -> pageObj.getTextMapping(elementName, parent);
+			case "textbox" -> pageObj.getTextBoxMapping(elementName, parent, false);
+			case "dropdown", "multiselect" -> pageObj.getDropdownMapping(elementName, parent);
+			case "radio" -> pageObj.getRadioMapping(elementName, parent);
+			case "datepicker" -> pageObj.getDatePickerMapping(elementName, parent);
+			case "textarea" -> pageObj.getTextBoxMapping(elementName, parent, true);
+			case "fileinput" -> pageObj.getFileInputMapping(elementName, parent);
+			case "checkbox" -> pageObj.getCheckboxMapping(elementName, parent);
+			case "timepicker" -> pageObj.getTimePickerMapping(elementName, parent);
+			default -> throw new IllegalArgumentException("Unknown element type: " + elementType);
 		};
+		return new SelfHealingLocator(
+				scenarioContext.getPage(), parent, locator, elementType, elementName);
 	}
 
-	private Locator getFileInputLookUp(String pageName, String elementName, Locator parentContext) {
-		return switch (pageName.toLowerCase()) {
-		case ACCORDION -> commonPageObjects.getFileInputMapping(elementName, parentContext);
-		case HOME_PAGE -> homePageObjects.getFileInputMapping(elementName, parentContext);
-		case LOGIN_PAGE -> loginPageObjects.getFileInputMapping(elementName, parentContext);
-		case DASHBOARD_PAGE -> dashboardPageObjects.getFileInputMapping(elementName, parentContext);
-		case DONATION_PAGE -> donationPageObjects.getFileInputMapping(elementName, parentContext);
-		case WORKLIST_PAGE,REQUEST_PAGE -> workflowPageObjects.getFileInputMapping(elementName, parentContext);
-		case PROFILE_PAGE -> profilePageObjects.getFileInputMapping(elementName, parentContext);
-
-		default -> throw new RuntimeException("Invalid page " + pageName);
-		};
-	}
-
-	private Locator getDatePickerLookUp(String pageName, String elementName, Locator parentContext) {
-		return switch (pageName.toLowerCase()) {
-		case ACCORDION -> commonPageObjects.getDatePickerMapping(elementName, parentContext);
-		case HOME_PAGE -> homePageObjects.getDatePickerMapping(elementName, parentContext);
-		case LOGIN_PAGE -> loginPageObjects.getDatePickerMapping(elementName, parentContext);
-		case DASHBOARD_PAGE -> dashboardPageObjects.getDatePickerMapping(elementName, parentContext);
-		case DONATION_PAGE -> donationPageObjects.getDatePickerMapping(elementName, parentContext);
-		case WORKLIST_PAGE,REQUEST_PAGE -> workflowPageObjects.getDatePickerMapping(elementName, parentContext);
-		case PROFILE_PAGE -> profilePageObjects.getDatePickerMapping(elementName, parentContext);
-		default -> throw new RuntimeException("Invalid page " + pageName);
-		};
-	}
-
-	private Locator getRadioLookUp(String pageName, String elementName, Locator parentContext) {
-		return switch (pageName.toLowerCase()) {
-		case ACCORDION -> commonPageObjects.getRadioMapping(elementName, parentContext);
-		case HOME_PAGE -> homePageObjects.getRadioMapping(elementName, parentContext);
-		case LOGIN_PAGE -> loginPageObjects.getRadioMapping(elementName, parentContext);
-		case DASHBOARD_PAGE -> dashboardPageObjects.getRadioMapping(elementName, parentContext);
-		case DONATION_PAGE -> donationPageObjects.getRadioMapping(elementName, parentContext);
-		case WORKLIST_PAGE,REQUEST_PAGE -> workflowPageObjects.getRadioMapping(elementName, parentContext);
-		case PROFILE_PAGE -> profilePageObjects.getRadioMapping(elementName, parentContext);
-		default -> throw new RuntimeException("Invalid page " + pageName);
-		};
-	}
-
-	private Locator getDropdownLookUp(String pageName, String elementName, Locator parentContext) {
-		return switch (pageName.toLowerCase()) {
-		case ACCORDION -> commonPageObjects.getDropdownMapping(elementName, parentContext);
-		case HOME_PAGE -> homePageObjects.getDropdownMapping(elementName, parentContext);
-		case LOGIN_PAGE -> loginPageObjects.getDropdownMapping(elementName, parentContext);
-		case DASHBOARD_PAGE -> dashboardPageObjects.getDropdownMapping(elementName, parentContext);
-		case DONATION_PAGE -> donationPageObjects.getDropdownMapping(elementName, parentContext);
-		case WORKLIST_PAGE,REQUEST_PAGE -> workflowPageObjects.getDropdownMapping(elementName, parentContext);
-		case PROFILE_PAGE -> profilePageObjects.getDropdownMapping(elementName, parentContext);
-		default -> throw new RuntimeException("Invalid page " + pageName);
-		};
-	}
-
-	private Locator getTextBoxLookUp(String pageName, String elementName, Locator parentContext,
-			boolean isTextArea) {
-		return switch (pageName.toLowerCase()) {
-		case ACCORDION -> commonPageObjects.getTextBoxMapping(elementName, parentContext, isTextArea);
-		case HOME_PAGE -> homePageObjects.getTextBoxMapping(elementName, parentContext, isTextArea);
-		case LOGIN_PAGE -> loginPageObjects.getTextBoxMapping(elementName, parentContext, isTextArea);
-		case DASHBOARD_PAGE -> dashboardPageObjects.getTextBoxMapping(elementName, parentContext, isTextArea);
-		case DONATION_PAGE -> donationPageObjects.getTextBoxMapping(elementName, parentContext, isTextArea);
-		case WORKLIST_PAGE, REQUEST_PAGE -> workflowPageObjects.getTextBoxMapping(elementName, parentContext,isTextArea);
-        case PROFILE_PAGE -> profilePageObjects.getTextBoxMapping(elementName, parentContext,isTextArea);
-		default -> throw new RuntimeException("Invalid page " + pageName);
-		};
-	}
-
-	private Locator getTextLookUp(String pageName, String elementName, Locator parentContext) {
-		return switch (pageName.toLowerCase()) {
-		case ACCORDION -> commonPageObjects.getTextMapping(elementName, parentContext);
-		case HOME_PAGE -> homePageObjects.getTextMapping(elementName, parentContext);
-		case LOGIN_PAGE -> loginPageObjects.getTextMapping(elementName, parentContext);
-		case DASHBOARD_PAGE -> dashboardPageObjects.getTextMapping(elementName, parentContext);
-		case DONATION_PAGE -> donationPageObjects.getTextMapping(elementName, parentContext);
-		case WORKLIST_PAGE, REQUEST_PAGE -> workflowPageObjects.getTextMapping(elementName, parentContext);
-        case PROFILE_PAGE -> profilePageObjects.getTextMapping(elementName, parentContext);
-		default -> throw new RuntimeException("Invalid page " + pageName);
-		};
-	}
-
-	public Locator getLinkLookUp(String pageName, String elementName, Locator parentContext) {
-		return switch (pageName.toLowerCase()) {
-		case ACCORDION -> commonPageObjects.getLinkMapping(elementName, parentContext);
-		case HOME_PAGE -> homePageObjects.getLinkMapping(elementName, parentContext);
-		case LOGIN_PAGE -> loginPageObjects.getLinkMapping(elementName, parentContext);
-		case DASHBOARD_PAGE -> dashboardPageObjects.getLinkMapping(elementName, parentContext);
-		case DONATION_PAGE -> donationPageObjects.getLinkMapping(elementName, parentContext);
-		case WORKLIST_PAGE, REQUEST_PAGE -> workflowPageObjects.getLinkMapping(elementName, parentContext);
-        case PROFILE_PAGE -> profilePageObjects.getLinkMapping(elementName, parentContext);
-		default -> throw new RuntimeException("Invalid page " + pageName);
-		};
-	}
-
-	public Locator getButtonLookUp(String pageName, String elementName, Locator parentContext) {
-		return switch (pageName.toLowerCase()) {
-		case ACCORDION -> commonPageObjects.getButtonMapping(elementName, parentContext);
-		case HOME_PAGE -> homePageObjects.getButtonMapping(elementName, parentContext);
-		case LOGIN_PAGE -> loginPageObjects.getButtonMapping(elementName, parentContext);
-		case DASHBOARD_PAGE -> dashboardPageObjects.getButtonMapping(elementName, parentContext);
-		case DONATION_PAGE -> donationPageObjects.getButtonMapping(elementName, parentContext);
-		case WORKLIST_PAGE, REQUEST_PAGE -> workflowPageObjects.getButtonMapping(elementName, parentContext);
-        case PROFILE_PAGE -> profilePageObjects.getButtonMapping(elementName, parentContext);
-		default -> throw new RuntimeException("Invalid page " + pageName);
-		};
-	}
-
-	public void setAccordionMapping(String accordionName, Locator locator) {
-		accordionMapping.put(accordionName, locator);
-	}
-	
-	public Locator getAccordionMapping(String accordionName) {
-		return accordionMapping.get(accordionName);
+	public Locator getLookupForm(String formName, String pageName) {
+		CommonPageObjects pageObj = pageName == null ? commonPageObjects : pageRegistry.get(pageName.toLowerCase());
+		if (pageObj == null) {
+			throw new RuntimeException("Unknown page: " + pageName + ". Register it in ControlLookup#register().");
+		}
+		return pageObj.getFormMapping(formName, null);
 	}
 
 }

@@ -2,6 +2,9 @@ package ngo.nabarun.test.ngo_nabarun_test.step_definations;
 
 import java.util.List;
 
+import com.auth0.client.mgmt.types.ListUsersByEmailRequestParameters;
+import com.auth0.client.mgmt.types.UpdateUserRequestContent;
+import com.auth0.client.mgmt.types.UserResponseSchema;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
@@ -10,24 +13,25 @@ import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext.ContextKeys;
 import ngo.nabarun.test.ngo_nabarun_test.models.api.User;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.LoginPageObjects;
-import ngo.nabarun.test.ngo_nabarun_test.utilities.ElementHelper;
+import ngo.nabarun.test.ngo_nabarun_test.utilities.Auth0Client;
+import ngo.nabarun.test.ngo_nabarun_test.utilities.ControlActions;
+import ngo.nabarun.test.ngo_nabarun_test.utils.CommonUtils;
+import ngo.nabarun.test.ngo_nabarun_test.utils.DataUtils;
 
 public class LoginStepDefinations {
 
 	private final LoginPageObjects pageObject;
-    private final DataProvider dataProvider;
+	private final DataProvider dataProvider;
 	private final ScenarioContext scenarioContext;
-	private final ElementHelper elementHelper;
-    private final ProfileStepDefinations profileStepDefinations;
+	private final ControlActions controlActions;
 
-    public LoginStepDefinations(ScenarioContext scenarioContext,ElementHelper elementHelper, DataProvider dataProvider,LoginPageObjects pageObject,
-			ProfileStepDefinations profileStepDefinations) {
+	public LoginStepDefinations(ScenarioContext scenarioContext, ControlActions ca,
+			DataProvider dataProvider, LoginPageObjects pageObject) {
 		this.pageObject = pageObject;
 		this.dataProvider = dataProvider;
 		this.scenarioContext = scenarioContext;
-		this.elementHelper = elementHelper;
-        this.profileStepDefinations = profileStepDefinations;
-    }
+		this.controlActions = ca;
+	}
 
 	@Given("^I login with \"(.+)\" (user|role) using (Password|OTP) option$")
 	public void i_performed_login_with_an_user_having_role(String loginId, String loginIdType, String loginOption)
@@ -43,73 +47,71 @@ public class LoginStepDefinations {
 			email = users.stream().findFirst()
 					.orElseThrow(() -> new RuntimeException("Unable to find users with role " + loginId)).getEmail();
 		} else {
-			email = loginId;
-		}
-
-		if (email.equalsIgnoreCase("{NewUserEmail}")) {
-			email = scenarioContext.get(ContextKeys.New_User_Email, String.class);
+			email = DataUtils.resolveData(loginId, scenarioContext);
 		}
 
 		if (loginOption.equalsIgnoreCase("Password")) {
-			elementHelper.click(pageObject.ContinueWithPasswordButton.get());
+			controlActions.click(pageObject.ContinueWithPasswordButton.get());
 			pageObject.LoginEmail.get().fill(email);
-			elementHelper.click(pageObject.LoginSubmit.get());
+			controlActions.click(pageObject.LoginSubmit.get());
 			pageObject.LoginPassword.get().fill(password);
-			elementHelper.click(pageObject.LoginSubmit.get());
+			controlActions.click(pageObject.LoginSubmit.get());
 		} else {
 			throw new RuntimeException("LoginOption '" + loginOption + "' is not allowed.");
 		}
 	}
 
-	@And("^I handle (user consent|change password|complete profile|all conditional post login) screen if it appeared$")
-	public void iCheckIfUserConsentScreenAppearedOrNot(String screen) throws Throwable {
-		switch (screen.toLowerCase()) {
-		case "user consent":
-			handle_user_consent_screen_if_it_appeared();
-			break;
-		case "change password":
-			handle_change_password_screen_if_it_appeared();
-			break;
-		case "complete profile":
-			handle_complete_profile_screen_if_it_appeared();
-			break;
-		case "all conditional post login":
-			handle_user_consent_screen_if_it_appeared();
-			handle_change_password_screen_if_it_appeared();
-			handle_complete_profile_screen_if_it_appeared();
-			break;
-		default:
-			throw new RuntimeException("Screen '" + screen + "' is not allowed.");
+	@And("^I handle (user consent|change password|all conditional post login) screen(| if needed)$")
+	public void iCheckIfUserConsentScreenAppearedOrNot(String screen, String condition) throws Exception {
+		boolean expectedToAppear = condition.trim().equalsIgnoreCase("if needed") ? false : true;
+		switch (screen.trim().toLowerCase()) {
+			case "user consent":
+				handle_user_consent_screen(expectedToAppear);
+				break;
+			case "change password":
+				handle_change_password_screen(expectedToAppear);
+				break;
+			case "all conditional post login":
+				handle_change_password_screen(expectedToAppear);
+				handle_user_consent_screen(expectedToAppear);
+				break;
+			default:
+				throw new RuntimeException("Screen '" + screen + "' is not allowed.");
 		}
 	}
 
-	private void handle_user_consent_screen_if_it_appeared() throws Exception {
-		// Handling consent screen if it appeared
-		if (elementHelper.isElementPresent(pageObject.AcceptConsentLocator, 5)) {
-			elementHelper.click(pageObject.AcceptConsent.get());
+	@And("^I change \"(.+)\" user's (password to default password|email as verified)$")
+	public void iChangeUsersPasswordToDefaultPassword(String email, String action) throws Throwable {
+		email = DataUtils.resolveData(email, scenarioContext);
+		UserResponseSchema user = Auth0Client.managementAPI().users()
+				.listUsersByEmail(ListUsersByEmailRequestParameters.builder().email(email).build()).getFirst();
+		if (action.equalsIgnoreCase("password to default password")) {
+			Auth0Client.managementAPI().users().update(user.getUserId().get(),
+					UpdateUserRequestContent.builder().password(Configs.TEST_DEFAULTPASSWORD).build());
+		} else if (action.equalsIgnoreCase("email as verified")) {
+			Auth0Client.managementAPI().users().update(user.getUserId().get(),
+					UpdateUserRequestContent.builder().emailVerified(true).build());
+		} else {
+			throw new RuntimeException("Action '" + action + "' is not allowed.");
+		}
+		CommonUtils.sleep(5);
+	}
+
+	private void handle_user_consent_screen(boolean isGuranteed) throws Exception {
+		if (isGuranteed || controlActions.isElementPresent(pageObject.AcceptConsentLocator, 2)) {
+			pageObject.AcceptConsent.get().scrollIntoViewIfNeeded();
+			controlActions.click(pageObject.AcceptConsent.get());
 		}
 	}
 
-	private void handle_change_password_screen_if_it_appeared() throws Exception {
-		// Handling change password screen if it appeared
-		if (elementHelper.isElementPresent(pageObject.PasswordChangedTxtLocator, 15)) {
+	private void handle_change_password_screen(boolean isGuranteed) throws Exception {
+		if (isGuranteed || controlActions.isElementPresent(pageObject.PasswordChangedTxtLocator, 2)) {
 			pageObject.NewPassword.get().fill(Configs.TEST_DEFAULTPASSWORD);
 			pageObject.ConfirmNewPassword.get().fill(Configs.TEST_DEFAULTPASSWORD);
-			elementHelper.click(pageObject.ChangePasswordSubmit.get());
-			Thread.sleep(10000); // wait for the change password to complete
+			controlActions.click(pageObject.ChangePasswordSubmit.get());
+			Thread.sleep(5000); // wait for the change password to complete
 			scenarioContext.getPage().reload();
 			Thread.sleep(5000);
-			i_performed_login_with_an_user_having_role(
-					scenarioContext.get(ContextKeys.Login_Id, String.class),
-					scenarioContext.get(ContextKeys.Login_Id_Type, String.class),
-					scenarioContext.get(ContextKeys.Login_Option, String.class));
-		}
-	}
-
-	private void handle_complete_profile_screen_if_it_appeared() throws Exception {
-		// Handling complete profile screen if it appeared
-		if (elementHelper.isElementPresent(pageObject.PageHeader("COMPLETE PROFILE"), 10)) {
-			profileStepDefinations.fillCompleteProfileForm();
 		}
 	}
 

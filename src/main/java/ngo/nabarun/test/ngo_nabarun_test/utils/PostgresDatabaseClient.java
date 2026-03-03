@@ -21,8 +21,8 @@ public class PostgresDatabaseClient implements IDatabaseClient {
     public PostgresDatabaseClient() {
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl(Configs.DB_URL);
-        config.setUsername(Configs.DB_USERNAME);
-        config.setPassword(Configs.DB_PASSWORD);
+        // config.setUsername(Configs.DB_USERNAME);
+        // config.setPassword(Configs.DB_PASSWORD);
         config.setDriverClassName("org.postgresql.Driver");
         this.dataSource = new HikariDataSource(config);
         this.objectMapper = new ObjectMapper();
@@ -72,7 +72,7 @@ public class PostgresDatabaseClient implements IDatabaseClient {
         List<T> results = new ArrayList<>();
         logger.info("Executing query: " + query);
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query.toString())) {
+                PreparedStatement stmt = conn.prepareStatement(query.toString())) {
             setParameters(stmt, params);
             try (ResultSet rs = stmt.executeQuery()) {
                 ResultSetMetaData metaData = rs.getMetaData();
@@ -111,7 +111,7 @@ public class PostgresDatabaseClient implements IDatabaseClient {
         }
 
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query.toString())) {
+                PreparedStatement stmt = conn.prepareStatement(query.toString())) {
             setParameters(stmt, params);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -125,7 +125,7 @@ public class PostgresDatabaseClient implements IDatabaseClient {
         List<Map<String, Object>> results = new ArrayList<>();
         logger.info("Executing raw query: " + sql);
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
             if (params != null) {
                 setParameters(stmt, params);
             }
@@ -151,7 +151,7 @@ public class PostgresDatabaseClient implements IDatabaseClient {
     public boolean executeUpdate(String sql, List<Object> params) {
         logger.info("Executing raw update: " + sql);
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
             if (params != null) {
                 setParameters(stmt, params);
             }

@@ -5,26 +5,27 @@ import ngo.nabarun.test.ngo_nabarun_test.helpers.DataProvider;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext.ContextKeys;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.WorkflowPageObjects;
-import ngo.nabarun.test.ngo_nabarun_test.utilities.ElementHelper;
+import ngo.nabarun.test.ngo_nabarun_test.utilities.ControlActions;
 
 public class WorkflowStepDefinitions {
 
 	private final ScenarioContext scenarioContext;
-	private final ElementHelper elementHelper;
+	private final ControlActions controlActions;
 	private final WorkflowPageObjects workflowPageObjects;
 
-	public WorkflowStepDefinitions(ScenarioContext scenarioContext, ElementHelper elementHelper, DataProvider dp, WorkflowPageObjects workflowPageObjects) {
-		this.scenarioContext=scenarioContext;
-		this.elementHelper=elementHelper;
-		this.workflowPageObjects=workflowPageObjects;
+	public WorkflowStepDefinitions(ScenarioContext scenarioContext, ControlActions ca, DataProvider dp,
+			WorkflowPageObjects workflowPageObjects) {
+		this.scenarioContext = scenarioContext;
+		this.controlActions = ca;
+		this.workflowPageObjects = workflowPageObjects;
 	}
 
 	@Then("^I search the created request under \"([^\"]*)\" tab$")
 	public void iSearchTheCreatedRequestUnderTab(String tab) throws Throwable {
 		String requestId = scenarioContext.get(ContextKeys.RequestId, String.class);
-		elementHelper.scrollToTop();
-		elementHelper.click(workflowPageObjects.getButtonMapping("Advanced Search", null));
+		controlActions.scrollToTop();
+		controlActions.click(workflowPageObjects.getButtonMapping("Advanced Search", null));
 		workflowPageObjects.ADVSearch_RequestId.get().fill(requestId);
-		elementHelper.click(workflowPageObjects.getButtonMapping("Search", null));
+		controlActions.click(workflowPageObjects.getButtonMapping("Search", null));
 	}
 }

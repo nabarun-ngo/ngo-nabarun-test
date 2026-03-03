@@ -1,9 +1,12 @@
 package ngo.nabarun.test.ngo_nabarun_test.step_definations;
 
 import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.Page;
+import com.microsoft.playwright.Response;
 import com.microsoft.playwright.assertions.LocatorAssertions;
 
 import io.cucumber.datatable.DataTable;
+import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
@@ -11,6 +14,7 @@ import ngo.nabarun.test.ngo_nabarun_test.page_objects.CommonPageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ControlLookup;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.SelfHealingLocator;
 import ngo.nabarun.test.ngo_nabarun_test.utils.CommonUtils;
+import ngo.nabarun.test.ngo_nabarun_test.utils.DataUtils;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ControlActions;
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 import java.util.List;
@@ -30,14 +34,14 @@ public class AccordionStepDefinitions {
     private final CommonPageObjects commonPageObjects;
     private final ControlActions controlActions;
     private Locator openAccordion;
-    // private ScenarioContext scenarioContext;
+    private ScenarioContext scenarioContext;
 
     public AccordionStepDefinitions(ControlActions controlActions,
             CommonPageObjects commonPageObjects, ControlLookup controlLookup, ScenarioContext scenarioContext) {
         this.controlActions = controlActions;
         this.commonPageObjects = commonPageObjects;
         this.controlLookup = controlLookup;
-        // this.scenarioContext = scenarioContext;
+        this.scenarioContext = scenarioContext;
     }
 
     @Then("^I open the (\\d+)(th|rd|st|nd) accordion$")
@@ -75,14 +79,38 @@ public class AccordionStepDefinitions {
         fillAccordionFields(parent, dataTable);
     }
 
-    @Then("^I click \"(.+)\" button in the opened accordion$")
-    public void iClickButtonInTheAccordionRowContainingAtAccordion(String buttonText) {
-        validateAccordion();
-        Locator parent = this.openAccordion;
-        parent.waitFor();
-        Locator btn = this.commonPageObjects.getButtonMapping(buttonText, parent);
-        btn.waitFor();
-        controlActions.click(btn);
+    @Then("^I click \"(.+)\" button in the (opened|create) accordion$")
+    public void iClickButtonInTheAccordionRowContainingAtAccordion(String buttonText, String accordionType) {
+        if (accordionType.equals("opened")) {
+            validateAccordion();
+            Locator parent = this.openAccordion;
+            parent.waitFor();
+            Locator btn = this.commonPageObjects.getButtonMapping(buttonText, parent);
+            btn.waitFor();
+            controlActions.click(btn);
+        } else if (accordionType.equals("create")) {
+            Locator createPanel = commonPageObjects.Create_Accordion.get();
+            createPanel.waitFor();
+            Locator btn = this.commonPageObjects.getButtonMapping(buttonText, createPanel);
+            btn.waitFor();
+            controlActions.click(btn);
+        }
+    }
+
+    @Given("^I click \"(.+)\" button in the (opened|create) accordion and collect \"(.+)\" from response of \"(.+)\" and store as \"(.+)\"")
+    public void i_click_and_collect(String buttonText, String accordionType, String jsonPath,
+            String urlPattern, String storeKey) {
+
+        String url = DataUtils.resolveData(urlPattern, scenarioContext);
+
+        Page page = scenarioContext.getPage();
+        Response response = page.waitForResponse(res -> res.url().contains(url), () -> {
+            iClickButtonInTheAccordionRowContainingAtAccordion(buttonText, accordionType);
+        });
+        String responseText = response.text();
+        String value = DataUtils.extractValueByPath(responseText, jsonPath);
+        logger.info("Collected value of " + storeKey + " from " + urlPattern + " is: " + value);
+        scenarioContext.setCustomValue(storeKey, value);
     }
 
     private void validateAccordion() {

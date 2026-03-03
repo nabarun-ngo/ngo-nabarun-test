@@ -17,6 +17,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * Utility class for data generation and placeholder replacement.
  */
@@ -25,6 +28,7 @@ public class DataUtils {
 	private static final SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy");
 	private static final SimpleDateFormat DEFAULT_TIME_FORMAT = new SimpleDateFormat("HH:mm:ss");
 	private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+	private static final Logger logger = LogManager.getLogger(DataUtils.class);
 
 	public static String firstDayOfCurrentMonth() {
 		LocalDate firstDay = LocalDate.now().withDayOfMonth(1);
@@ -315,7 +319,9 @@ public class DataUtils {
 	 * @return The fully resolved string
 	 */
 	public static String resolveData(String input, ScenarioContext context) {
+		logger.info("Resolving data for input: {}", input);
 		String step1 = replacePlaceholders(input);
+		logger.info("Resolved data for input: {}", step1);
 		return resolveVariables(step1, context);
 	}
 

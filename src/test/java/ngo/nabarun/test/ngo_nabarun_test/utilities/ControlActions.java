@@ -61,6 +61,7 @@ public class ControlActions {
                     case "dropdown" -> selectMatOption(locator, resolvedValue);
                     case "multiselect", "dropdown-multi" -> selectMatOptions(locator, resolvedValue);
                     case "datepicker" -> selectMatDate(locator, resolvedValue);
+                    case "radio" -> clickRadioOption(locator, resolvedValue);
                     default -> {
                         logger.error("Cannot SELECT on unknown element type: {}", elementType);
                         throw new IllegalArgumentException("Cannot SELECT on element type: " + elementType);
@@ -318,8 +319,14 @@ public class ControlActions {
      * Checks if an element is present using a CSS/XPath selector.
      */
     public boolean isElementPresent(String selector, int timeout) {
-        Locator locator = scenarioContext.getPage().locator(selector);
-        return isElementPresent(locator, timeout);
+        try {
+            Page page = this.scenarioContext.getPage();
+            page.waitForSelector(selector, new Page.WaitForSelectorOptions().setTimeout(timeout * 1000));
+            Locator locator = page.locator(selector);
+            return locator.isVisible();
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private String getMonthCode(int calendarMonth) {

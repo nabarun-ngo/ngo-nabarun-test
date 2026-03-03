@@ -1,6 +1,7 @@
 package ngo.nabarun.test.ngo_nabarun_test.page_objects;
 
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.AriaRole;
@@ -21,7 +22,9 @@ public class CommonPageObjects extends BasePageObjects implements ICommonPageObj
 
 	@Override
 	public Locator PageHeader(String title) {
-		return findLocator("//app-page-title//h1[normalize-space(text())=\"" + title + "\"]");
+		return page().locator("app-page-title h1")
+				.filter(new Locator.FilterOptions()
+						.setHasText(Pattern.compile(title, Pattern.CASE_INSENSITIVE)));
 	}
 
 	@Override
@@ -69,8 +72,9 @@ public class CommonPageObjects extends BasePageObjects implements ICommonPageObj
 
 	@Override
 	public Locator getButtonMapping(String elementName, Locator parent) {
-		return switch (elementName) {
-			case "Add Icon" -> AngularMaterial.MatIcon(scope(parent), "add");
+		System.out.println("Element Name: " + elementName);
+		return switch (elementName.toLowerCase()) {
+			case "add icon" -> AngularMaterial.MatIcon(scope(parent), "add");
 			default ->
 				scope(parent).getByRole(AriaRole.BUTTON, new Locator.GetByRoleOptions().setName(elementName));
 		};
@@ -101,10 +105,8 @@ public class CommonPageObjects extends BasePageObjects implements ICommonPageObj
 
 	@Override
 	public Locator getRadioMapping(String elementName, Locator parent) {
-		return switch (elementName) {
-			default ->
-				super.scope(parent).getByRole(AriaRole.RADIO, new Locator.GetByRoleOptions().setName(elementName));
-		};
+		return findLocator("//*[normalize-space(text())='" + elementName + "']/following-sibling::*//mat-radio-group",
+				parent, FindBy.XPATH);
 	}
 
 	@Override

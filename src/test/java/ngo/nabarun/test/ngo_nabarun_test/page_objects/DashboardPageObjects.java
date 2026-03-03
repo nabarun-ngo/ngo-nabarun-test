@@ -23,7 +23,7 @@ public class DashboardPageObjects extends CommonPageObjects {
 	public Locator getTextMapping(String elementName, Locator parent) {
 		return switch (elementName) {
 			case "Donations" -> findLocator("#donationTile");
-			case "Accounts" -> findLocator("#accountsTile");
+			case "Accounts" -> findLocator("#accountTile");
 			case "Expenses" -> findLocator("#expenseTile");
 			case "Tasks" -> findLocator("#worklistTile");
 			case "Members" -> findLocator("#memberTile");

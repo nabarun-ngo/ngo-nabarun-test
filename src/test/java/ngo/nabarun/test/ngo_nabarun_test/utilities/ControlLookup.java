@@ -6,6 +6,7 @@ import java.util.Map;
 import com.microsoft.playwright.Locator;
 
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
+import ngo.nabarun.test.ngo_nabarun_test.page_objects.AccountsPageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.CommonPageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.DashboardPageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.DonationPageObjects;
@@ -31,7 +32,8 @@ public class ControlLookup {
 	public ControlLookup(ScenarioContext scenarioContext, CommonPageObjects commonPageObjects,
 			LoginPageObjects loginPageObjects, HomePageObjects homePageObjects,
 			DonationPageObjects donationPageObjects, DashboardPageObjects dashboardPageObjects,
-			WorkflowPageObjects workflowPageObjects, ProfilePageObjects profilePageObjects) {
+			WorkflowPageObjects workflowPageObjects, ProfilePageObjects profilePageObjects,
+			AccountsPageObjects accountsPageObjects) {
 		this.scenarioContext = scenarioContext;
 		this.commonPageObjects = commonPageObjects;
 		register("login", loginPageObjects);
@@ -39,8 +41,11 @@ public class ControlLookup {
 		register("dashboard", dashboardPageObjects);
 		register("donation", donationPageObjects);
 		register("tasks", workflowPageObjects);
-		register("request", workflowPageObjects);
+		register("requests", workflowPageObjects);
 		register("profile", profilePageObjects);
+		register("members", profilePageObjects);
+		register("accounts", accountsPageObjects);
+		register("transactions", accountsPageObjects);
 	}
 
 	/**
@@ -91,7 +96,7 @@ public class ControlLookup {
 			case "text" -> pageObj.getTextMapping(elementName, parent);
 			case "section" -> pageObj.getTextMapping(elementName, parent);
 			case "textbox" -> pageObj.getTextBoxMapping(elementName, parent, false);
-			case "dropdown" -> pageObj.getDropdownMapping(elementName, parent);
+			case "dropdown", "multiselect" -> pageObj.getDropdownMapping(elementName, parent);
 			case "radio" -> pageObj.getRadioMapping(elementName, parent);
 			case "datepicker" -> pageObj.getDatePickerMapping(elementName, parent);
 			case "textarea" -> pageObj.getTextBoxMapping(elementName, parent, true);

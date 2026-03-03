@@ -68,8 +68,7 @@ public class CommonStepDefinitions {
 	@When("^I (enter|select|click|upload) \"([^\"]*)\" on \"([^\"]*)\" (textbox|dropdown|radio|datepicker|textarea|fileinput|multiselect) at \"([^\"]*)\" (page)$")
 	public void iEnterOnTextboxAtAccordion(String actionName, String rawValue, String elementName, String elementType,
 			String pageName, String pageType) throws Throwable {
-		String effectiveType = "multiselect".equalsIgnoreCase(elementType) ? "dropdown" : elementType;
-		SelfHealingLocator element = controlLookup.getLookupElement(elementName, effectiveType, pageName);
+		SelfHealingLocator element = controlLookup.getLookupElement(elementName, elementType, pageName);
 		controlActions.executeAction(actionName, element.getLocator(), elementType, rawValue);
 	}
 

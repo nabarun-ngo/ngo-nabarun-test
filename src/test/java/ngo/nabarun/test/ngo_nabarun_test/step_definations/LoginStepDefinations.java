@@ -1,14 +1,10 @@
 package ngo.nabarun.test.ngo_nabarun_test.step_definations;
 
-import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
-
 import java.util.List;
 
 import com.auth0.client.mgmt.types.ListUsersByEmailRequestParameters;
 import com.auth0.client.mgmt.types.UpdateUserRequestContent;
 import com.auth0.client.mgmt.types.UserResponseSchema;
-import com.microsoft.playwright.assertions.LocatorAssertions;
-
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
@@ -28,16 +24,13 @@ public class LoginStepDefinations {
 	private final DataProvider dataProvider;
 	private final ScenarioContext scenarioContext;
 	private final ControlActions controlActions;
-	private final ProfileStepDefinations profileStepDefinations;
 
 	public LoginStepDefinations(ScenarioContext scenarioContext, ControlActions ca,
-			DataProvider dataProvider, LoginPageObjects pageObject,
-			ProfileStepDefinations profileStepDefinations) {
+			DataProvider dataProvider, LoginPageObjects pageObject) {
 		this.pageObject = pageObject;
 		this.dataProvider = dataProvider;
 		this.scenarioContext = scenarioContext;
 		this.controlActions = ca;
-		this.profileStepDefinations = profileStepDefinations;
 	}
 
 	@Given("^I login with \"(.+)\" (user|role) using (Password|OTP) option$")
@@ -68,22 +61,19 @@ public class LoginStepDefinations {
 		}
 	}
 
-	@And("^I handle (user consent|change password|complete profile|all conditional post login) screen$")
-	public void iCheckIfUserConsentScreenAppearedOrNot(String screen) throws Throwable {
-		switch (screen.toLowerCase()) {
+	@And("^I handle (user consent|change password|all conditional post login) screen(| if needed)$")
+	public void iCheckIfUserConsentScreenAppearedOrNot(String screen, String condition) throws Exception {
+		boolean expectedToAppear = condition.trim().equalsIgnoreCase("if needed") ? false : true;
+		switch (screen.trim().toLowerCase()) {
 			case "user consent":
-				handle_user_consent_screen_if_it_appeared();
+				handle_user_consent_screen(expectedToAppear);
 				break;
 			case "change password":
-				handle_change_password_screen_if_it_appeared();
-				break;
-			case "complete profile":
-				handle_complete_profile_screen_if_it_appeared();
+				handle_change_password_screen(expectedToAppear);
 				break;
 			case "all conditional post login":
-				handle_user_consent_screen_if_it_appeared();
-				handle_change_password_screen_if_it_appeared();
-				handle_complete_profile_screen_if_it_appeared();
+				handle_change_password_screen(expectedToAppear);
+				handle_user_consent_screen(expectedToAppear);
 				break;
 			default:
 				throw new RuntimeException("Screen '" + screen + "' is not allowed.");
@@ -107,35 +97,21 @@ public class LoginStepDefinations {
 		CommonUtils.sleep(5);
 	}
 
-	private void handle_user_consent_screen_if_it_appeared() throws Exception {
-		// Handling consent screen if it appeared
-		if (controlActions.isElementPresent(pageObject.AcceptConsentLocator, 5)) {
+	private void handle_user_consent_screen(boolean isGuranteed) throws Exception {
+		if (isGuranteed || controlActions.isElementPresent(pageObject.AcceptConsentLocator, 2)) {
 			pageObject.AcceptConsent.get().scrollIntoViewIfNeeded();
 			controlActions.click(pageObject.AcceptConsent.get());
 		}
 	}
 
-	private void handle_change_password_screen_if_it_appeared() throws Exception {
-		// Handling change password screen if it appeared
-		// if (controlActions.isElementPresent(pageObject.PasswordChangedTxtLocator,
-		// 15))
-		{
+	private void handle_change_password_screen(boolean isGuranteed) throws Exception {
+		if (isGuranteed || controlActions.isElementPresent(pageObject.PasswordChangedTxtLocator, 2)) {
 			pageObject.NewPassword.get().fill(Configs.TEST_DEFAULTPASSWORD);
 			pageObject.ConfirmNewPassword.get().fill(Configs.TEST_DEFAULTPASSWORD);
 			controlActions.click(pageObject.ChangePasswordSubmit.get());
-			Thread.sleep(10000); // wait for the change password to complete
+			Thread.sleep(5000); // wait for the change password to complete
 			scenarioContext.getPage().reload();
 			Thread.sleep(5000);
-		}
-	}
-
-	private void handle_complete_profile_screen_if_it_appeared() throws Exception {
-		// Handling complete profile screen if it appeared
-		assertThat(pageObject.PageHeader("COMPLETE PROFILE")).isVisible(
-				new LocatorAssertions.IsVisibleOptions().setTimeout(Configs.GLOBAL_EXPLICIT_WAIT));
-		// if (controlActions.isElementPresent(, 10))
-		{
-			profileStepDefinations.fillCompleteProfileForm();
 		}
 	}
 

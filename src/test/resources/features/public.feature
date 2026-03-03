@@ -3,14 +3,16 @@ Feature: Public facing pages
 
   Background:
     Given I have opened to Nabarun's public portal
-  #Th
 
   @regression @smoke @public01
-  Scenario Outline: Public - Create and fullfill Join Request - Happy Path
+  Scenario: Public - Create and fullfill Join Request - Happy Path
+    ## Create Join Request from public portal
     Then I click on "Join Us" link at "Home" page
+    Then I store "{RandomFirstName}" value as "NewUserFirstName" variable
+    Then I store "{RandomLastName}" value as "NewUserLastName" variable
     Then I store "{RandomEmail}" value as "NewUserEmail" variable
-    Then I enter "{RandomFirstName}" on "Your First Name" textbox at "Home" page
-    Then I enter "{RandomLastName}" on "Your Last Name" textbox at "Home" page
+    Then I enter "{NewUserFirstName}" on "Your First Name" textbox at "Home" page
+    Then I enter "{NewUserLastName}" on "Your Last Name" textbox at "Home" page
     Then I enter "{NewUserEmail}" on "Your Email (JoinUs)" textbox at "Home" page
     Then I enter "{RandomNumber:10}" on "Your Mobile Number (JoinUs)" textbox at "Home" page
     Then I enter "{RandomLocation}" on "Where are you from?" textbox at "Home" page
@@ -21,7 +23,9 @@ Feature: Public facing pages
       | Expected_Content                                                        |
       | Thank you for showing interest! Please check your email for next steps. |
     Then I click on "Login" link at "Home" page and wait for new window to load
+    ## Approval of 'Join Request' workflow by Group Coordinator
     Then I login with "groupcoordinator@nabarun.com" user using Password option
+    Then I handle all conditional post login screen if needed
     Then I must be landed to "WELCOME TO NABARUN'S SECURED DASHBOARD" screen
     When I click on "Tasks" text at "Dashboard" page
     Then I must be landed to "My Tasks" screen
@@ -57,7 +61,9 @@ Feature: Public facing pages
       | Workflow ID | textbox    | enter        | {JoinRequestId} |
     Then The accordions should have exactly 2 rows
     Then I logout from current session
+    ## Approval of 'Join Request' workflow by President
     Then I login with "president@nabarun.com" user using Password option
+    Then I handle all conditional post login screen if needed
     Then I must be landed to "WELCOME TO NABARUN'S SECURED DASHBOARD" screen
     Then I click on "Tasks" text at "Dashboard" page
     Then I must be landed to "My Tasks" screen
@@ -83,6 +89,8 @@ Feature: Public facing pages
       | Workflow ID | textbox    | enter        | {JoinRequestId} |
     Then The accordions should have exactly 1 rows
     Then I logout from current session
+    ## Verification of 'Join Request' workflow completion
+    ## New User Login, Email Verification and Password Change
     Then I change "{NewUserEmail}" user's password to default password
     Then I login with "{NewUserEmail}" user using Password option
     Then I should see text "Check your email" at "Login" page
@@ -96,6 +104,7 @@ Feature: Public facing pages
     Then I refresh the current page
     Then I wait for 5 seconds
     Then I login with "{NewUserEmail}" user using Password option
+    Then I must be landed to "COMPLETE PROFILE" screen
     Then I fillup the "Complete Profile" form with the following fields at "Profile" page
       | Field_Name                                | Field_Type | Field_Action | Field_Value           |
       | Title                                     | dropdown   | select       | Mr                    |
@@ -113,4 +122,112 @@ Feature: Public facing pages
       | Pin code                                  | textbox    | enter        |                700110 |
     Then I click on "Update" button at "Profile" page
     Then I must be landed to "WELCOME TO NABARUN'S SECURED DASHBOARD" screen
-    Then I wait for 10 seconds
+    Then I click on "Requests" text at "Dashboard" page
+    Then I must be landed to "Requests" screen
+    Then I click on "Add Icon" button at "Requests" page
+    ## Create Exit Request from internal portal
+    Then I fill the following fields in the create accordion
+      | Field_Name          | Field_Type | Field_Action | Field_Value     |
+      | Request Type        | dropdown   | select       | Exit Request    |
+      | Reason for Exit     | textarea   | enter        | For XYZ reason. |
+      | Suggestion/Comments | textarea   | enter        | No suggestions. |
+    Then I click "Create" button in the create accordion and collect "responsePayload.id" from response of "workflows/create" and store as "WorkflowId"
+    Then I click on "Advanced Search" button at "Requests" page
+    Then I perform advance search with the following fields
+      | Field_Name | Field_Type | Field_Action | Field_Value  |
+      | Request ID | textbox    | enter        | {WorkflowId} |
+    Then The accordions should have exactly 1 rows
+    Then I logout from current session
+    ## Approval of 'Exit Request' workflow by Group Coordinator
+    Then I login with "groupcoordinator@nabarun.com" user using Password option
+    Then I handle all conditional post login screen if needed
+    Then I must be landed to "WELCOME TO NABARUN'S SECURED DASHBOARD" screen
+    Then I click on "Tasks" text at "Dashboard" page
+    Then I must be landed to "My Tasks" screen
+    Then I click on "Advanced Search" button at "Tasks" page
+    Then I perform advance search with the following fields
+      | Field_Name  | Field_Type | Field_Action | Field_Value  |
+      | Workflow ID | textbox    | enter        | {WorkflowId} |
+    Then The accordions should have exactly 1 rows
+    Then I open the 1st accordion
+    Then I click "Accept" button in the opened accordion
+    Then I open the 1st accordion
+    Then I click "Update" button in the opened accordion
+    Then I fill the following fields in the opened accordion
+      | Field_Name                                      | Field_Type | Field_Action | Field_Value  |
+      | Task Status                                     | dropdown   | select       | Completed    |
+      | Remarks                                         | textarea   | enter        | Task is done |
+      | Should we proceed with the termination process? | dropdown   | select       | Yes          |
+      | Exit Discussion Notes                           | textarea   | enter        | ok to exit   |
+    Then I click "Confirm" button in the opened accordion
+    Then The accordions should have exactly 0 rows
+    Then I logout from current session
+    ## Approval of 'Exit Request' workflow by Cashier
+    Then I login with "cashier@nabarun.com" user using Password option
+    Then I handle all conditional post login screen if needed
+    Then I must be landed to "WELCOME TO NABARUN'S SECURED DASHBOARD" screen
+    Then I click on "Tasks" text at "Dashboard" page
+    Then I must be landed to "My Tasks" screen
+    Then I click on "Advanced Search" button at "Tasks" page
+    Then I perform advance search with the following fields
+      | Field_Name  | Field_Type | Field_Action | Field_Value  |
+      | Workflow ID | textbox    | enter        | {WorkflowId} |
+    Then The accordions should have exactly 1 rows
+    Then I open the 1st accordion
+    Then I click "Accept" button in the opened accordion
+    Then I open the 1st accordion
+    Then I click "Update" button in the opened accordion
+    Then I fill the following fields in the opened accordion
+      | Field_Name                              | Field_Type | Field_Action | Field_Value  |
+      | Task Status                             | dropdown   | select       | Completed    |
+      | Remarks                                 | textarea   | enter        | Task is done |
+      | Has financial clearance been completed? | dropdown   | select       | Yes          |
+      | Financial Clearance Notes               | textarea   | enter        | cleared      |
+    Then I click "Confirm" button in the opened accordion
+    Then The accordions should have exactly 0 rows
+    Then I logout from current session
+    ## Approval of 'Exit Request' workflow by President
+    Then I login with "president@nabarun.com" user using Password option
+    Then I handle all conditional post login screen if needed
+    Then I must be landed to "WELCOME TO NABARUN'S SECURED DASHBOARD" screen
+    Then I click on "Members" text at "Dashboard" page
+    Then I must be landed to "MEMBERS" screen
+    Then I click on "Advanced Search" button at "Members" page
+    Then I perform advance search with the following fields
+      | Field_Name | Field_Type | Field_Action | Field_Value    |
+      | Email      | textbox    | enter        | {NewUserEmail} |
+    Then I should see 1 member profile with the following details
+      | Name                                 | Role   |
+      | {NewUserFirstName} {NewUserLastName} | Member |
+    Then I wait for 5 seconds
+    Then I click on "Back to Dashboard" text at "Members" page
+    Then I click on "Tasks" text at "Dashboard" page
+    Then I must be landed to "My Tasks" screen
+    Then I click on "Advanced Search" button at "Tasks" page
+    Then I perform advance search with the following fields
+      | Field_Name  | Field_Type | Field_Action | Field_Value  |
+      | Workflow ID | textbox    | enter        | {WorkflowId} |
+    Then The accordions should have exactly 1 rows
+    Then I open the 1st accordion
+    Then I click "Accept" button in the opened accordion
+    Then I open the 1st accordion
+    Then I click "Update" button in the opened accordion
+    Then I fill the following fields in the opened accordion
+      | Field_Name                   | Field_Type | Field_Action | Field_Value  |
+      | Task Status                  | dropdown   | select       | Completed    |
+      | Remarks                      | textarea   | enter        | Task is done |
+      | Approve Termination Request? | dropdown   | select       | Approve      |
+      | Final Remarks                | textarea   | enter        | ok approved  |
+    Then I click "Confirm" button in the opened accordion
+    Then The accordions should have exactly 0 rows
+    Then I click on "Back to Dashboard" text at "Tasks" page
+    ## Verification existing member is removed from list
+    Then I click on "Members" text at "Dashboard" page
+    Then I must be landed to "MEMBERS" screen
+    Then I click on "Advanced Search" button at "Members" page
+    Then I perform advance search with the following fields
+      | Field_Name | Field_Type | Field_Action | Field_Value    |
+      | Email      | textbox    | enter        | {NewUserEmail} |
+    Then I wait for "No member found." text to be visible at "Members" page
+    Then I wait for 5 seconds
+    Then I logout from current session

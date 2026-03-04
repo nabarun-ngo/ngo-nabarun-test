@@ -19,6 +19,7 @@ jobs:
    with:
       platform: "java"
       command: "clean install -DskipTests"
+      java_version: 21
       
   create_release:
     if: github.event.pull_request.merged == true

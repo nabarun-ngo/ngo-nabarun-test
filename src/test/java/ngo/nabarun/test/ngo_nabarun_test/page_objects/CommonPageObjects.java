@@ -43,14 +43,6 @@ public class CommonPageObjects extends BasePageObjects implements ICommonPageObj
 	}
 
 	@Override
-	public Locator getAccordions(Locator parent, int index) {
-		if (index == -1) {
-			return scope(parent).locator("//mat-expansion-panel");
-		}
-		return findLocator("(//mat-expansion-panel)" + "[" + index + "]", parent, FindBy.XPATH);
-	}
-
-	@Override
 	public Locator getDropdownMapping(String elementName, Locator parent) {
 		return findLocator("//*[normalize-space(text())='" + elementName + "']/following-sibling::*//mat-select",
 				parent, FindBy.XPATH);
@@ -72,11 +64,11 @@ public class CommonPageObjects extends BasePageObjects implements ICommonPageObj
 
 	@Override
 	public Locator getButtonMapping(String elementName, Locator parent) {
-		System.out.println("Element Name: " + elementName);
 		return switch (elementName.toLowerCase()) {
 			case "add icon" -> AngularMaterial.MatIcon(scope(parent), "add");
 			default ->
-				scope(parent).getByRole(AriaRole.BUTTON, new Locator.GetByRoleOptions().setName(elementName));
+				scope(parent).getByRole(AriaRole.BUTTON,
+						new Locator.GetByRoleOptions().setName(elementName).setExact(true));
 		};
 	}
 

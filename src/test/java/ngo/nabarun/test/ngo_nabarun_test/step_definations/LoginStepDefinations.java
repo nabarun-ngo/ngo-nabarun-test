@@ -11,7 +11,7 @@ import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.DataProvider;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext.ContextKeys;
-import ngo.nabarun.test.ngo_nabarun_test.models.api.User;
+import ngo.nabarun.test.ngo_nabarun_test.models.db.UserDBModel;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.LoginPageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.Auth0Client;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ControlActions;
@@ -43,7 +43,7 @@ public class LoginStepDefinations {
 		scenarioContext.set(ContextKeys.Login_Id_Type, loginIdType);
 
 		if (loginIdType.equalsIgnoreCase("role")) {
-			List<User> users = dataProvider.getUsersByRoleViaAPI(loginId);
+			List<UserDBModel> users = dataProvider.getUsersByRole(loginId);
 			email = users.stream().findFirst()
 					.orElseThrow(() -> new RuntimeException("Unable to find users with role " + loginId)).getEmail();
 		} else {

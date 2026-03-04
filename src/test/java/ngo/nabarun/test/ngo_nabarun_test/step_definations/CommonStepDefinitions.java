@@ -65,7 +65,7 @@ public class CommonStepDefinitions {
 		page.close();
 	}
 
-	@When("^I (enter|select|click|upload) \"([^\"]*)\" on \"([^\"]*)\" (textbox|dropdown|radio|datepicker|textarea|fileinput|multiselect) at \"([^\"]*)\" (page)$")
+	@When("^I (enter|select|click|upload) \"([^\"]*)\" on \"([^\"]*)\" (textbox|dropdown|radio|datepicker|textarea|fileinput|multiselect|autocomplete) at \"([^\"]*)\" (page)$")
 	public void iEnterOnTextboxAtAccordion(String actionName, String rawValue, String elementName, String elementType,
 			String pageName, String pageType) throws Throwable {
 		SelfHealingLocator element = controlLookup.getLookupElement(elementName, elementType, pageName);

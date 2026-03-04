@@ -12,8 +12,6 @@ public interface ICommonPageObject {
 
     Locator Search_Container();
 
-    Locator getAccordions(Locator parent, int index);
-
     Locator getDropdownMapping(String elementName, Locator parent);
 
     Locator getDatePickerMapping(String elementName, Locator parent);

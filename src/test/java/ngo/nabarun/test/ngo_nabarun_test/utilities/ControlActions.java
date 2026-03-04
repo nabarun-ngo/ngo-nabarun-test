@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 
 import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
+import ngo.nabarun.test.ngo_nabarun_test.page_objects.BasePageObjects;
+import ngo.nabarun.test.ngo_nabarun_test.page_objects.BasePageObjects.HighlightMode;
 import ngo.nabarun.test.ngo_nabarun_test.utils.CommonUtils;
 import ngo.nabarun.test.ngo_nabarun_test.utils.DataUtils;
 
@@ -53,8 +55,13 @@ public class ControlActions {
         logger.debug("Executing Action: {} on Element Type: {} with Value: {}", actionName, elementType, resolvedValue);
         switch (actionName.toUpperCase()) {
             case "ENTER" -> {
-                locator.clear();
-                locator.fill(resolvedValue);
+                if ("autocomplete".equalsIgnoreCase(elementType)) {
+                    selectAutocompleteOption(locator, resolvedValue);
+                } else {
+                    BasePageObjects.highlight(locator, HighlightMode.ENTER);
+                    locator.clear();
+                    locator.fill(resolvedValue);
+                }
             }
             case "SELECT" -> {
                 switch (elementType.toLowerCase()) {
@@ -62,6 +69,7 @@ public class ControlActions {
                     case "multiselect", "dropdown-multi" -> selectMatOptions(locator, resolvedValue);
                     case "datepicker" -> selectMatDate(locator, resolvedValue);
                     case "radio" -> clickRadioOption(locator, resolvedValue);
+                    case "autocomplete" -> selectAutocompleteOption(locator, resolvedValue);
                     default -> {
                         logger.error("Cannot SELECT on unknown element type: {}", elementType);
                         throw new IllegalArgumentException("Cannot SELECT on element type: " + elementType);
@@ -69,13 +77,17 @@ public class ControlActions {
                 }
             }
             case "CLICK" -> {
+                BasePageObjects.highlight(locator, HighlightMode.CLICK);
                 if ("radio".equalsIgnoreCase(elementType)) {
                     clickRadioOption(locator, resolvedValue);
                 } else {
                     locator.click();
                 }
             }
-            case "UPLOAD" -> uploadFileByFileChooser(locator, resolvedValue);
+            case "UPLOAD" -> {
+                BasePageObjects.highlight(locator, HighlightMode.UPLOAD);
+                uploadFileByFileChooser(locator, resolvedValue);
+            }
             case "SCROLL" -> locator.scrollIntoViewIfNeeded();
             case "CLICK AND HOLD" -> locator.hover();
             default -> {
@@ -113,6 +125,7 @@ public class ControlActions {
 
         // Retry loop for opening the dropdown if it fails to appear
         for (int i = 0; i < 3; i++) {
+            BasePageObjects.highlight(selectEl, HighlightMode.SELECT);
             selectEl.click();
             try {
                 // Wait for any option to become visible as a sign that the dropdown is open
@@ -147,6 +160,7 @@ public class ControlActions {
                     .setState(com.microsoft.playwright.options.WaitForSelectorState.ATTACHED)
                     .setTimeout(5000));
 
+            BasePageObjects.highlight(targetOption, HighlightMode.SELECT);
             targetOption.scrollIntoViewIfNeeded();
             targetOption.click(new Locator.ClickOptions().setForce(true));
             logger.info("Successfully selected option: '{}'", value);
@@ -155,6 +169,7 @@ public class ControlActions {
             List<Locator> allOptions = page.locator("mat-option, [role='option']").all();
             for (Locator opt : allOptions) {
                 if (opt.textContent().toLowerCase().contains(value.toLowerCase().trim())) {
+                    BasePageObjects.highlight(opt, HighlightMode.SELECT);
                     opt.scrollIntoViewIfNeeded();
                     opt.click(new Locator.ClickOptions().setForce(true));
                     logger.info("Selected option '{}' via fallback iteration.", value);
@@ -181,6 +196,7 @@ public class ControlActions {
         selectEl.scrollIntoViewIfNeeded();
         selectEl.waitFor(
                 new Locator.WaitForOptions().setState(com.microsoft.playwright.options.WaitForSelectorState.VISIBLE));
+        BasePageObjects.highlight(selectEl, HighlightMode.SELECT);
         selectEl.click();
 
         // Give a brief moment for Material animation/panel to attach
@@ -199,6 +215,7 @@ public class ControlActions {
                 targetOption.waitFor(new Locator.WaitForOptions()
                         .setState(com.microsoft.playwright.options.WaitForSelectorState.VISIBLE)
                         .setTimeout(Configs.GLOBAL_EXPLICIT_WAIT));
+                BasePageObjects.highlight(targetOption, HighlightMode.SELECT);
                 targetOption.click(new Locator.ClickOptions().setForce(true));
             } catch (Exception e) {
                 logger.warn("Option '{}' not found or visible in multi-select dropdown.", val);
@@ -212,6 +229,7 @@ public class ControlActions {
      * Clicks a specific radio option within a container.
      */
     public void clickRadioOption(Locator element, String value) {
+        BasePageObjects.highlight(element.getByText(value), HighlightMode.CLICK);
         element.getByText(value).click();
     }
 
@@ -224,6 +242,7 @@ public class ControlActions {
      */
     public void selectMatDate(Locator element, String value) {
         try {
+            BasePageObjects.highlight(element, HighlightMode.SELECT);
             Date date = DEFAULT_SDF.parse(value);
             selectMatDate(element, date);
         } catch (ParseException e) {
@@ -303,6 +322,7 @@ public class ControlActions {
      */
     public void click(Locator locator) {
         logger.debug("Performing click operation.");
+        BasePageObjects.highlight(locator, HighlightMode.CLICK);
         locator.click();
     }
 
@@ -352,5 +372,39 @@ public class ControlActions {
         page.waitForSelector(selector, new Page.WaitForSelectorOptions()
                 .setState(WaitForSelectorState.HIDDEN)
                 .setTimeout(Configs.GLOBAL_EXPLICIT_WAIT));
+    }
+
+    /**
+     * Selects an option from an autocomplete field.
+     */
+    public void selectAutocompleteOption(Locator inputEl, String value) {
+        logger.info("Attempting to select Autocomplete Option: '{}'", value);
+        inputEl.scrollIntoViewIfNeeded();
+
+        // 1. Fill the input to trigger suggestions
+        inputEl.click();
+        inputEl.fill("");
+        inputEl.pressSequentially(value, new Locator.PressSequentiallyOptions().setDelay(150));
+
+        Page page = this.scenarioContext.getPage();
+
+        Locator targetOption = page.locator("mat-option, [role='option']")
+                .getByText(value, new Locator.GetByTextOptions().setExact(false))
+                .first();
+
+        try {
+            targetOption.waitFor(new Locator.WaitForOptions()
+                    .setState(com.microsoft.playwright.options.WaitForSelectorState.VISIBLE)
+                    .setTimeout(Configs.GLOBAL_EXPLICIT_WAIT));
+
+            BasePageObjects.highlight(targetOption, HighlightMode.SELECT);
+            targetOption.click(new Locator.ClickOptions().setForce(true));
+            logger.info("Clicked on autocomplete suggestion: '{}'", value);
+        } catch (Exception e) {
+            logger.error("Failed to click autocomplete option '{}'. Trying fallback click.", value);
+            page.locator("mat-option, [role='option']").getByText(value, new Locator.GetByTextOptions().setExact(false))
+                    .first().click(new Locator.ClickOptions().setForce(true));
+        }
+
     }
 }

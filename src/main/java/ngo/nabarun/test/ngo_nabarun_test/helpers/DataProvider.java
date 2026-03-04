@@ -2,43 +2,33 @@ package ngo.nabarun.test.ngo_nabarun_test.helpers;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.Arrays;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import com.fasterxml.jackson.core.type.TypeReference;
-import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
-import ngo.nabarun.test.ngo_nabarun_test.models.api.ApiPagination;
-import ngo.nabarun.test.ngo_nabarun_test.models.api.ApiResponse;
-import ngo.nabarun.test.ngo_nabarun_test.models.api.User;
+import ngo.nabarun.test.ngo_nabarun_test.models.db.UserDBModel;
+import ngo.nabarun.test.ngo_nabarun_test.models.db.ProjectDBModel;
+import ngo.nabarun.test.ngo_nabarun_test.models.db.ExpenseDBModel;
 import ngo.nabarun.test.ngo_nabarun_test.models.db.DonationDBModel;
 import ngo.nabarun.test.ngo_nabarun_test.models.db.TicketDBModel;
-import ngo.nabarun.test.ngo_nabarun_test.models.db.UserDBModel;
-import ngo.nabarun.test.ngo_nabarun_test.utils.APIUtils;
-import ngo.nabarun.test.ngo_nabarun_test.utils.DBFilter;
+import ngo.nabarun.test.ngo_nabarun_test.models.db.AccountDBModel;
+import ngo.nabarun.test.ngo_nabarun_test.models.db.MeetingDBModel;
+import ngo.nabarun.test.ngo_nabarun_test.models.db.ProjectTeamMemberDBModel;
+import ngo.nabarun.test.ngo_nabarun_test.repository.DonationDAO;
+import ngo.nabarun.test.ngo_nabarun_test.repository.TicketDAO;
+import ngo.nabarun.test.ngo_nabarun_test.repository.UserDAO;
+import ngo.nabarun.test.ngo_nabarun_test.repository.ProjectDAO;
+import ngo.nabarun.test.ngo_nabarun_test.repository.ExpenseDAO;
+import ngo.nabarun.test.ngo_nabarun_test.repository.AccountDAO;
+import ngo.nabarun.test.ngo_nabarun_test.repository.MeetingDAO;
+import ngo.nabarun.test.ngo_nabarun_test.repository.ProjectTeamMemberDAO;
 import ngo.nabarun.test.ngo_nabarun_test.utils.DBUtils;
 
 public class DataProvider {
 	private static final Logger logger = LogManager.getLogger(DataProvider.class);
 
-	public List<User> getUsersByRoleViaAPI(String role) {
-		String rootUrl = Configs.ROOT_URL;
-		String apiKey = "";
-		String requestUrl = rootUrl + "/api/user/list?roles=" + role + "&userByRole=true";
-		TypeReference<ApiResponse<ApiPagination<User>>> typeRef = new TypeReference<ApiResponse<ApiPagination<User>>>() {
-		};
-		ApiResponse<ApiPagination<User>> apiResponse = APIUtils.httpGet(requestUrl, Map.of("X-API-KEY", apiKey),
-				typeRef);
-		return apiResponse.getResponsePayload().getContent();
-	}
-
 	public UserDBModel findUserByName(String firstName, String lastName) {
 		try {
-			return DBUtils.getClient().findFirst(UserDBModel.class, Arrays.asList(
-					DBFilter.eq("firstName", firstName),
-					DBFilter.eq("lastName", lastName)
-			));
+			return DBUtils.getJdbi().withExtension(UserDAO.class, dao -> dao.findByName(firstName, lastName));
 		} catch (Exception e) {
 			logger.error("Error finding user by name", e);
 			return null;
@@ -48,12 +38,8 @@ public class DataProvider {
 	public List<DonationDBModel> findDonationsBetweenDates(Date startDate, Date endDate, String profileId,
 			String type) {
 		try {
-			return DBUtils.getClient().findMany(DonationDBModel.class, Arrays.asList(
-					DBFilter.gte("raisedOn", startDate),
-					DBFilter.lte("raisedOn", endDate),
-					DBFilter.eq("donorId", profileId),
-					DBFilter.eq("type", type)
-			));
+			return DBUtils.getJdbi().withExtension(DonationDAO.class,
+					dao -> dao.findBetweenDates(startDate, endDate, profileId, type));
 		} catch (Exception e) {
 			logger.error("Error finding donations between dates", e);
 			throw new RuntimeException("Error finding donations between dates", e);
@@ -62,9 +48,7 @@ public class DataProvider {
 
 	public boolean deleteDonationById(String donationId) {
 		try {
-			return DBUtils.getClient().delete(DonationDBModel.class, Arrays.asList(
-					DBFilter.eq("id", donationId)
-			));
+			return DBUtils.getJdbi().withExtension(DonationDAO.class, dao -> dao.deleteById(donationId)) > 0;
 		} catch (Exception e) {
 			logger.error("Error deleting donation by id", e);
 			return false;
@@ -73,11 +57,63 @@ public class DataProvider {
 
 	public TicketDBModel findOTPDetails(String email) {
 		try {
-			return DBUtils.getClient().findFirst(TicketDBModel.class, Arrays.asList(
-					DBFilter.eq("email", email)
-			));
+			return DBUtils.getJdbi().withExtension(TicketDAO.class, dao -> dao.findFirstByEmail(email));
 		} catch (Exception e) {
 			logger.error("Error finding OTP details", e);
+			return null;
+		}
+	}
+
+	public List<UserDBModel> getUsersByRole(String roleCode) {
+		try {
+			return DBUtils.getJdbi().withExtension(UserDAO.class, dao -> dao.findByRole(roleCode));
+		} catch (Exception e) {
+			logger.error("Error finding users by role", e);
+			return null;
+		}
+	}
+
+	public List<ProjectDBModel> getProjectsByManagerEmail(String email) {
+		try {
+			return DBUtils.getJdbi().withExtension(ProjectDAO.class, dao -> dao.findByManagerEmail(email));
+		} catch (Exception e) {
+			logger.error("Error finding projects by manager email", e);
+			return null;
+		}
+	}
+
+	public List<ExpenseDBModel> getExpensesByProjectCode(String projectCode) {
+		try {
+			return DBUtils.getJdbi().withExtension(ExpenseDAO.class, dao -> dao.findByProjectCode(projectCode));
+		} catch (Exception e) {
+			logger.error("Error finding expenses by project code", e);
+			return null;
+		}
+	}
+
+	public List<AccountDBModel> getAccountsByHolderEmail(String email) {
+		try {
+			return DBUtils.getJdbi().withExtension(AccountDAO.class, dao -> dao.findByHolderEmail(email));
+		} catch (Exception e) {
+			logger.error("Error finding accounts by holder email", e);
+			return null;
+		}
+	}
+
+	public List<MeetingDBModel> getMeetingsByProjectCode(String projectCode) {
+		try {
+			return DBUtils.getJdbi().withExtension(MeetingDAO.class, dao -> dao.findByProjectCode(projectCode));
+		} catch (Exception e) {
+			logger.error("Error finding meetings by project code", e);
+			return null;
+		}
+	}
+
+	public List<ProjectTeamMemberDBModel> getTeamMembersByUserEmail(String email) {
+		try {
+			return DBUtils.getJdbi().withExtension(ProjectTeamMemberDAO.class, dao -> dao.findByUserEmail(email));
+		} catch (Exception e) {
+			logger.error("Error finding project team members by user email", e);
 			return null;
 		}
 	}

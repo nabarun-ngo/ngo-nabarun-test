@@ -11,6 +11,10 @@ public class BasePageObjects {
         TEXT, LABEL, XPATH, CSS, ANY
     }
 
+    public enum HighlightMode {
+        IDENTIFICATION, OPERATION, CLICK, ENTER, SELECT, UPLOAD
+    }
+
     protected final ScenarioContext scenarioContext;
 
     public BasePageObjects(ScenarioContext scenarioContext) {
@@ -42,12 +46,72 @@ public class BasePageObjects {
     }
 
     protected final Locator maybeHighlight(Locator locator) {
-        if (!isHighlightEnabled())
-            return locator;
-        locator.evaluate("el => {" + "  let count = 0;" + "  const blink = () => {"
-                + "    el.style.outline = (count % 2 === 0) ? '3px solid red' : '';" + "    count++;"
-                + "    if (count < 6) setTimeout(blink, 250);" + "  };" + "  blink();" + "}");
+        if (isHighlightEnabled()) {
+            highlight(locator, HighlightMode.IDENTIFICATION);
+        }
         return locator;
+    }
+
+    /**
+     * Highlights an element based on the mode.
+     * IDENTIFICATION: Blink effect for finding elements.
+     * OPERATION: Solid highlight for clicks/entries.
+     */
+    public static void highlight(Locator locator, HighlightMode mode) {
+        if (!isHighlightEnabled())
+            return;
+        try {
+            String color;
+            String bgColor;
+            boolean blink = false;
+
+            switch (mode) {
+                case IDENTIFICATION -> {
+                    color = "#00ffff"; // Cyan
+                    bgColor = "transparent";
+                    blink = true;
+                }
+                case CLICK -> {
+                    color = "#ff00ff"; // Magenta
+                    bgColor = "rgba(255, 0, 255, 0.2)";
+                }
+                case ENTER -> {
+                    color = "#00ff00"; // Green
+                    bgColor = "rgba(0, 255, 0, 0.2)";
+                }
+                case SELECT -> {
+                    color = "#ffa500"; // Orange
+                    bgColor = "rgba(255, 165, 0, 0.2)";
+                }
+                case UPLOAD -> {
+                    color = "#0000ff"; // Blue
+                    bgColor = "rgba(0, 0, 255, 0.2)";
+                }
+                default -> { // OPERATION or fallback
+                    color = "#ff00ff";
+                    bgColor = "rgba(255, 0, 255, 0.2)";
+                }
+            }
+
+            if (blink) {
+                locator.evaluate("el => {" + "  let count = 0;" + "  const blinkFn = () => {"
+                        + "    el.style.outline = (count % 2 === 0) ? '3px solid " + color + "' : '';" + "    count++;"
+                        + "    if (count < 6) setTimeout(blinkFn, 200);" + "  };" + "  blinkFn();" + "}");
+            } else {
+                locator.evaluate("el => { " +
+                        "  const originalOutline = el.style.outline; " +
+                        "  const originalBg = el.style.backgroundColor; " +
+                        "  el.style.outline = '3px solid " + color + "'; " +
+                        "  el.style.backgroundColor = '" + bgColor + "'; " +
+                        "  setTimeout(() => { " +
+                        "    el.style.outline = originalOutline; " +
+                        "    el.style.backgroundColor = originalBg; " +
+                        "  }, 800); " +
+                        "}");
+            }
+        } catch (Exception e) {
+            // Silently ignore highlight errors
+        }
     }
 
     /**

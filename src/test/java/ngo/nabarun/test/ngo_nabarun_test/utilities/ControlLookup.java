@@ -95,7 +95,7 @@ public class ControlLookup {
 			case "link" -> pageObj.getLinkMapping(elementName, parent);
 			case "text" -> pageObj.getTextMapping(elementName, parent);
 			case "section" -> pageObj.getTextMapping(elementName, parent);
-			case "textbox" -> pageObj.getTextBoxMapping(elementName, parent, false);
+			case "textbox", "autocomplete" -> pageObj.getTextBoxMapping(elementName, parent, false);
 			case "dropdown", "multiselect" -> pageObj.getDropdownMapping(elementName, parent);
 			case "radio" -> pageObj.getRadioMapping(elementName, parent);
 			case "datepicker" -> pageObj.getDatePickerMapping(elementName, parent);

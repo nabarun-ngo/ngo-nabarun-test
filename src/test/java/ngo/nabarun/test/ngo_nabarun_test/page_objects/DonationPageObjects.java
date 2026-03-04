@@ -26,4 +26,12 @@ public class DonationPageObjects extends CommonPageObjects {
 		};
 	}
 
+	@Override
+	public Locator getTextBoxMapping(String elementName, Locator parentContext, boolean isTextArea) {
+		return switch (elementName) {
+			case "Member Search" -> Modal_UserSearch.get();
+			default -> super.getTextBoxMapping(elementName, parentContext, isTextArea);
+		};
+	}
+
 }

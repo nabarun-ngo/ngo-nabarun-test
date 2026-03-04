@@ -67,7 +67,8 @@ Feature: Donation Management
     Then I click on "Back to Dashboard" link at "Accounts" page
     When I click on "Donations" text at "Dashboard" page
     Then I must be landed to "DONATIONS" screen
-    When I click on "Guest Donations" text at "Donation" page
+    When I click on "Member Donations" text at "Donation" page
+    Then I select "Member TestUser" on "Member" dropdown at "Donation" page
     Then I logout from current session
   #@regression
   # @donation @donation02

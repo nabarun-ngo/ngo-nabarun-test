@@ -1,26 +1,28 @@
 package ngo.nabarun.test.ngo_nabarun_test.utils;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.sqlobject.SqlObjectPlugin;
+import org.jdbi.v3.postgres.PostgresPlugin;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
 
 public class DBUtils {
-	private static final Logger logger = LogManager.getLogger(DBUtils.class);
-	private static IDatabaseClient databaseClient;
+	private static Jdbi jdbi;
 
 	static {
-		try {
-			// Initialize with Postgres client
-			databaseClient = new PostgresDatabaseClient();
-		} catch (Exception e) {
-			logger.error("Failed to initialize database client", e);
-		}
+		HikariConfig config = new HikariConfig();
+		config.setJdbcUrl(Configs.DB_URL);
+		config.setDriverClassName("org.postgresql.Driver");
+		HikariDataSource dataSource = new HikariDataSource(config);
+
+		jdbi = Jdbi.create(dataSource)
+				.installPlugin(new SqlObjectPlugin())
+				.installPlugin(new PostgresPlugin());
 	}
 
-	public static IDatabaseClient getClient() {
-		if (databaseClient == null) {
-			throw new RuntimeException("Database client not initialized");
-		}
-		return databaseClient;
+	public static Jdbi getJdbi() {
+		return jdbi;
 	}
 
 }

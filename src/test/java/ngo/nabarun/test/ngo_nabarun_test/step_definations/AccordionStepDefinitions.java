@@ -10,7 +10,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
-import ngo.nabarun.test.ngo_nabarun_test.page_objects.CommonPageObjects;
+import ngo.nabarun.test.ngo_nabarun_test.page_objects.AccordionPageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ControlLookup;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.SelfHealingLocator;
 import ngo.nabarun.test.ngo_nabarun_test.utils.CommonUtils;
@@ -31,22 +31,22 @@ public class AccordionStepDefinitions {
 
     private static final Logger logger = LogManager.getLogger(AccordionStepDefinitions.class);
     private final ControlLookup controlLookup;
-    private final CommonPageObjects commonPageObjects;
+    private final AccordionPageObjects accordionPageObjects;
     private final ControlActions controlActions;
     private Locator openAccordion;
     private ScenarioContext scenarioContext;
 
     public AccordionStepDefinitions(ControlActions controlActions,
-            CommonPageObjects commonPageObjects, ControlLookup controlLookup, ScenarioContext scenarioContext) {
+            AccordionPageObjects accordionPageObjects, ControlLookup controlLookup, ScenarioContext scenarioContext) {
         this.controlActions = controlActions;
-        this.commonPageObjects = commonPageObjects;
+        this.accordionPageObjects = accordionPageObjects;
         this.controlLookup = controlLookup;
         this.scenarioContext = scenarioContext;
     }
 
     @Then("^I open the (\\d+)(th|rd|st|nd) accordion$")
     public void iOpenTheAccordion(int resultNumber, String suffix) {
-        this.openAccordion = commonPageObjects.getAccordions(null, resultNumber);
+        this.openAccordion = accordionPageObjects.getAccordions(null, resultNumber);
         do {
             logger.info("Accordion is not expanded. Retrying...");
             this.openAccordion.click();
@@ -66,7 +66,7 @@ public class AccordionStepDefinitions {
 
     @Then("^I fill the following fields in the create accordion$")
     public void iFillTheCreateSectionAtAccordion(DataTable dataTable) {
-        Locator createPanel = commonPageObjects.Create_Accordion.get();
+        Locator createPanel = accordionPageObjects.Create_Accordion.get();
         createPanel.waitFor();
         fillAccordionFields(createPanel, dataTable);
     }
@@ -85,13 +85,13 @@ public class AccordionStepDefinitions {
             validateAccordion();
             Locator parent = this.openAccordion;
             parent.waitFor();
-            Locator btn = this.commonPageObjects.getButtonMapping(buttonText, parent);
+            Locator btn = this.accordionPageObjects.getButtonMapping(buttonText, parent);
             btn.waitFor();
             controlActions.click(btn);
         } else if (accordionType.equals("create")) {
-            Locator createPanel = commonPageObjects.Create_Accordion.get();
+            Locator createPanel = accordionPageObjects.Create_Accordion.get();
             createPanel.waitFor();
-            Locator btn = this.commonPageObjects.getButtonMapping(buttonText, createPanel);
+            Locator btn = this.accordionPageObjects.getButtonMapping(buttonText, createPanel);
             btn.waitFor();
             controlActions.click(btn);
         }
@@ -144,9 +144,23 @@ public class AccordionStepDefinitions {
 
     @Then("^The accordions should have (at least|exactly) (\\d+) rows$")
     public void theAccordionShouldHaveAtLeastRows(String condition, int expectedRows) {
-        Locator locator = commonPageObjects.getAccordions(null, -1);
+        Locator locator = accordionPageObjects.getAccordions(null, -1);
         assertThat(locator)
                 .hasCount(expectedRows,
                         new LocatorAssertions.HasCountOptions().setTimeout(Configs.GLOBAL_EXPLICIT_WAIT));
+    }
+
+    @Then("^The open accordion should have following values$")
+    public void theAccordionShouldHaveAtLeastRows(DataTable dataTable) {
+        List<Map<String, String>> fieldInputModels = dataTable.asMaps(String.class, String.class);
+        for (Map<String, String> fieldInputModel : fieldInputModels) {
+            String sectionName = fieldInputModel.get("Section_Name");
+            String fieldName = fieldInputModel.get("Field_Name");
+            String value = DataUtils.resolveData(fieldInputModel.get("Field_Value"), scenarioContext);
+            Locator section = accordionPageObjects.getFormMapping(sectionName, this.openAccordion);
+            Locator element = accordionPageObjects.getReadOnlyField(fieldName, section);
+            assertThat(element).hasText(value,
+                    new LocatorAssertions.HasTextOptions().setTimeout(Configs.GLOBAL_EXPLICIT_WAIT));
+        }
     }
 }

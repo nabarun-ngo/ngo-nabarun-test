@@ -67,12 +67,63 @@ Feature: Donation Management
     # Then I click on "Back to Dashboard" link at "Accounts" page
     # When I click on "Donations" text at "Dashboard" page
     # Then I must be landed to "DONATIONS" screen
+    Then I check and delete regular donation raised for "Member TestUser" this month
     When I click on "Member Donations" text at "Donation" page
-    Then I wait for 30 seconds
     Then I enter "Member TestUser" on "Member Search" autocomplete at "Donation" page
-    Then I wait for 30 seconds
     Then I click on "Select" button at "Donation" page
-    Then I wait for 30 seconds
+    Then I click on "Add Icon" button at "Donation" page
+    Then I fill the following fields in the create accordion
+      | Field_Name          | Field_Type | Field_Action | Field_Value           |
+      | Donation type       | dropdown   | select       | Regular               |
+      | Donation amount     | textbox    | enter        | {RandomNumber:3}      |
+      | Donation start date | datepicker | select       | {FirstOfCurrentMonth} |
+      | Donation end date   | datepicker | select       | {LastOfCurrentMonth}  |
+    Then I click "Confirm" button in the create accordion and collect "responsePayload.id" from response of "donation/create" and store as "DonationId"
+    Then I click on "Advanced Search" button at "Donation" page
+    Then I perform advance search with the following fields
+      | Field_Name      | Field_Type | Field_Action | Field_Value  |
+      | Donation Number | textbox    | enter        | {DonationId} |
+    Then The accordions should have exactly 1 rows
+    Then I open the 1st accordion
+    Then I click "Update" button in the opened accordion
+    # Update Amount
+    Then I fill the following fields in the opened accordion
+      | Field_Name      | Field_Type | Field_Action | Field_Value      |
+      | Donation amount | textbox    | enter        | {RandomNumber:3} |
+    Then I click "Confirm" button in the opened accordion
+    Then I open the 1st accordion
+    Then I click "Update" button in the opened accordion
+    # Update Status to PAID
+    Then I fill the following fields in the opened accordion
+      | Field_Name       | Field_Type | Field_Action | Field_Value             |
+      | Donation status  | dropdown   | select       | Paid                    |
+      | Donation paid on | datepicker | select       | {SystemDate}            |
+      | Donation paid to | dropdown   | select       | Treasurer TestUser      |
+      | Payment method   | dropdown   | select       | UPI                     |
+      | UPI name         | dropdown   | select       | Google Pay              |
+      | Remarks          | textarea   | enter        | Test Test               |
+      | Upload           | fileinput  | upload       | test_files/test_pdf.pdf |
+    Then I click "Confirm" button in the opened accordion and collect "responsePayload.transactionRef" from response of "donation/{DonationId}/update" and store as "TransactionRef"
+    Then I click on "Back to Dashboard" link at "Donation" page
+    When I click on "Accounts" text at "Dashboard" page
+    Then I must be landed to "Accounts" screen
+    Then I click on "Manage Accounts" text at "Accounts" page
+    Then I click on "Advanced Search" button at "Accounts" page
+    Then I perform advance search with the following fields
+      | Field_Name   | Field_Type | Field_Action | Field_Value             |
+      | Account Type | dropdown   | select       | Main Account (Treasure) |
+    Then The accordions should have exactly 1 rows
+    Then I open the 1st accordion
+    Then I click "View Transactions" button in the opened accordion
+    Then I must be landed to "Transactions" screen
+    Then I click on "Advanced Search" button at "Transactions" page
+    Then I perform advance search with the following fields
+      | Field_Name               | Field_Type | Field_Action | Field_Value      |
+      | Transaction Reference Id | textbox    | enter        | {TransactionRef} |
+    Then The accordions should have exactly 1 rows
+    Then I open the 1st accordion
+    Then I click on "Back to Accounts" link at "Transactions" page
+    Then I click on "Back to Dashboard" link at "Accounts" page
     Then I logout from current session
   #@regression
   # @donation @donation02

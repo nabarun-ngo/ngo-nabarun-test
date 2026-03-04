@@ -1,6 +1,10 @@
 package ngo.nabarun.test.ngo_nabarun_test.step_definations;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,17 +18,19 @@ import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.DataProvider;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext.ContextKeys;
+import ngo.nabarun.test.ngo_nabarun_test.models.db.DonationDBModel;
+import ngo.nabarun.test.ngo_nabarun_test.models.db.UserDBModel;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.DonationPageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ControlActions;
+import ngo.nabarun.test.ngo_nabarun_test.utils.DataUtils;
 
 public class DonationStepDefinations {
-	// private static final SimpleDateFormat dateFormat = new
-	// SimpleDateFormat("dd/MM/yyyy");
+	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
 	private DonationPageObjects donationPageObjects;
 	private ScenarioContext scenarioContext;
 	private ControlActions controlActions;
-	// private DataProvider dataProvider;
+	private DataProvider dataProvider;
 
 	public DonationStepDefinations(ScenarioContext sc, ControlActions ca,
 			DataProvider dp,
@@ -32,7 +38,7 @@ public class DonationStepDefinations {
 		this.donationPageObjects = donationPageObjects;
 		this.scenarioContext = sc;
 		this.controlActions = ca;
-		// this.dataProvider = dp;
+		this.dataProvider = dp;
 	}
 
 	@Then("^I capture and store the donation id$")
@@ -83,18 +89,17 @@ public class DonationStepDefinations {
 
 	@Then("^I check and delete regular donation raised for \"([^\"]*)\" this month$")
 	public void iCheckAndDeleteRegularDonationRaisedForThisMonth(String memberName) throws Throwable {
-		// String firstName = memberName.split(" ")[0];
-		// String lastName = memberName.split(" ")[1];
-		// UserDBModel user = dataProvider.findUserByName(firstName, lastName);
-		// Date startDate = dateFormat.parse(DataUtils.firstDayOfCurrentMonth());
-		// Date endDate = dateFormat.parse(DataUtils.lastDayOfCurrentMonth());
-		// String id = user.getId();
-		// List<DonationDBModel>
-		// donations=dataProvider.findDonationsBetweenDates(startDate,endDate,id,"REGULAR");
-		// for(DonationDBModel donation:donations) {
-		// String donationId=donation.getId();
-		// dataProvider.deleteDonationById(donationId);
-		// }
+		String firstName = memberName.split(" ")[0];
+		String lastName = memberName.split(" ")[1];
+		UserDBModel user = dataProvider.findUserByName(firstName, lastName);
+		Date startDate = dateFormat.parse(DataUtils.firstDayOfCurrentMonth());
+		Date endDate = dateFormat.parse(DataUtils.lastDayOfCurrentMonth());
+		String id = user.getId();
+		List<DonationDBModel> donations = dataProvider.findDonationsBetweenDates(startDate, endDate, id, "REGULAR");
+		for (DonationDBModel donation : donations) {
+			String donationId = donation.getId();
+			dataProvider.deleteDonationById(donationId);
+		}
 	}
 
 	@Then("I start listening to network calls")

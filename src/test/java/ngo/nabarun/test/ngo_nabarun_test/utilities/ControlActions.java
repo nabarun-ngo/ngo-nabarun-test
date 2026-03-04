@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
@@ -389,39 +388,23 @@ public class ControlActions {
 
         Page page = this.scenarioContext.getPage();
 
-        // 2. Wait for the suggestion to appear and be visible.
-        // We prioritize clicking the overlay options.
-        Locator targetOption = page.locator(
-                ".mat-autocomplete-panel mat-option, .mat-mdc-autocomplete-panel mat-option, [role='listbox'] [role='option'], .mat-option")
-                .filter(new Locator.FilterOptions()
-                        .setHasText(Pattern.compile(Pattern.quote(value), Pattern.CASE_INSENSITIVE)))
+        Locator targetOption = page.locator("mat-option, [role='option']")
+                .getByText(value, new Locator.GetByTextOptions().setExact(false))
                 .first();
 
         try {
             targetOption.waitFor(new Locator.WaitForOptions()
                     .setState(com.microsoft.playwright.options.WaitForSelectorState.VISIBLE)
-                    .setTimeout(10000));
+                    .setTimeout(Configs.GLOBAL_EXPLICIT_WAIT));
 
             BasePageObjects.highlight(targetOption, HighlightMode.SELECT);
-            // Using force click and a slight delay to ensure the overlay is ready
-            page.waitForTimeout(500);
             targetOption.click(new Locator.ClickOptions().setForce(true));
             logger.info("Clicked on autocomplete suggestion: '{}'", value);
         } catch (Exception e) {
             logger.error("Failed to click autocomplete option '{}'. Trying fallback click.", value);
-            // Fallback: If standard click fails, try to click by text directly on the page
             page.locator("mat-option, [role='option']").getByText(value, new Locator.GetByTextOptions().setExact(false))
                     .first().click(new Locator.ClickOptions().setForce(true));
         }
 
-        // 3. Optional: Some UI patterns require clicking a 'Select' or 'Confirm' button
-        // The screenshot shows a 'Select' button in the 'Select Member' modal.
-        // We check if it exists and is enabled.
-        Locator selectBtn = page.locator("button:has-text('Select'), button:has-text('Confirm')").last();
-        if (selectBtn.isVisible() && selectBtn.isEnabled()) {
-            BasePageObjects.highlight(selectBtn, HighlightMode.CLICK);
-            selectBtn.click();
-            logger.info("Clicked confirmation button in autocomplete modal.");
-        }
     }
 }

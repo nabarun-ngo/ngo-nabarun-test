@@ -40,6 +40,5 @@ public class EventListener implements ConcurrentEventListener {
                 logger.error("Exception: " + error.getMessage(), error);
             }
         }
-        ThreadContext.remove("scenarioName");
     };
 }

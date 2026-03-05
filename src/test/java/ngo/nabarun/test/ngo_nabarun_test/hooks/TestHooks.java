@@ -106,14 +106,6 @@ public class TestHooks {
 				scenario.attach(logs, "text/plain", "error_log");
 			} else {
 				logger.warn("Log file does not exist at " + logFile.getAbsolutePath());
-				// list down all files in target/logs directory
-				File logDir = new File("target/logs");
-				File[] logFiles = logDir.listFiles();
-				if (logFiles != null) {
-					for (File file : logFiles) {
-						logger.info("Log file: " + file.getName());
-					}
-				}
 			}
 		}
 		logger.info("******************************************************************************************");
@@ -127,11 +119,11 @@ public class TestHooks {
 		browser.close();
 		scenarioStartTime.remove();
 		stepStartTime.remove();
+		ThreadContext.remove("scenarioName");
 	}
 
 	@AfterAll()
 	public static void afterTest() {
-
 	}
 
 }

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 
 import com.microsoft.playwright.*;
@@ -23,7 +24,6 @@ import ngo.nabarun.test.ngo_nabarun_test.utilities.DevToolsUtility;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
 
 public class TestHooks {
 	private static final Logger logger = LogManager.getLogger(TestHooks.class);
@@ -93,21 +93,41 @@ public class TestHooks {
 	public void afterScenario(Scenario scenario) throws InterruptedException, IOException {
 		long duration = System.currentTimeMillis() - scenarioStartTime.get();
 		Page page = scenarioContext.getPage();
-		String scenarioName = ThreadContext.get("scenarioName");
+		String scenarioName = scenario.getName().replaceAll("[^a-zA-Z0-9-]", "_");
+
+		// Capture and save screenshot on failure
 		if (scenario.isFailed()) {
 			logger.error("Scenario FAILED. Capturing screenshot.");
 			byte[] screenshot = page.screenshot(new Page.ScreenshotOptions().setType(ScreenshotType.PNG));
-			scenario.attach(screenshot, "image/png", "error_screenshot");
+			Files.createDirectories(Paths.get("target/logs"));
 			Files.write(Paths.get("target/logs/" + scenarioName + ".png"), screenshot);
-			File logFile = new File("target/logs/" + scenarioName + ".log");
-			logger.info("Log file exists: " + logFile.exists() + " at " + logFile.getAbsolutePath());
-			if (logFile.exists()) {
-				byte[] logs = Files.readAllBytes(logFile.toPath());
-				scenario.attach(logs, "text/plain", "error_log");
-			} else {
-				logger.warn("Log file does not exist at " + logFile.getAbsolutePath());
-			}
 		}
+
+		// Attach ALL files under target/logs/ to the Cucumber report
+		File logsDir = new File("target/logs");
+		if (logsDir.exists() && logsDir.isDirectory()) {
+			File[] logFiles = logsDir.listFiles();
+			if (logFiles != null && logFiles.length > 0) {
+				Arrays.sort(logFiles); // consistent ordering
+				for (File file : logFiles) {
+					if (!file.isFile())
+						continue;
+					try {
+						byte[] content = Files.readAllBytes(file.toPath());
+						String mimeType = resolveMimeType(file.getName());
+						scenario.attach(content, mimeType, file.getName());
+						logger.info("Attached to Cucumber report: " + file.getName() + " (" + mimeType + ")");
+					} catch (IOException e) {
+						logger.warn("Could not attach file: " + file.getName() + " - " + e.getMessage());
+					}
+				}
+			} else {
+				logger.warn("No files found in logs directory: " + logsDir.getAbsolutePath());
+			}
+		} else {
+			logger.warn("Logs directory does not exist: " + logsDir.getAbsolutePath());
+		}
+
 		logger.info("******************************************************************************************");
 		logger.info("Scenario Finished: " + scenario.getName());
 		logger.info("Scenario Status: " + scenario.getStatus());
@@ -119,7 +139,23 @@ public class TestHooks {
 		browser.close();
 		scenarioStartTime.remove();
 		stepStartTime.remove();
-		ThreadContext.remove("scenarioName");
+	}
+
+	private String resolveMimeType(String fileName) {
+		String lower = fileName.toLowerCase();
+		if (lower.endsWith(".png"))
+			return "image/png";
+		if (lower.endsWith(".jpg") || lower.endsWith(".jpeg"))
+			return "image/jpeg";
+		if (lower.endsWith(".log") || lower.endsWith(".txt"))
+			return "text/plain";
+		if (lower.endsWith(".json"))
+			return "application/json";
+		if (lower.endsWith(".xml"))
+			return "application/xml";
+		if (lower.endsWith(".html"))
+			return "text/html";
+		return "application/octet-stream";
 	}
 
 	@AfterAll()

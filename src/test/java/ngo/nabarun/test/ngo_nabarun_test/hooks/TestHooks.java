@@ -100,9 +100,20 @@ public class TestHooks {
 			scenario.attach(screenshot, "image/png", "error_screenshot");
 			Files.write(Paths.get("target/logs/" + scenarioName + ".png"), screenshot);
 			File logFile = new File("target/logs/" + scenarioName + ".log");
+			logger.info("Log file exists: " + logFile.exists() + " at " + logFile.getAbsolutePath());
 			if (logFile.exists()) {
 				byte[] logs = Files.readAllBytes(logFile.toPath());
 				scenario.attach(logs, "text/plain", "error_log");
+			} else {
+				logger.warn("Log file does not exist at " + logFile.getAbsolutePath());
+				// list down all files in target/logs directory
+				File logDir = new File("target/logs");
+				File[] logFiles = logDir.listFiles();
+				if (logFiles != null) {
+					for (File file : logFiles) {
+						logger.info("Log file: " + file.getName());
+					}
+				}
 			}
 		}
 		logger.info("******************************************************************************************");

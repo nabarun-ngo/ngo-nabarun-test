@@ -24,6 +24,7 @@ import ngo.nabarun.test.ngo_nabarun_test.utilities.DevToolsUtility;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 public class TestHooks {
 	private static final Logger logger = LogManager.getLogger(TestHooks.class);
@@ -31,7 +32,6 @@ public class TestHooks {
 	private Browser browser;
 	private BrowserContext context;
 	private final ThreadLocal<Long> scenarioStartTime = new ThreadLocal<>();
-	private final ThreadLocal<Long> stepStartTime = new ThreadLocal<>();
 
 	public TestHooks(ScenarioContext scenarioContext) {
 		this.scenarioContext = scenarioContext;
@@ -43,6 +43,8 @@ public class TestHooks {
 
 	@Before()
 	public void beforeScenario(Scenario scenario) {
+		String scenarioName = scenario.getName().replaceAll("[^a-zA-Z0-9-]", "_");
+		ThreadContext.put("scenarioName", scenarioName);
 		scenarioStartTime.set(System.currentTimeMillis());
 		logger.info("******************************************************************************************");
 		logger.info("Scenario Started: " + scenario.getName());
@@ -80,20 +82,17 @@ public class TestHooks {
 
 	@BeforeStep
 	public void beforeStep(Scenario scenario) {
-		stepStartTime.set(System.currentTimeMillis());
 	}
 
 	@AfterStep
 	public void afterStep(Scenario scenario) {
-		long duration = System.currentTimeMillis() - stepStartTime.get();
-		logger.info("Step " + scenario.getStatus() + " | Duration: " + duration + "ms");
 	}
 
 	@After
 	public void afterScenario(Scenario scenario) throws InterruptedException, IOException {
 		long duration = System.currentTimeMillis() - scenarioStartTime.get();
 		Page page = scenarioContext.getPage();
-		String scenarioName = scenario.getName().replaceAll("[^a-zA-Z0-9-]", "_");
+		String scenarioName = ThreadContext.get("scenarioName");
 
 		// Capture and save screenshot on failure
 		if (scenario.isFailed()) {
@@ -101,9 +100,27 @@ public class TestHooks {
 			byte[] screenshot = page.screenshot(new Page.ScreenshotOptions().setType(ScreenshotType.PNG));
 			Files.createDirectories(Paths.get("target/logs"));
 			Files.write(Paths.get("target/logs/" + scenarioName + ".png"), screenshot);
+			attachLogs(scenario);
 		}
+		logger.info("******************************************************************************************");
+		logger.info("Scenario Finished: " + scenario.getName());
+		logger.info("Scenario Status: " + scenario.getStatus());
+		logger.info("Total Duration: " + duration + "ms");
+		logger.info("******************************************************************************************");
+		logger.info("Closing browser and cleaning up context.");
+		page.close();
+		context.close();
+		browser.close();
+		scenarioStartTime.remove();
+		ThreadContext.remove("scenarioName");
+	}
 
-		// Attach ALL files under target/logs/ to the Cucumber report
+	@AfterAll()
+	public static void afterTest() {
+
+	}
+
+	private void attachLogs(Scenario scenario) {
 		File logsDir = new File("target/logs");
 		if (logsDir.exists() && logsDir.isDirectory()) {
 			File[] logFiles = logsDir.listFiles();
@@ -127,18 +144,6 @@ public class TestHooks {
 		} else {
 			logger.warn("Logs directory does not exist: " + logsDir.getAbsolutePath());
 		}
-
-		logger.info("******************************************************************************************");
-		logger.info("Scenario Finished: " + scenario.getName());
-		logger.info("Scenario Status: " + scenario.getStatus());
-		logger.info("Total Duration: " + duration + "ms");
-		logger.info("******************************************************************************************");
-		logger.info("Closing browser and cleaning up context.");
-		page.close();
-		context.close();
-		browser.close();
-		scenarioStartTime.remove();
-		stepStartTime.remove();
 	}
 
 	private String resolveMimeType(String fileName) {
@@ -156,10 +161,6 @@ public class TestHooks {
 		if (lower.endsWith(".html"))
 			return "text/html";
 		return "application/octet-stream";
-	}
-
-	@AfterAll()
-	public static void afterTest() {
 	}
 
 }

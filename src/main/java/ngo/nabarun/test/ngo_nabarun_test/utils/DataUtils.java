@@ -105,7 +105,7 @@ public class DataUtils {
 	 * @return A new string with all identified placeholders replaced by generated
 	 *         values.
 	 */
-	public static String replacePlaceholders(String input) {
+	private static String replacePlaceholders(String input) {
 		if (input == null || input.isEmpty()) {
 			return input;
 		}
@@ -290,7 +290,7 @@ public class DataUtils {
 	 * @param context The ScenarioContext to look up variables
 	 * @return The resolved string
 	 */
-	public static String resolveVariables(String input, ScenarioContext context) {
+	private static String resolveVariables(String input, ScenarioContext context) {
 		if (input == null || !input.contains("{") || context == null) {
 			return input;
 		}
@@ -319,10 +319,12 @@ public class DataUtils {
 	 * @return The fully resolved string
 	 */
 	public static String resolveData(String input, ScenarioContext context) {
-		logger.info("Resolving data for input: {}", input);
-		String step1 = replacePlaceholders(input);
-		logger.info("Resolved data for input: {}", step1);
-		return resolveVariables(step1, context);
+		String data_resolved = replacePlaceholders(input);
+		String variable_resolved = resolveVariables(data_resolved, context);
+		if (!variable_resolved.equals(input)) {
+			logger.info("Resolved data for input: {} => {}", input, variable_resolved);
+		}
+		return variable_resolved;
 	}
 
 	public static String extractValueByPath(String json, String path) {

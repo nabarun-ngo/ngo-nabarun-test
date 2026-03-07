@@ -21,6 +21,7 @@ import ngo.nabarun.test.ngo_nabarun_test.repository.ExpenseDAO;
 import ngo.nabarun.test.ngo_nabarun_test.repository.AccountDAO;
 import ngo.nabarun.test.ngo_nabarun_test.repository.MeetingDAO;
 import ngo.nabarun.test.ngo_nabarun_test.repository.ProjectTeamMemberDAO;
+import ngo.nabarun.test.ngo_nabarun_test.repository.WorkflowDAO;
 import ngo.nabarun.test.ngo_nabarun_test.utils.DBUtils;
 
 public class DataProvider {
@@ -114,6 +115,25 @@ public class DataProvider {
 			return DBUtils.getJdbi().withExtension(ProjectTeamMemberDAO.class, dao -> dao.findByUserEmail(email));
 		} catch (Exception e) {
 			logger.error("Error finding project team members by user email", e);
+			return null;
+		}
+	}
+
+	public int getAssignmentCountByWorkflowId(String workflowId, String userId) {
+		try {
+			return DBUtils.getJdbi().withExtension(WorkflowDAO.class,
+					dao -> dao.getAssignmentCountByWorkflowId(workflowId, userId));
+		} catch (Exception e) {
+			logger.error("Error getting assignment count by workflow id", e);
+			return 0;
+		}
+	}
+
+	public UserDBModel getUserByEmail(String email) {
+		try {
+			return DBUtils.getJdbi().withExtension(UserDAO.class, dao -> dao.findByEmail(email));
+		} catch (Exception e) {
+			logger.error("Error finding user by email", e);
 			return null;
 		}
 	}

@@ -29,6 +29,7 @@ Feature: Public facing pages
     Then I must be landed to "WELCOME TO NABARUN'S SECURED DASHBOARD" screen
     When I click on "Tasks" text at "Dashboard" page
     Then I must be landed to "My Tasks" screen
+    Then I wait for Task assignment to be completed for "{JoinRequestId}" workflow up to 90 seconds
     Then I click on "Advanced Search" button at "Tasks" page
     Then I perform advance search with the following fields
       | Field_Name  | Field_Type | Field_Action | Field_Value     |

@@ -20,7 +20,7 @@ Feature: Donation Management
     Then I store "{RandomName}" value as "DonorName" variable
     Then I store "{RandomEmail}" value as "DonorEmail" variable
     Then I store "9{RandomNumber:9}" value as "DonorPhone" variable
-    Then I store "{RandomNumber:3}" value as "DonationAmount" variable
+    Then I store "{RandomInt:100,999}" value as "DonationAmount" variable
     Then I fill the following fields in the create accordion
       | Field_Name                            | Field_Type | Field_Action | Field_Value      |
       | Donor name                            | textbox    | enter        | {DonorName}      |
@@ -49,7 +49,7 @@ Feature: Donation Management
       | Donation Details | Donation raised on | {SystemDate [dd/MM/yyyy]} |
     ## 5. Update Donation Amount
     Then I click "Update" button in the opened accordion
-    Then I store "{RandomNumber:3}" value as "DonationAmount" variable
+    Then I store "{RandomInt:100,999}" value as "DonationAmount" variable
     Then I fill the following fields in the opened accordion
       | Field_Name      | Field_Type | Field_Action | Field_Value      |
       | Donation amount | textbox    | enter        | {DonationAmount} |
@@ -126,7 +126,7 @@ Feature: Donation Management
     Then I click on "Add Icon" button at "Donation" page
     Then I store "{SystemDate [dd/MM/yyyy]}" value as "PaidOn" variable
     Then I store "{RandomName}" value as "DonorName" variable
-    Then I store "{RandomNumber:3}" value as "DonationAmount" variable
+    Then I store "{RandomInt:100,999}" value as "DonationAmount" variable
     Then I fill the following fields in the create accordion
       | Field_Name                            | Field_Type | Field_Action | Field_Value      |
       | Donor name                            | textbox    | enter        | {DonorName}      |
@@ -307,7 +307,7 @@ Feature: Donation Management
     Then I enter "Member TestUser" on "Member Search" autocomplete at "Donation" page
     Then I click on "Select" button at "Donation" page
     Then I click on "Add Icon" button at "Donation" page
-    Then I store "{RandomNumber:3}" value as "DonationAmount" variable
+    Then I store "{RandomInt:100,999}" value as "DonationAmount" variable
     Then I fill the following fields in the create accordion
       | Field_Name                            | Field_Type | Field_Action | Field_Value      |
       | Donation type                         | dropdown   | select       | One Time         |
@@ -368,7 +368,7 @@ Feature: Donation Management
     Then I enter "Member TestUser" on "Member Search" autocomplete at "Donation" page
     Then I click on "Select" button at "Donation" page
     Then I click on "Add Icon" button at "Donation" page
-    Then I store "{RandomNumber:3}" value as "DonationAmount" variable
+    Then I store "{RandomInt:100,999}" value as "DonationAmount" variable
     Then I store "{FirstOfCurrentMonth}" value as "DonationStartDate" variable
     Then I store "{LastOfCurrentMonth}" value as "DonationEndDate" variable
     Then I fill the following fields in the create accordion

@@ -13,6 +13,7 @@ import ngo.nabarun.test.ngo_nabarun_test.helpers.DataProvider;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 import ngo.nabarun.test.ngo_nabarun_test.page_objects.CommonPageObjects;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ControlLookup;
+import ngo.nabarun.test.ngo_nabarun_test.utilities.DevToolsUtility;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.ControlActions;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.SelfHealingLocator;
 import ngo.nabarun.test.ngo_nabarun_test.utils.DataUtils;
@@ -62,6 +63,9 @@ public class CommonStepDefinitions {
 		Page newWindowPage = page.context().waitForPage(element.getLocator()::click);
 		newWindowPage.setDefaultTimeout(Configs.IMPLICIT_WAIT);
 		scenarioContext.setPage(newWindowPage);
+		DevToolsUtility devToolsUtility = new DevToolsUtility(scenarioContext);
+		devToolsUtility.enableConsoleLogging(false);
+		devToolsUtility.enableNetworkLogging(true);
 		page.close();
 	}
 

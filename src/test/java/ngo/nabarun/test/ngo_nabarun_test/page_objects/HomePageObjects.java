@@ -46,4 +46,12 @@ public class HomePageObjects extends CommonPageObjects {
 		};
 	}
 
+	public Locator getButtonMapping(String elementName, Locator parent) {
+		return switch (elementName) {
+			case "Join Now" ->
+				scope(parent).getByRole(AriaRole.BUTTON, new Locator.GetByRoleOptions().setName(elementName));
+			default -> super.getButtonMapping(elementName, parent);
+		};
+	}
+
 }

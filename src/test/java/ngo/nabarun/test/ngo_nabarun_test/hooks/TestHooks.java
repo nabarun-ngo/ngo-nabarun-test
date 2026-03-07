@@ -2,6 +2,7 @@ package ngo.nabarun.test.ngo_nabarun_test.hooks;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -104,9 +105,14 @@ public class TestHooks {
 			scenario.attach(screenshot, "image/png", scenarioName + ".png");
 			logger.info("Attached to Cucumber report: " + scenarioName + ".png" + " (image/png)");
 			// attach log file
-			byte[] log_content = Files.readAllBytes(Paths.get(LOGS_DIR, scenarioName + ".log"));
-			scenario.attach(log_content, "text/plain", scenarioName + ".log");
-			logger.info("Attached to Cucumber report: " + scenarioName + ".log" + " (text/plain)");
+			Path logPath = Paths.get(LOGS_DIR, scenarioName + ".log");
+			if (Files.exists(logPath)) {
+				byte[] log_content = Files.readAllBytes(logPath);
+				scenario.attach(log_content, "text/plain", scenarioName + ".log");
+				logger.info("Attached to Cucumber report: " + scenarioName + ".log" + " (text/plain)");
+			} else {
+				logger.error("Log file not found: " + logPath);
+			}
 		}
 		logger.info("******************************************************************************************");
 		logger.info("Scenario Finished: " + scenario.getName());

@@ -15,4 +15,7 @@ public interface UserDAO {
 
     @SqlQuery("SELECT * FROM \"user_profiles\" inner join user_roles on user_profiles.id = user_roles.userId WHERE user_roles.roleCode = :roleCode")
     List<UserDBModel> findByRole(@Bind("roleCode") String roleCode);
+
+    @SqlQuery("SELECT * FROM \"user_profiles\" WHERE \"email\" = :email LIMIT 1")
+    UserDBModel findByEmail(@Bind("email") String email);
 }

@@ -383,8 +383,9 @@ public class ControlActions {
 
         // 1. Fill the input to trigger suggestions
         inputEl.click();
-        inputEl.fill("");
+        // inputEl.fill(value);
         inputEl.pressSequentially(value, new Locator.PressSequentiallyOptions().setDelay(150));
+        inputEl.click();
 
         Page page = this.scenarioContext.getPage();
 

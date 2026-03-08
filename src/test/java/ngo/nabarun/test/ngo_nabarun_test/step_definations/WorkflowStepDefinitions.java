@@ -1,7 +1,8 @@
 package ngo.nabarun.test.ngo_nabarun_test.step_definations;
 
 import java.util.List;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import io.cucumber.java.en.Then;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.DataProvider;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
@@ -17,6 +18,7 @@ public class WorkflowStepDefinitions {
 	// private final ControlActions controlActions;
 	// private final WorkflowPageObjects workflowPageObjects;
 	private final DataProvider dataProvider;
+	private static final Logger logger = LogManager.getLogger(WorkflowStepDefinitions.class);
 
 	public WorkflowStepDefinitions(ScenarioContext scenarioContext, ControlActions ca, DataProvider dp,
 			WorkflowPageObjects workflowPageObjects) {
@@ -46,10 +48,10 @@ public class WorkflowStepDefinitions {
 			workflowId = DataUtils.resolveData(workflowId, scenarioContext);
 			count = dataProvider.getAssignmentCountByWorkflowId(workflowId, user.getId());
 			if (count > 0) {
-				System.out.println("Workflow task assignment completed for: " + workflowId);
+				logger.info("Workflow task assignment completed for: " + workflowId);
 				break;
 			}
-			System.out.println("Waiting for task assignment for workflow " + workflowId + " for " + waitingTime
+			logger.info("Waiting for task assignment for workflow " + workflowId + " for " + waitingTime
 					+ " seconds.");
 			Thread.sleep(5000);
 			waitingTime += 5;

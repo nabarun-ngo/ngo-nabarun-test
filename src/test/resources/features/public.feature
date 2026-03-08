@@ -68,6 +68,7 @@ Feature: Public facing pages
     Then I must be landed to "WELCOME TO NABARUN'S SECURED DASHBOARD" screen
     Then I click on "Tasks" text at "Dashboard" page
     Then I must be landed to "My Tasks" screen
+    Then I wait for Task assignment to be completed for "{JoinRequestId}" workflow up to 90 seconds
     Then I click on "Advanced Search" button at "Tasks" page
     Then I perform advance search with the following fields
       | Field_Name  | Field_Type | Field_Action | Field_Value     |
@@ -97,10 +98,14 @@ Feature: Public facing pages
     Then I should see text "Check your email" at "Login" page
     Then I should see text "Please enter the 4-digit verification code that was sent to {NewUserEmail}. The code is valid for 10 minutes." at "Login" page
     Then I change "{NewUserEmail}" user's email as verified
-    Then I open Nabarun's internal portal
+    Then I have opened to Nabarun's internal portal
     Then I click on "Login with Password" button at "Login" page
     Then I handle change password screen
-    Then I handle user consent screen
+    ##### Temp arrangement to avoid issue with invalid state error
+    #Then I have opened to Nabarun's internal portal
+    #Then I login with "{NewUserEmail}" user using Password option
+    ####
+    Then I handle user consent screen if needed
     Then I wait for 5 seconds
     Then I refresh the current page
     Then I wait for 5 seconds
@@ -145,6 +150,7 @@ Feature: Public facing pages
     Then I must be landed to "WELCOME TO NABARUN'S SECURED DASHBOARD" screen
     Then I click on "Tasks" text at "Dashboard" page
     Then I must be landed to "My Tasks" screen
+    Then I wait for Task assignment to be completed for "{WorkflowId}" workflow up to 90 seconds
     Then I click on "Advanced Search" button at "Tasks" page
     Then I perform advance search with the following fields
       | Field_Name  | Field_Type | Field_Action | Field_Value  |
@@ -169,6 +175,7 @@ Feature: Public facing pages
     Then I must be landed to "WELCOME TO NABARUN'S SECURED DASHBOARD" screen
     Then I click on "Tasks" text at "Dashboard" page
     Then I must be landed to "My Tasks" screen
+    Then I wait for Task assignment to be completed for "{WorkflowId}" workflow up to 90 seconds
     Then I click on "Advanced Search" button at "Tasks" page
     Then I perform advance search with the following fields
       | Field_Name  | Field_Type | Field_Action | Field_Value  |
@@ -204,6 +211,7 @@ Feature: Public facing pages
     Then I click on "Back to Dashboard" text at "Members" page
     Then I click on "Tasks" text at "Dashboard" page
     Then I must be landed to "My Tasks" screen
+    Then I wait for Task assignment to be completed for "{WorkflowId}" workflow up to 90 seconds
     Then I click on "Advanced Search" button at "Tasks" page
     Then I perform advance search with the following fields
       | Field_Name  | Field_Type | Field_Action | Field_Value  |
@@ -225,6 +233,7 @@ Feature: Public facing pages
     ## Verification existing member is removed from list
     Then I click on "Members" text at "Dashboard" page
     Then I must be landed to "MEMBERS" screen
+    Then I wait for 60 seconds
     Then I click on "Advanced Search" button at "Members" page
     Then I perform advance search with the following fields
       | Field_Name | Field_Type | Field_Action | Field_Value    |

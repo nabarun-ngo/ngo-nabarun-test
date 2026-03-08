@@ -20,6 +20,7 @@ import io.cucumber.java.Scenario;
 import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
 import ngo.nabarun.test.ngo_nabarun_test.utilities.DevToolsUtility;
+import ngo.nabarun.test.ngo_nabarun_test.utils.DBUtils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -113,6 +114,12 @@ public class TestHooks {
 			} else {
 				logger.error("Log file not found: " + logPath);
 			}
+			Path testLogPath = Paths.get(LOGS_DIR, "test.log");
+			if (Files.exists(testLogPath)) {
+				byte[] test_log_content = Files.readAllBytes(testLogPath);
+				scenario.attach(test_log_content, "text/plain", "test.log");
+				logger.info("Attached to Cucumber report: " + "test.log" + " (text/plain)");
+			}
 		}
 		logger.info("******************************************************************************************");
 		logger.info("Scenario Finished: " + scenario.getName());
@@ -129,6 +136,7 @@ public class TestHooks {
 
 	@AfterAll()
 	public static void afterTest() {
-
+		DBUtils.close();
+		logger.info("Database connection pool closed.");
 	}
 }

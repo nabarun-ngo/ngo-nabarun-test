@@ -321,7 +321,7 @@ public class DataUtils {
 	public static String resolveData(String input, ScenarioContext context) {
 		String data_resolved = replacePlaceholders(input);
 		String variable_resolved = resolveVariables(data_resolved, context);
-		if (!variable_resolved.equals(input)) {
+		if (variable_resolved != null && !variable_resolved.equals(input)) {
 			logger.info("Resolved data for input: {} => {}", input, variable_resolved);
 		}
 		return variable_resolved;

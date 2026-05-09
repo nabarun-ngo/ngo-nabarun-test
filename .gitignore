@@ -68,3 +68,4 @@ springboot-env.conf
 .settings
 ngo-nabarun-test.iml
 /.apt_generated_tests/
+**/allure-results/*

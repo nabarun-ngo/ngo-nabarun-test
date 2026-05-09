@@ -14,6 +14,8 @@ public class LoginPageObjects extends CommonPageObjects {
 	
 	public String AcceptConsentLocator="//*[text()='Accept']";
 	public String PasswordChangedTxtLocator="//*[normalize-space(text())='Your old password has been expired']";
+	public String LoginPageHeaderLocator = "//*[normalize-space(text())='Welcome to Nabarun']";
+	public String ContinueWithPasswordButtonLocator = "#password";
 	
 	
 	public Supplier<Locator> ContinueWithPasswordButton = () -> findLocator("#password");

@@ -11,6 +11,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import io.cucumber.plugin.event.Status;
 
+import ngo.nabarun.test.ngo_nabarun_test.utils.StepState;
+
 public class EventListener implements ConcurrentEventListener {
     private static final Logger logger = LogManager.getLogger(EventListener.class);
 
@@ -23,6 +25,7 @@ public class EventListener implements ConcurrentEventListener {
     private final EventHandler<TestStepStarted> stepStartedHandler = event -> {
         if (event.getTestStep() instanceof PickleStepTestStep pickleStep) {
             String stepName = pickleStep.getStep().getText();
+            StepState.setCurrentStep(stepName);
             logger.info("-----Step '" + stepName + "' Started-----");
         }
     };

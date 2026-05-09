@@ -83,6 +83,37 @@ public class TestHooks {
 
 	@BeforeStep
 	public void beforeStep(Scenario scenario) {
+		if (Configs.IS_SHOW_STEP_OVERLAY) {
+			String stepName = ngo.nabarun.test.ngo_nabarun_test.utils.StepState.getCurrentStep();
+			if (stepName != null && scenarioContext.getPage() != null) {
+				try {
+					scenarioContext.getPage().evaluate("step => {" +
+							"let el = document.getElementById('cucumber-step-overlay');" +
+							"if (!el) {" +
+							"  el = document.createElement('div');" +
+							"  el.id = 'cucumber-step-overlay';" +
+							"  el.style.position = 'fixed';" +
+							"  el.style.bottom = '10px';" +
+							"  el.style.right = '10px';" +
+							"  el.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';" +
+							"  el.style.color = 'white';" +
+							"  el.style.padding = '10px 15px';" +
+							"  el.style.borderRadius = '8px';" +
+							"  el.style.zIndex = '10000';" +
+							"  el.style.fontSize = '14px';" +
+							"  el.style.fontFamily = 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif';" +
+							"  el.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)';" +
+							"  el.style.pointerEvents = 'none';" +
+							"  el.style.transition = 'opacity 0.3s';" +
+							"  document.body.appendChild(el);" +
+							"}" +
+							"el.innerHTML = '<b>Current Step:</b><br/>' + step;" +
+							"}", stepName);
+				} catch (Exception e) {
+					// ignore if page is not ready or closed
+				}
+			}
+		}
 	}
 
 	@AfterStep

@@ -294,7 +294,7 @@ Feature: Public facing pages
     Then I enter "{RandomInt:100,5000}" on "Donation Amount" textbox at "Home" page
     Then I enter "{RandomName}" on "Full Name" textbox at "Home" page
     Then I enter "{RandomEmail}" on "Email Address" textbox at "Home" page
-    Then I enter "9{RandomNumber:9}" on "Mobile Number" textbox at "Home" page
+    Then I enter "9{RandomNumber:9}" on "Your Mobile Number (Donate)" textbox at "Home" page
     Then I click on "Donate Now" button at "Home" page and collect "id" from response of "/donate" and store as "DonationRequestId"
     Then I wait for following text to display at "Home" page
       | Expected_Content                                                                                       |
@@ -321,7 +321,7 @@ Feature: Public facing pages
       | Task Status                                   | dropdown   | select       | Completed         |
       | Remarks                                       | textarea   | enter        | Task is done      |
       | Has the donation been collected successfully? | dropdown   | select       | Yes               |
-      | Payment Transaction Reference                 | textarea   | enter        | {RandomNumber:10} |
+      | Payment Transaction Reference                 | textbox    | enter        | {RandomNumber:10} |
     Then I click "Confirm" button in the opened accordion
     Then The accordions should have exactly 0 rows
     Then I click on "Completed Tasks" text at "Tasks" page
@@ -329,5 +329,4 @@ Feature: Public facing pages
       | Field_Name  | Field_Type | Field_Action | Field_Value         |
       | Workflow ID | textbox    | enter        | {DonationRequestId} |
     Then The accordions should have exactly 1 rows
-    Then I wait for 1000 seconds
     Then I logout from current session

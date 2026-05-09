@@ -11,6 +11,5 @@ import static io.cucumber.junit.platform.engine.Constants.*;
 @IncludeEngines("cucumber")
 @SelectClasspathResource("features") // folder under src/test/resources/
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "ngo.nabarun.test.ngo_nabarun_test")
-@ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "ngo.nabarun.test.ngo_nabarun_test.hooks.EventListener")
 public class RunNGONabarunTest {
 }

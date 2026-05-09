@@ -26,11 +26,13 @@ public class HomePageObjects extends CommonPageObjects {
 
 	public Locator getTextBoxMapping(String elementName, Locator parentContext, boolean isTextArea) {
 		return switch (elementName) {
+			case "Donation Amount" -> findLocator("#amount");
 			case "Your Name" -> findLocator("//input[@name='fullName']", ContactForm.get(), FindBy.XPATH);
 			case "Your Email (JoinUs)" -> Join_Email.get();
 			case "Your Mobile Number (JoinUs)" -> Join_Mobile.get();
 			case "Your Email (ContactUs)" -> Contact_Email.get();
 			case "Your Mobile Number (ContactUs)" -> Contact_Mobile.get();
+			case "Your Mobile Number (Donate)" -> findLocator("#mobileno");
 			default ->
 				scope(parentContext).getByRole(AriaRole.TEXTBOX, new Locator.GetByRoleOptions().setName(elementName));
 		};
@@ -47,6 +49,7 @@ public class HomePageObjects extends CommonPageObjects {
 	@Override
 	public Locator getLinkMapping(String elementName, Locator parent) {
 		return switch (elementName) {
+			case "Donate Now" -> findLocator("//*[@id=\"navbarCollapse\"]/div[2]/a");
 			case "Join Us", "Contact Us" ->
 				findLocator("nav").getByRole(AriaRole.LINK, new Locator.GetByRoleOptions().setName(elementName));
 			default -> super.getLinkMapping(elementName, parent);
@@ -55,6 +58,7 @@ public class HomePageObjects extends CommonPageObjects {
 
 	public Locator getButtonMapping(String elementName, Locator parent) {
 		return switch (elementName) {
+			case "Donate Now" -> findLocator("//button[string()='Donate Now']");
 			case "Join Now", "Send Message" ->
 				scope(parent).getByRole(AriaRole.BUTTON, new Locator.GetByRoleOptions().setName(elementName));
 			default -> super.getButtonMapping(elementName, parent);

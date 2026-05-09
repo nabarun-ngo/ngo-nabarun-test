@@ -58,26 +58,47 @@ public class EventListener implements ConcurrentEventListener {
     private void injectOverlay(Page page, String stepName) {
         try {
             page.evaluate("step => {" +
-                    "let el = document.getElementById('cucumber-step-overlay');" +
-                    "if (!el) {" +
-                    "  el = document.createElement('div');" +
-                    "  el.id = 'cucumber-step-overlay';" +
-                    "  el.style.position = 'fixed';" +
-                    "  el.style.bottom = '10px';" +
-                    "  el.style.right = '10px';" +
-                    "  el.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';" +
-                    "  el.style.color = 'white';" +
-                    "  el.style.padding = '10px 15px';" +
-                    "  el.style.borderRadius = '8px';" +
-                    "  el.style.zIndex = '10000';" +
-                    "  el.style.fontSize = '14px';" +
-                    "  el.style.fontFamily = 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif';" +
-                    "  el.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)';" +
-                    "  el.style.pointerEvents = 'none';" +
-                    "  el.style.transition = 'opacity 0.3s';" +
-                    "  document.body.appendChild(el);" +
+                    "let host = document.getElementById('cucumber-step-overlay-host');" +
+                    "if (!host) {" +
+                    "  host = document.createElement('div');" +
+                    "  host.id = 'cucumber-step-overlay-host';" +
+                    "  document.body.appendChild(host);" +
+                    "  const shadow = host.attachShadow({mode: 'open'});" +
+                    "  const style = document.createElement('style');" +
+                    "  style.textContent = `" +
+                    "    #overlay {" +
+                    "      position: fixed;" +
+                    "      bottom: 10px;" +
+                    "      right: 10px;" +
+                    "      background-color: rgba(0, 0, 0, 0.7);" +
+                    "      color: white;" +
+                    "      padding: 10px 15px;" +
+                    "      border-radius: 8px;" +
+                    "      z-index: 2147483647;" +
+                    "      font-size: 14px;" +
+                    "      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;" +
+                    "      box-shadow: 0 4px 6px rgba(0,0,0,0.3);" +
+                    "      pointer-events: none;" +
+                    "      transition: opacity 0.3s;" +
+                    "      white-space: pre-wrap;" +
+                    "      line-height: 1.4;" +
+                    "    }" +
+                    "    #overlay::before {" +
+                    "      content: 'Current Step:';" +
+                    "      font-weight: bold;" +
+                    "      display: block;" +
+                    "      margin-bottom: 4px;" +
+                    "      text-decoration: underline;" +
+                    "    }" +
+                    "    #overlay::after {" +
+                    "      content: var(--step-name);" +
+                    "    }`;" +
+                    "  const el = document.createElement('div');" +
+                    "  el.id = 'overlay';" +
+                    "  shadow.appendChild(style);" +
+                    "  shadow.appendChild(el);" +
                     "}" +
-                    "el.innerHTML = '<b>Current Step:</b><br/>' + step;" +
+                    "host.shadowRoot.getElementById('overlay').style.setProperty('--step-name', JSON.stringify(step));" +
                     "}", stepName);
         } catch (Exception e) {
             // ignore if page is not ready or closed

@@ -13,7 +13,7 @@ set "PUBLIC_DIR=%BASE_DIR%\ngo-nabarun-public"
 
 echo [1/3] Starting NestJS Backend Service...
 if exist "!BE_DIR!" (
-    start "Nabarun Backend (NestJS)" cmd /c "cd /d !BE_DIR! && echo Starting Backend... && npm run start:dev"
+    start "Nabarun Backend (NestJS)" cmd /c "cd /d !BE_DIR! && echo Starting Backend... && npm run start"
 ) else (
     echo [ERROR] Backend directory not found: !BE_DIR!
 )

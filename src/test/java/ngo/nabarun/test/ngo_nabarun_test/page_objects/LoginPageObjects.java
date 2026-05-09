@@ -22,7 +22,7 @@ public class LoginPageObjects extends CommonPageObjects {
 	public Supplier<Locator> LoginPassword = () -> findLocator("#password");
 	public Supplier<Locator> LoginSubmit = () -> findLocator("//button[@type='submit']");
 
-	public Supplier<Locator> LoginPageHeader = () -> findLocator("//p[normalize-space(text())='Welcome to Nabarun']");
+	public Supplier<Locator> LoginPageHeader = () -> findLocator("//*[normalize-space(text())='Welcome to Nabarun']");
 	public Supplier<Locator> NewPassword = () -> findLocator("//*[@placeholder='Enter new password']");
 	public Supplier<Locator> ConfirmNewPassword = () -> findLocator("//*[@placeholder='Confirm new password']");
 	public Supplier<Locator> ChangePasswordSubmit = () -> findLocator(".af-nextButton");

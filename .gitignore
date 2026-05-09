@@ -67,3 +67,4 @@ springboot-env.conf
 .project
 .settings
 ngo-nabarun-test.iml
+/.apt_generated_tests/

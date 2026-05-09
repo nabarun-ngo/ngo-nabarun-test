@@ -13,16 +13,24 @@ public class HomePageObjects extends CommonPageObjects {
 		super(scenarioContext);
 	}
 
-	public Supplier<Locator> Join_Email = () -> findLocator("//div[@id='join']//input[@id='email']");
-	public Supplier<Locator> Join_Mobile = () -> findLocator("//div[@id='join']//input[@id='contactNumber']");
-	public Supplier<Locator> Join_Email_Text = () -> findLocator("#id");
-	public Supplier<Locator> Join_OTP = () -> findLocator("#otp");
-	public Supplier<Locator> Request_Alert = () -> findLocator(".alert-success");
+	public Supplier<Locator> JoinForm = () -> findLocator("//div[@id='join']");
+
+	public Supplier<Locator> Join_Email = () -> findLocator("//input[@id='email']", JoinForm.get(), FindBy.XPATH);
+	public Supplier<Locator> Join_Mobile = () -> findLocator("//input[@id='contactNumber']", JoinForm.get(),
+			FindBy.XPATH);
+
+	public Supplier<Locator> ContactForm = () -> findLocator("//div[@id='contact']");
+	public Supplier<Locator> Contact_Email = () -> findLocator("//input[@id='email']", ContactForm.get(), FindBy.XPATH);
+	public Supplier<Locator> Contact_Mobile = () -> findLocator("//input[@id='contactNumber']", ContactForm.get(),
+			FindBy.XPATH);
 
 	public Locator getTextBoxMapping(String elementName, Locator parentContext, boolean isTextArea) {
 		return switch (elementName) {
+			case "Your Name" -> findLocator("//input[@name='fullName']", ContactForm.get(), FindBy.XPATH);
 			case "Your Email (JoinUs)" -> Join_Email.get();
 			case "Your Mobile Number (JoinUs)" -> Join_Mobile.get();
+			case "Your Email (ContactUs)" -> Contact_Email.get();
+			case "Your Mobile Number (ContactUs)" -> Contact_Mobile.get();
 			default ->
 				scope(parentContext).getByRole(AriaRole.TEXTBOX, new Locator.GetByRoleOptions().setName(elementName));
 		};
@@ -32,7 +40,6 @@ public class HomePageObjects extends CommonPageObjects {
 	public Locator getTextMapping(String elementName, Locator parent) {
 		return switch (elementName) {
 			case "I agree with the Rules and Regulations of Nabarun" -> findLocator("#acceptance");
-			case "Your Mobile Number (JoinUs)" -> Join_Mobile.get();
 			default -> super.getTextMapping(elementName, parent);
 		};
 	}
@@ -40,7 +47,7 @@ public class HomePageObjects extends CommonPageObjects {
 	@Override
 	public Locator getLinkMapping(String elementName, Locator parent) {
 		return switch (elementName) {
-			case "Join Us" ->
+			case "Join Us", "Contact Us" ->
 				findLocator("nav").getByRole(AriaRole.LINK, new Locator.GetByRoleOptions().setName(elementName));
 			default -> super.getLinkMapping(elementName, parent);
 		};
@@ -48,7 +55,7 @@ public class HomePageObjects extends CommonPageObjects {
 
 	public Locator getButtonMapping(String elementName, Locator parent) {
 		return switch (elementName) {
-			case "Join Now" ->
+			case "Join Now", "Send Message" ->
 				scope(parent).getByRole(AriaRole.BUTTON, new Locator.GetByRoleOptions().setName(elementName));
 			default -> super.getButtonMapping(elementName, parent);
 		};

@@ -76,6 +76,7 @@ public class TestHooks {
 		logger.info("New page created and timeout set to " + Configs.IMPLICIT_WAIT + "ms");
 		page.setDefaultTimeout(Configs.IMPLICIT_WAIT);
 		scenarioContext.setPage(page);
+		ngo.nabarun.test.ngo_nabarun_test.utils.StepState.setPage(page);
 		DevToolsUtility devToolsUtility = new DevToolsUtility(scenarioContext);
 		devToolsUtility.enableConsoleLogging(false);
 		devToolsUtility.enableNetworkLogging(true);
@@ -132,6 +133,7 @@ public class TestHooks {
 		browser.close();
 		scenarioStartTime.remove();
 		ThreadContext.remove("scenarioName");
+		ngo.nabarun.test.ngo_nabarun_test.utils.StepState.clear();
 	}
 
 	@AfterAll()

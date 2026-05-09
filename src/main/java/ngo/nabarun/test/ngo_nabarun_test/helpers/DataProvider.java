@@ -125,7 +125,7 @@ public class DataProvider {
 					dao -> dao.getAssignmentCountByWorkflowId(workflowId, userId));
 		} catch (Exception e) {
 			logger.error("Error getting assignment count by workflow id", e);
-			return 0;
+			throw e;
 		}
 	}
 

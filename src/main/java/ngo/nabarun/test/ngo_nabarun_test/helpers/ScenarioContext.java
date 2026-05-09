@@ -48,6 +48,7 @@ public class ScenarioContext {
 
 	public void setPage(Page page) {
 		this.page = page;
+		ngo.nabarun.test.ngo_nabarun_test.utils.StepState.setPage(page);
 	}
 
 	public Page getPage() {

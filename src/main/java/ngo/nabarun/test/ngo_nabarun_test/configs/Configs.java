@@ -17,6 +17,7 @@ public class Configs {
 	public static final boolean IS_HEADLESS = TRUE_MATRIX.contains(ConfigManager.get("HEADLESS", "false"));
 	public static final boolean IS_DEBUG_HIGHLIGHT = TRUE_MATRIX.contains(ConfigManager.get("DEBUG_HIGHLIGHT", "true"));
 	public static final boolean IS_AUTO_HEAL = TRUE_MATRIX.contains(ConfigManager.get("AUTO_HEAL", "false"));
+	public static final boolean IS_SHOW_STEP_OVERLAY = TRUE_MATRIX.contains(ConfigManager.get("SHOW_STEP_OVERLAY", "false"));
 
 	public static final String AUTH0_CLIENT_ID = ConfigManager.get("AUTH0_CLIENT_ID", "");
 	public static final String AUTH0_CLIENT_SECRET = ConfigManager.get("AUTH0_CLIENT_SECRET", "");

@@ -72,8 +72,14 @@ public class LoginStepDefinations {
 				handle_change_password_screen(expectedToAppear);
 				break;
 			case "all conditional post login":
+				if (isAtLoginScreen()) {
+					reLogin();
+				}
 				handle_change_password_screen(expectedToAppear);
 				handle_user_consent_screen(expectedToAppear);
+				if (isAtLoginScreen()) {
+					reLogin();
+				}
 				break;
 			default:
 				throw new RuntimeException("Screen '" + screen + "' is not allowed.");
@@ -112,6 +118,20 @@ public class LoginStepDefinations {
 			Thread.sleep(5000); // wait for the change password to complete
 			scenarioContext.getPage().reload();
 			Thread.sleep(5000);
+		}
+	}
+
+	private boolean isAtLoginScreen() {
+		return controlActions.isElementPresent(pageObject.LoginPageHeaderLocator, 2)
+				|| controlActions.isElementPresent(pageObject.ContinueWithPasswordButtonLocator, 2);
+	}
+
+	private void reLogin() throws Exception {
+		String loginId = scenarioContext.get(ContextKeys.Login_Id, String.class);
+		String loginIdType = scenarioContext.get(ContextKeys.Login_Id_Type, String.class);
+		String loginOption = scenarioContext.get(ContextKeys.Login_Option, String.class);
+		if (loginId != null && loginIdType != null && loginOption != null) {
+			i_performed_login_with_an_user_having_role(loginId, loginIdType, loginOption);
 		}
 	}
 

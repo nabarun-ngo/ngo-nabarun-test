@@ -4,7 +4,7 @@ Feature: Public facing pages
   Background:
     Given I have opened to Nabarun's public portal
 
-  @regression @smoke @public01
+  @regression @smoke @public01 @public
   Scenario: Public - Create and fullfill Join Request - Happy Path
     ## Create Join Request from public portal
     Then I click on "Join Us" link at "Home" page
@@ -240,4 +240,93 @@ Feature: Public facing pages
       | Email      | textbox    | enter        | {NewUserEmail} |
     Then I wait for "No member found." text to be visible at "Members" page
     Then I wait for 5 seconds
+    Then I logout from current session
+
+  @regression @public02 @public
+  Scenario: Public - Create and fullfill Contact Us Request - Happy Path
+    ## Create Contact Us Request from public portal
+    Then I click on "Contact Us" link at "Home" page
+    Then I enter "{RandomName}" on "Your Name" textbox at "Home" page
+    Then I enter "{RandomEmail}" on "Your Email (ContactUs)" textbox at "Home" page
+    Then I enter "9{RandomNumber:9}" on "Your Mobile Number (ContactUs)" textbox at "Home" page
+    Then I enter "{RandomWord:2}" on "Subject" textbox at "Home" page
+    Then I enter "{RandomWord:50}" on "Message" textarea at "Home" page
+    Then I click on "Send Message" button at "Home" page and collect "id" from response of "/contact" and store as "ContactRequestId"
+    Then I wait for following text to display at "Home" page
+      | Expected_Content                                        |
+      | Thank you for your message! We'll get back to you soon. |
+    Then I click on "Login" link at "Home" page and wait for new window to load
+    ## Approval of 'Contact Us Request' workflow by Group Coordinator
+    Then I login with "groupcoordinator@nabarun.com" user using Password option
+    Then I handle all conditional post login screen if needed
+    Then I must be landed to "WELCOME TO NABARUN'S SECURED DASHBOARD" screen
+    When I click on "Tasks" text at "Dashboard" page
+    Then I must be landed to "My Tasks" screen
+    Then I wait for Task assignment to be completed for "{ContactRequestId}" workflow up to 90 seconds
+    Then I click on "Advanced Search" button at "Tasks" page
+    Then I perform advance search with the following fields
+      | Field_Name  | Field_Type | Field_Action | Field_Value        |
+      | Workflow ID | textbox    | enter        | {ContactRequestId} |
+    Then The accordions should have exactly 1 rows
+    Then I open the 1st accordion
+    Then I click "Accept" button in the opened accordion
+    Then I open the 1st accordion
+    Then I click "Update" button in the opened accordion
+    Then I fill the following fields in the opened accordion
+      | Field_Name                                  | Field_Type | Field_Action | Field_Value     |
+      | Task Status                                 | dropdown   | select       | Completed       |
+      | Remarks                                     | textarea   | enter        | Task is done    |
+      | Has the request been successfully resolved? | dropdown   | select       | Yes             |
+      | Resolution Remarks                          | textarea   | enter        | Test resolution |
+    Then I click "Confirm" button in the opened accordion
+    Then The accordions should have exactly 0 rows
+    Then I click on "Completed Tasks" text at "Tasks" page
+    Then I perform advance search with the following fields
+      | Field_Name  | Field_Type | Field_Action | Field_Value        |
+      | Workflow ID | textbox    | enter        | {ContactRequestId} |
+    Then The accordions should have exactly 1 rows
+    Then I logout from current session
+
+  @regression @public03 @public
+  Scenario: Public - Create and fullfill Donation Request - Happy Path
+    ## Create Donation Request from public portal
+    Then I click on "Donate Now" link at "Home" page
+    Then I enter "{RandomInt:100,5000}" on "Donation Amount" textbox at "Home" page
+    Then I enter "{RandomName}" on "Full Name" textbox at "Home" page
+    Then I enter "{RandomEmail}" on "Email Address" textbox at "Home" page
+    Then I enter "9{RandomNumber:9}" on "Your Mobile Number (Donate)" textbox at "Home" page
+    Then I click on "Donate Now" button at "Home" page and collect "id" from response of "/donate" and store as "DonationRequestId"
+    Then I wait for following text to display at "Home" page
+      | Expected_Content                                                                                       |
+      | Thank you for your interest in donating to us! We will contact you soon to arrange payment collection. |
+    Then I click on "Login" link at "Home" page and wait for new window to load
+    ## Approval of 'Donation Request' workflow by Cashier
+    Then I login with "cashier@nabarun.com" user using Password option
+    Then I handle all conditional post login screen if needed
+    Then I must be landed to "WELCOME TO NABARUN'S SECURED DASHBOARD" screen
+    When I click on "Tasks" text at "Dashboard" page
+    Then I must be landed to "My Tasks" screen
+    Then I wait for Task assignment to be completed for "{DonationRequestId}" workflow up to 90 seconds
+    Then I click on "Advanced Search" button at "Tasks" page
+    Then I perform advance search with the following fields
+      | Field_Name  | Field_Type | Field_Action | Field_Value         |
+      | Workflow ID | textbox    | enter        | {DonationRequestId} |
+    Then The accordions should have exactly 1 rows
+    Then I open the 1st accordion
+    Then I click "Accept" button in the opened accordion
+    Then I open the 1st accordion
+    Then I click "Update" button in the opened accordion
+    Then I fill the following fields in the opened accordion
+      | Field_Name                                    | Field_Type | Field_Action | Field_Value       |
+      | Task Status                                   | dropdown   | select       | Completed         |
+      | Remarks                                       | textarea   | enter        | Task is done      |
+      | Has the donation been collected successfully? | dropdown   | select       | Yes               |
+      | Payment Transaction Reference                 | textbox    | enter        | {RandomNumber:10} |
+    Then I click "Confirm" button in the opened accordion
+    Then The accordions should have exactly 0 rows
+    Then I click on "Completed Tasks" text at "Tasks" page
+    Then I perform advance search with the following fields
+      | Field_Name  | Field_Type | Field_Action | Field_Value         |
+      | Workflow ID | textbox    | enter        | {DonationRequestId} |
+    Then The accordions should have exactly 1 rows
     Then I logout from current session

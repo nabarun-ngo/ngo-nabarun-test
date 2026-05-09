@@ -9,7 +9,7 @@ Feature: Requests & Worklist
     Then I click on "Requests" text at "Dashboard" page
     Then I must be landed to "Requests" screen
 
-  @regression @workflow01
+  @regression @workflow01 @workflow
   Scenario: Request - Create and fullfill Join Request - For Others
     Then I store "{RandomFirstName}" value as "NewUserFirstName" variable
     Then I store "{RandomLastName}" value as "NewUserLastName" variable

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="WARN">
+<Configuration status="WARN" packages="ngo.nabarun.test.ngo_nabarun_test.utils">
     <Properties>
         <!-- Reads LOG_LEVEL from Environment Variables, fallback to INFO if not set -->
         <Property name="logLevel">${env:LOG_LEVEL:-INFO}</Property>
@@ -13,32 +13,23 @@
             <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
         </Console>
 
-        <!-- Dynamic File Logging per scenario -->
-        <Routing name="RoutingAppender">
-            <Routes pattern="$${ctx:scenarioName}">
-                <!-- This route is chosen when scenarioName is set in ThreadContext -->
-                <Route>
-                    <File name="FileLogger-${ctx:scenarioName}" fileName="target/logs/${ctx:scenarioName}.log" immediateFlush="true">
-                        <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level - %msg%n" />
-                        <ThresholdFilter level="${logLevel}" onMatch="ACCEPT" onMismatch="DENY"/>
-                    </File>
-                </Route>
-                
-                <!-- Default route when scenarioName is not set -->
-                <Route key="$${ctx:scenarioName}">
-                    <File name="DefaultFileLogger" fileName="target/logs/test.log" immediateFlush="true">
-                        <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level - %msg%n" />
-                        <ThresholdFilter level="${logLevel}" onMatch="ACCEPT" onMismatch="DENY"/>
-                    </File>
-                </Route>
-            </Routes>
-        </Routing>
+        <!-- Overall Execution Log File -->
+        <File name="ExecutionFile" fileName="target/execution.log" immediateFlush="true">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level - %msg%n" />
+            <ThresholdFilter level="${logLevel}" onMatch="ACCEPT" onMismatch="DENY"/>
+        </File>
+
+        <!-- Programmatic Memory Logging for Cucumber Reports -->
+        <MemoryAppender name="MemoryAppender">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level - %msg%n" />
+        </MemoryAppender>
     </Appenders>
 
     <Loggers>
         <Root level="${logLevel}">
             <AppenderRef ref="Console"/>
-            <AppenderRef ref="RoutingAppender"/>
+            <AppenderRef ref="ExecutionFile"/>
+            <AppenderRef ref="MemoryAppender"/>
         </Root>
     </Loggers>
 </Configuration>

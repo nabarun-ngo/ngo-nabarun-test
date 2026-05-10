@@ -332,7 +332,7 @@ Feature: API Tests for Donation
       | Attribute              | Value   |
       | responsePayload.status | PENDING |
     ## 10. Transition to 'Pay Later' (PAY_LATER)
-    Then I send a PATCH request to "/donation/{DonationId}/update1" with payload:
+    Then I send a PATCH request to "/donation/{DonationId}/update" with payload:
       """
       {
         "status": "PAY_LATER",

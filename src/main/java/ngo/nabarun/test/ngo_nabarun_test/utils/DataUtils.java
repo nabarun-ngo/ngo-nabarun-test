@@ -329,8 +329,10 @@ public class DataUtils {
 
 	public static String extractValueByPath(String json, String path) {
 		try {
-			ObjectMapper mapper = CommonUtils.getObjectMapper();
+			ObjectMapper mapper = new ObjectMapper();
 			JsonNode node = mapper.readTree(json);
+			// Support both dot notation and simple array access
+			// Example: data.items[0].id
 			String[] parts = path.split("\\.");
 			for (String part : parts) {
 				if (part.contains("[") && part.contains("]")) {
@@ -340,12 +342,13 @@ public class DataUtils {
 				} else {
 					node = node.get(part);
 				}
-				if (node == null || node.isMissingNode())
+				if (node == null || node.isMissingNode()) {
 					throw new RuntimeException("Path not found: " + path + " at part: " + part);
+				}
 			}
 			return node.isValueNode() ? node.asText() : node.toString();
 		} catch (Exception e) {
-			throw new RuntimeException("Failed to extract value from response: " + e.getMessage(), e);
+			throw new RuntimeException("Failed to extract value from response using path '" + path + "': " + e.getMessage(), e);
 		}
 	}
 

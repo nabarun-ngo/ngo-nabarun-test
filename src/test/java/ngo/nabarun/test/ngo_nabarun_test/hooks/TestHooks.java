@@ -31,6 +31,8 @@ public class TestHooks {
 	private final ScenarioContext scenarioContext;
 	private Browser browser;
 	private BrowserContext context;
+	private Playwright playwright;
+	private APIRequestContext requestContext;
 	private final ThreadLocal<Long> scenarioStartTime = new ThreadLocal<>();
 	private static final String LOGS_DIR = "target/logs";
 
@@ -52,34 +54,42 @@ public class TestHooks {
 		logger.info("Scenario Tags: " + scenario.getSourceTagNames());
 		logger.info("******************************************************************************************");
 		scenarioContext.reset();
-		Playwright playwright = Playwright.create();
+		playwright = Playwright.create();
 
-		String browserName = Configs.BROWSER.toLowerCase();
-		BrowserType.LaunchOptions launchOptions = switch (browserName) {
-			case "chrome" -> new BrowserType.LaunchOptions().setChannel("chrome");
-			case "edge" -> new BrowserType.LaunchOptions().setChannel("msedge");
-			default -> throw new IllegalArgumentException("Unexpected browser: " + browserName);
-		};
+		if (scenario.getSourceTagNames().contains("@api")) {
+			logger.info("API test detected. Initializing API request context.");
+			requestContext = playwright.request().newContext(new APIRequest.NewContextOptions()
+					.setBaseURL(Configs.API_BASE_URL)
+					.setIgnoreHTTPSErrors(true));
+			scenarioContext.setRequestContext(requestContext);
+		} else {
+			String browserName = Configs.BROWSER.toLowerCase();
+			BrowserType.LaunchOptions launchOptions = switch (browserName) {
+				case "chrome" -> new BrowserType.LaunchOptions().setChannel("chrome");
+				case "edge" -> new BrowserType.LaunchOptions().setChannel("msedge");
+				default -> throw new IllegalArgumentException("Unexpected browser: " + browserName);
+			};
 
-		launchOptions.setHeadless(Configs.IS_HEADLESS);
-		launchOptions.setArgs(List.of("--start-maximized"));
-		launchOptions.setSlowMo(250);
+			launchOptions.setHeadless(Configs.IS_HEADLESS);
+			launchOptions.setArgs(List.of("--start-maximized"));
+			launchOptions.setSlowMo(250);
 
-		logger.info("Launching browser: " + browserName + " in " + (Configs.IS_HEADLESS ? "headless" : "headed")
-				+ " mode.");
-		browser = playwright.chromium().launch(launchOptions);
-		context = browser.newContext(new Browser.NewContextOptions()
-				.setPermissions(List.of("notifications"))
-				.setViewportSize(null));
+			logger.info("Launching browser: " + browserName + " in " + (Configs.IS_HEADLESS ? "headless" : "headed")
+					+ " mode.");
+			browser = playwright.chromium().launch(launchOptions);
+			context = browser.newContext(new Browser.NewContextOptions()
+					.setPermissions(List.of("notifications"))
+					.setViewportSize(null));
 
-		Page page = context.newPage();
-		logger.info("New page created and timeout set to " + Configs.IMPLICIT_WAIT + "ms");
-		page.setDefaultTimeout(Configs.IMPLICIT_WAIT);
-		scenarioContext.setPage(page);
-		ngo.nabarun.test.ngo_nabarun_test.utils.StepState.setPage(page);
-		DevToolsUtility devToolsUtility = new DevToolsUtility(scenarioContext);
-		devToolsUtility.enableConsoleLogging(false);
-		devToolsUtility.enableNetworkLogging(true);
+			Page page = context.newPage();
+			logger.info("New page created and timeout set to " + Configs.IMPLICIT_WAIT + "ms");
+			page.setDefaultTimeout(Configs.IMPLICIT_WAIT);
+			scenarioContext.setPage(page);
+			ngo.nabarun.test.ngo_nabarun_test.utils.StepState.setPage(page);
+			DevToolsUtility devToolsUtility = new DevToolsUtility(scenarioContext);
+			devToolsUtility.enableConsoleLogging(false);
+			devToolsUtility.enableNetworkLogging(true);
+		}
 	}
 
 	@BeforeStep
@@ -97,7 +107,7 @@ public class TestHooks {
 		String scenarioName = ThreadContext.get("scenarioName");
 
 		// Capture and save screenshot on failure
-		if (scenario.isFailed()) {
+		if (scenario.isFailed() && page != null) {
 			logger.error("Scenario FAILED. Capturing screenshot.");
 			byte[] screenshot = page.screenshot(new Page.ScreenshotOptions().setType(ScreenshotType.PNG));
 			// save screenshot
@@ -127,10 +137,12 @@ public class TestHooks {
 		logger.info("Scenario Status: " + scenario.getStatus());
 		logger.info("Total Duration: " + duration + "ms");
 		logger.info("******************************************************************************************");
-		logger.info("Closing browser and cleaning up context.");
-		page.close();
-		context.close();
-		browser.close();
+		logger.info("Closing Playwright and cleaning up context.");
+		if (page != null) page.close();
+		if (context != null) context.close();
+		if (browser != null) browser.close();
+		if (requestContext != null) requestContext.dispose();
+		if (playwright != null) playwright.close();
 		scenarioStartTime.remove();
 		ThreadContext.remove("scenarioName");
 		ngo.nabarun.test.ngo_nabarun_test.utils.StepState.clear();

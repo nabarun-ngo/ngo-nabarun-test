@@ -28,6 +28,10 @@ public class ScenarioContext {
 		return type.cast(customValues.get(key));
 	}
 
+	public Map<String, Object> getCustomValues() {
+		return customValues;
+	}
+
 	public boolean containsKey(ContextKeys key) {
 		return context.containsKey(key);
 	}

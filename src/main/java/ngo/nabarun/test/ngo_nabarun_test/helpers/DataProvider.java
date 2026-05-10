@@ -28,6 +28,7 @@ public class DataProvider {
 	private static final Logger logger = LogManager.getLogger(DataProvider.class);
 
 	public UserDBModel findUserByName(String firstName, String lastName) {
+		logger.info("Querying user by name: {} {}", firstName, lastName);
 		try {
 			return DBUtils.getJdbi().withExtension(UserDAO.class, dao -> dao.findByName(firstName, lastName));
 		} catch (Exception e) {
@@ -38,6 +39,7 @@ public class DataProvider {
 
 	public List<DonationDBModel> findDonationsBetweenDates(Date startDate, Date endDate, String profileId,
 			String type) {
+		logger.info("Querying donations between {} and {} for profileId: {} and type: {}", startDate, endDate, profileId, type);
 		try {
 			return DBUtils.getJdbi().withExtension(DonationDAO.class,
 					dao -> dao.findBetweenDates(startDate, endDate, profileId, type));
@@ -48,6 +50,7 @@ public class DataProvider {
 	}
 
 	public boolean deleteDonationById(String donationId) {
+		logger.info("Deleting donation with id: {}", donationId);
 		try {
 			return DBUtils.getJdbi().withExtension(DonationDAO.class, dao -> dao.deleteById(donationId)) > 0;
 		} catch (Exception e) {
@@ -57,6 +60,7 @@ public class DataProvider {
 	}
 
 	public TicketDBModel findOTPDetails(String email) {
+		logger.info("Querying OTP details for email: {}", email);
 		try {
 			return DBUtils.getJdbi().withExtension(TicketDAO.class, dao -> dao.findFirstByEmail(email));
 		} catch (Exception e) {
@@ -66,6 +70,7 @@ public class DataProvider {
 	}
 
 	public List<UserDBModel> getUsersByRole(String roleCode) {
+		logger.info("Querying users with role code: {}", roleCode);
 		try {
 			return DBUtils.getJdbi().withExtension(UserDAO.class, dao -> dao.findByRole(roleCode));
 		} catch (Exception e) {
@@ -75,6 +80,7 @@ public class DataProvider {
 	}
 
 	public List<ProjectDBModel> getProjectsByManagerEmail(String email) {
+		logger.info("Querying projects for manager email: {}", email);
 		try {
 			return DBUtils.getJdbi().withExtension(ProjectDAO.class, dao -> dao.findByManagerEmail(email));
 		} catch (Exception e) {
@@ -84,6 +90,7 @@ public class DataProvider {
 	}
 
 	public List<ExpenseDBModel> getExpensesByProjectCode(String projectCode) {
+		logger.info("Querying expenses for project code: {}", projectCode);
 		try {
 			return DBUtils.getJdbi().withExtension(ExpenseDAO.class, dao -> dao.findByProjectCode(projectCode));
 		} catch (Exception e) {
@@ -93,6 +100,7 @@ public class DataProvider {
 	}
 
 	public List<AccountDBModel> getAccountsByHolderEmail(String email) {
+		logger.info("Querying accounts for holder email: {}", email);
 		try {
 			return DBUtils.getJdbi().withExtension(AccountDAO.class, dao -> dao.findByHolderEmail(email));
 		} catch (Exception e) {
@@ -102,6 +110,7 @@ public class DataProvider {
 	}
 
 	public List<MeetingDBModel> getMeetingsByProjectCode(String projectCode) {
+		logger.info("Querying meetings for project code: {}", projectCode);
 		try {
 			return DBUtils.getJdbi().withExtension(MeetingDAO.class, dao -> dao.findByProjectCode(projectCode));
 		} catch (Exception e) {
@@ -111,6 +120,7 @@ public class DataProvider {
 	}
 
 	public List<ProjectTeamMemberDBModel> getTeamMembersByUserEmail(String email) {
+		logger.info("Querying project team members for user email: {}", email);
 		try {
 			return DBUtils.getJdbi().withExtension(ProjectTeamMemberDAO.class, dao -> dao.findByUserEmail(email));
 		} catch (Exception e) {
@@ -120,6 +130,7 @@ public class DataProvider {
 	}
 
 	public int getAssignmentCountByWorkflowId(String workflowId, String userId) {
+		logger.info("Querying assignment count for workflowId: {} and userId: {}", workflowId, userId);
 		try {
 			return DBUtils.getJdbi().withExtension(WorkflowDAO.class,
 					dao -> dao.getAssignmentCountByWorkflowId(workflowId, userId));
@@ -130,6 +141,7 @@ public class DataProvider {
 	}
 
 	public UserDBModel getUserByEmail(String email) {
+		logger.info("Querying user by email: {}", email);
 		try {
 			return DBUtils.getJdbi().withExtension(UserDAO.class, dao -> dao.findByEmail(email));
 		} catch (Exception e) {

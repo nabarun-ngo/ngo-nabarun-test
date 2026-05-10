@@ -1,5 +1,6 @@
 {
 	"ROOT_URL": "http://localhost:3000",
+	"API_BASE_URL": "http://localhost:8080/api",
 	"APP_URL": "http://localhost:4201",
 	"POSTGRES_URI": "jdbc:postgresql://localhost:5432/nabarun_dev2?user=postgres&password=postgres"
 }

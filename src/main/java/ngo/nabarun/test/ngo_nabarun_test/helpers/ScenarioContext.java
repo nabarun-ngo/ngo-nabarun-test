@@ -3,12 +3,14 @@ package ngo.nabarun.test.ngo_nabarun_test.helpers;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.microsoft.playwright.APIRequestContext;
 import com.microsoft.playwright.Page;
 
 public class ScenarioContext {
 	private final Map<ContextKeys, Object> context = new HashMap<>();
 	private final Map<String, Object> customValues = new HashMap<>();
 	private Page page;
+	private APIRequestContext requestContext;
 
 	public void set(ContextKeys key, Object value) {
 		context.put(key, value);
@@ -26,6 +28,10 @@ public class ScenarioContext {
 		return type.cast(customValues.get(key));
 	}
 
+	public Map<String, Object> getCustomValues() {
+		return customValues;
+	}
+
 	public boolean containsKey(ContextKeys key) {
 		return context.containsKey(key);
 	}
@@ -38,6 +44,7 @@ public class ScenarioContext {
 		context.clear();
 		customValues.clear();
 		page = null;
+		requestContext = null;
 	}
 
 	public enum ContextKeys {
@@ -53,5 +60,13 @@ public class ScenarioContext {
 
 	public Page getPage() {
 		return this.page;
+	}
+
+	public void setRequestContext(APIRequestContext requestContext) {
+		this.requestContext = requestContext;
+	}
+
+	public APIRequestContext getRequestContext() {
+		return this.requestContext;
 	}
 }

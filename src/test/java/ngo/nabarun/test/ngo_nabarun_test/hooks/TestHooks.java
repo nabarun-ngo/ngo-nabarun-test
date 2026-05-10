@@ -31,6 +31,8 @@ public class TestHooks {
 	private final ScenarioContext scenarioContext;
 	private Browser browser;
 	private BrowserContext context;
+	private Playwright playwright;
+	private APIRequestContext requestContext;
 	private final ThreadLocal<Long> scenarioStartTime = new ThreadLocal<>();
 	private static final String LOGS_DIR = "target/logs";
 
@@ -52,34 +54,42 @@ public class TestHooks {
 		logger.info("Scenario Tags: " + scenario.getSourceTagNames());
 		logger.info("******************************************************************************************");
 		scenarioContext.reset();
-		Playwright playwright = Playwright.create();
+		playwright = Playwright.create();
 
-		String browserName = Configs.BROWSER.toLowerCase();
-		BrowserType.LaunchOptions launchOptions = switch (browserName) {
-			case "chrome" -> new BrowserType.LaunchOptions().setChannel("chrome");
-			case "edge" -> new BrowserType.LaunchOptions().setChannel("msedge");
-			default -> throw new IllegalArgumentException("Unexpected browser: " + browserName);
-		};
+		if (scenario.getSourceTagNames().contains("@api")) {
+			logger.info("API test detected. Initializing API request context.");
+			requestContext = playwright.request().newContext(new APIRequest.NewContextOptions()
+					.setBaseURL(Configs.API_BASE_URL)
+					.setIgnoreHTTPSErrors(true));
+			scenarioContext.setRequestContext(requestContext);
+		} else {
+			String browserName = Configs.BROWSER.toLowerCase();
+			BrowserType.LaunchOptions launchOptions = switch (browserName) {
+				case "chrome" -> new BrowserType.LaunchOptions().setChannel("chrome");
+				case "edge" -> new BrowserType.LaunchOptions().setChannel("msedge");
+				default -> throw new IllegalArgumentException("Unexpected browser: " + browserName);
+			};
 
-		launchOptions.setHeadless(Configs.IS_HEADLESS);
-		launchOptions.setArgs(List.of("--start-maximized"));
-		launchOptions.setSlowMo(250);
+			launchOptions.setHeadless(Configs.IS_HEADLESS);
+			launchOptions.setArgs(List.of("--start-maximized"));
+			launchOptions.setSlowMo(250);
 
-		logger.info("Launching browser: " + browserName + " in " + (Configs.IS_HEADLESS ? "headless" : "headed")
-				+ " mode.");
-		browser = playwright.chromium().launch(launchOptions);
-		context = browser.newContext(new Browser.NewContextOptions()
-				.setPermissions(List.of("notifications"))
-				.setViewportSize(null));
+			logger.info("Launching browser: " + browserName + " in " + (Configs.IS_HEADLESS ? "headless" : "headed")
+					+ " mode.");
+			browser = playwright.chromium().launch(launchOptions);
+			context = browser.newContext(new Browser.NewContextOptions()
+					.setPermissions(List.of("notifications"))
+					.setViewportSize(null));
 
-		Page page = context.newPage();
-		logger.info("New page created and timeout set to " + Configs.IMPLICIT_WAIT + "ms");
-		page.setDefaultTimeout(Configs.IMPLICIT_WAIT);
-		scenarioContext.setPage(page);
-		ngo.nabarun.test.ngo_nabarun_test.utils.StepState.setPage(page);
-		DevToolsUtility devToolsUtility = new DevToolsUtility(scenarioContext);
-		devToolsUtility.enableConsoleLogging(false);
-		devToolsUtility.enableNetworkLogging(true);
+			Page page = context.newPage();
+			logger.info("New page created and timeout set to " + Configs.IMPLICIT_WAIT + "ms");
+			page.setDefaultTimeout(Configs.IMPLICIT_WAIT);
+			scenarioContext.setPage(page);
+			ngo.nabarun.test.ngo_nabarun_test.utils.StepState.setPage(page);
+			DevToolsUtility devToolsUtility = new DevToolsUtility(scenarioContext);
+			devToolsUtility.enableConsoleLogging(false);
+			devToolsUtility.enableNetworkLogging(true);
+		}
 	}
 
 	@BeforeStep
@@ -96,8 +106,14 @@ public class TestHooks {
 		Page page = scenarioContext.getPage();
 		String scenarioName = ThreadContext.get("scenarioName");
 
-		// Capture and save screenshot on failure
-		if (scenario.isFailed()) {
+		logger.info("******************************************************************************************");
+		logger.info("Scenario Finished: " + scenario.getName());
+		logger.info("Scenario Status: " + scenario.getStatus());
+		logger.info("Total Duration: " + duration + "ms");
+		logger.info("******************************************************************************************");
+
+		// Capture and save screenshot on failure (UI tests only)
+		if (scenario.isFailed() && page != null) {
 			logger.error("Scenario FAILED. Capturing screenshot.");
 			byte[] screenshot = page.screenshot(new Page.ScreenshotOptions().setType(ScreenshotType.PNG));
 			// save screenshot
@@ -105,32 +121,54 @@ public class TestHooks {
 			Files.write(Paths.get(LOGS_DIR, scenarioName + ".png"), screenshot);
 			// attach screenshot
 			scenario.attach(screenshot, "image/png", scenarioName + ".png");
-			logger.info("Attached to Cucumber report: " + scenarioName + ".png" + " (image/png)");
-			// attach log file
-			Path logPath = Paths.get(LOGS_DIR, scenarioName + ".log");
-			if (Files.exists(logPath)) {
+			logger.info("Attached screenshot to Cucumber report.");
+		}
+
+		// Always attach log files if they exist (UI and API tests)
+		Path logPath = Paths.get(LOGS_DIR, scenarioName + ".log");
+		if (Files.exists(logPath)) {
+			try {
 				byte[] log_content = Files.readAllBytes(logPath);
 				scenario.attach(log_content, "text/plain", scenarioName + ".log");
-				logger.info("Attached to Cucumber report: " + scenarioName + ".log" + " (text/plain)");
-			} else {
-				logger.error("Log file not found: " + logPath);
+				logger.info("Attached scenario log to Cucumber report: " + scenarioName + ".log");
+			} catch (IOException e) {
+				logger.error("Failed to read log file for attachment: " + logPath, e);
 			}
+
+			// Also attach general test.log if it exists and wasn't already attached as part of a directory
 			Path testLogPath = Paths.get(LOGS_DIR, "test.log");
 			if (Files.exists(testLogPath)) {
-				byte[] test_log_content = Files.readAllBytes(testLogPath);
-				scenario.attach(test_log_content, "text/plain", "test.log");
-				logger.info("Attached to Cucumber report: " + "test.log" + " (text/plain)");
+				try {
+					byte[] test_log_content = Files.readAllBytes(testLogPath);
+					scenario.attach(test_log_content, "text/plain", "test.log");
+					logger.info("Attached general test.log to Cucumber report.");
+				} catch (IOException e) {
+					logger.warn("Failed to read general test.log for attachment.");
+				}
+			}
+		} else {
+			logger.warn("Log file not found: " + logPath + ". Attaching entire log directory instead.");
+			try (java.util.stream.Stream<Path> paths = Files.list(Paths.get(LOGS_DIR))) {
+				paths.filter(Files::isRegularFile)
+						.forEach(path -> {
+							try {
+								byte[] content = Files.readAllBytes(path);
+								scenario.attach(content, "text/plain", path.getFileName().toString());
+							} catch (IOException e) {
+								logger.error("Failed to attach log file: " + path, e);
+							}
+						});
+			} catch (IOException e) {
+				logger.error("Failed to list logs in " + LOGS_DIR, e);
 			}
 		}
-		logger.info("******************************************************************************************");
-		logger.info("Scenario Finished: " + scenario.getName());
-		logger.info("Scenario Status: " + scenario.getStatus());
-		logger.info("Total Duration: " + duration + "ms");
-		logger.info("******************************************************************************************");
-		logger.info("Closing browser and cleaning up context.");
-		page.close();
-		context.close();
-		browser.close();
+
+		logger.info("Closing Playwright and cleaning up context.");
+		if (page != null) page.close();
+		if (context != null) context.close();
+		if (browser != null) browser.close();
+		if (requestContext != null) requestContext.dispose();
+		if (playwright != null) playwright.close();
 		scenarioStartTime.remove();
 		ThreadContext.remove("scenarioName");
 		ngo.nabarun.test.ngo_nabarun_test.utils.StepState.clear();

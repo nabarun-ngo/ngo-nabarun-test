@@ -4,8 +4,6 @@ import com.auth0.client.auth.AuthAPI;
 import com.auth0.exception.Auth0Exception;
 import com.auth0.json.auth.TokenHolder;
 import com.auth0.net.Response;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.playwright.APIResponse;
 import com.microsoft.playwright.options.RequestOptions;
 import ngo.nabarun.test.ngo_nabarun_test.utils.DataUtils;
@@ -23,6 +21,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ApiStepDefinitions {
@@ -51,8 +50,8 @@ public class ApiStepDefinitions {
         this.authToken = tokenJar.get(email);
     }
 
-    @When("I send a POST request to {string} with payload:")
-    public void i_send_a_post_request_to_with_payload(String endpoint, String payload) {
+    @When("^I send a (POST|PUT|PATCH) request to \"(.+)\" with payload:$")
+    public void i_send_a_post_request_to_with_payload(String method, String endpoint, String payload) {
         String resolvedEndpoint = DataUtils.resolveData(endpoint, scenarioContext);
         String baseUrl = Configs.API_BASE_URL.endsWith("/") ? Configs.API_BASE_URL : Configs.API_BASE_URL + "/";
         String endpointPath = resolvedEndpoint.startsWith("/") ? resolvedEndpoint.substring(1) : resolvedEndpoint;
@@ -62,27 +61,47 @@ public class ApiStepDefinitions {
 
         logger.info("Sending POST request to: " + fullUrl);
         logger.info("Request Payload: " + resolvedPayload);
-
-        lastResponse = scenarioContext.getRequestContext().post(fullUrl, RequestOptions.create()
+        RequestOptions requestOptions = RequestOptions.create()
                 .setHeader("Content-Type", "application/json")
                 .setHeader("Authorization", "Bearer " + authToken)
-                .setData(resolvedPayload));
+                .setData(resolvedPayload);
+        switch (method.toUpperCase()) {
+            case "POST":
+                lastResponse = scenarioContext.getRequestContext().post(fullUrl, requestOptions);
+                break;
+            case "PUT":
+                lastResponse = scenarioContext.getRequestContext().put(fullUrl, requestOptions);
+                break;
+            case "PATCH":
+                lastResponse = scenarioContext.getRequestContext().patch(fullUrl, requestOptions);
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported HTTP method: " + method);
+        }
         logger.info("Response status: " + lastResponse.status());
         logger.info("Response body: " + lastResponse.text());
     }
 
-    @When("I send a GET request to {string}")
-    public void i_send_a_get_request_to(String endpoint) {
+    @When("^I send a (GET|DELETE) request to \"(.+)\"$")
+    public void i_send_a_get_request_to(String method, String endpoint) {
         String resolvedEndpoint = DataUtils.resolveData(endpoint, scenarioContext);
         String baseUrl = Configs.API_BASE_URL.endsWith("/") ? Configs.API_BASE_URL : Configs.API_BASE_URL + "/";
         String endpointPath = resolvedEndpoint.startsWith("/") ? resolvedEndpoint.substring(1) : resolvedEndpoint;
         String fullUrl = baseUrl + endpointPath;
 
         logger.info("Sending GET request to: " + fullUrl);
-
-        lastResponse = scenarioContext.getRequestContext().get(fullUrl, RequestOptions.create()
-                .setHeader("Authorization", "Bearer " + authToken));
-
+        RequestOptions requestOptions = RequestOptions.create()
+                .setHeader("Authorization", "Bearer " + authToken);
+        switch (method.toUpperCase()) {
+            case "GET":
+                lastResponse = scenarioContext.getRequestContext().get(fullUrl, requestOptions);
+                break;
+            case "DELETE":
+                lastResponse = scenarioContext.getRequestContext().delete(fullUrl, requestOptions);
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported HTTP method: " + method);
+        }
         logger.info("Response status: " + lastResponse.status());
         logger.debug("Response body: " + lastResponse.text());
     }
@@ -110,27 +129,44 @@ public class ApiStepDefinitions {
                 "Unexpected status code. Response: " + lastResponse.text());
     }
 
-    @Then("The API response should contain a valid donation ID")
-    public void the_api_response_should_contain_a_valid_donation_id() throws Exception {
-        String responseBody = lastResponse.text();
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode jsonNode = mapper.readTree(responseBody);
-
-        // Assuming response returns the created donation object with an ID
-        // or a structure containing ID
-        JsonNode idNode = jsonNode.get("id");
-        if (idNode == null && jsonNode.get("data") != null) {
-            idNode = jsonNode.get("data").get("id");
-        }
-
-        assertNotNull(idNode, "Donation ID not found in response: " + responseBody);
-        assertFalse(idNode.asText().isEmpty(), "Donation ID is empty");
-    }
-
     @Then("The API response should contain error message {string}")
     public void the_api_response_should_contain_error_message(String expectedMessage) throws Exception {
         String responseBody = lastResponse.text();
         assertTrue(responseBody.contains(expectedMessage),
                 "Expected error message '" + expectedMessage + "' not found in response: " + responseBody);
+    }
+
+    @Then("The API response attribute {string} should be {string}")
+    public void the_api_response_attribute_should_be(String jsonPath, String expectedValue) {
+        assertNotNull(lastResponse, "Last response is null, cannot validate attribute");
+        String responseBody = lastResponse.text();
+        String resolvedExpectedValue = DataUtils.resolveData(expectedValue, scenarioContext);
+        try {
+            String actualValue = DataUtils.extractValueByPath(responseBody, jsonPath);
+            assertEquals(resolvedExpectedValue, actualValue, "Value mismatch for attribute: " + jsonPath);
+            logger.info("Validated attribute '" + jsonPath + "' has expected value '" + resolvedExpectedValue + "'");
+        } catch (Exception e) {
+            logger.error("Failed to validate attribute. Error: " + e.getMessage());
+            fail("Failed to validate attribute '" + jsonPath + "'. Response: " + responseBody + ". Error: " + e.getMessage());
+        }
+    }
+
+    @Then("The API response should have the following attributes")
+    public void the_api_response_should_have_the_following_attributes(List<Map<String, String>> attributes) {
+        assertNotNull(lastResponse, "Last response is null, cannot validate attributes");
+        String responseBody = lastResponse.text();
+        for (Map<String, String> row : attributes) {
+            String jsonPath = row.get("Attribute");
+            String expectedValue = row.get("Value");
+            String resolvedExpectedValue = DataUtils.resolveData(expectedValue, scenarioContext);
+            try {
+                String actualValue = DataUtils.extractValueByPath(responseBody, jsonPath);
+                assertEquals(resolvedExpectedValue, actualValue, "Value mismatch for attribute: " + jsonPath);
+                logger.info("Validated attribute '" + jsonPath + "' has expected value '" + resolvedExpectedValue + "'");
+            } catch (Exception e) {
+                logger.error("Failed to validate attribute '" + jsonPath + "'. Error: " + e.getMessage());
+                fail("Failed to validate attribute '" + jsonPath + "'. Response: " + responseBody + ". Error: " + e.getMessage());
+            }
+        }
     }
 }

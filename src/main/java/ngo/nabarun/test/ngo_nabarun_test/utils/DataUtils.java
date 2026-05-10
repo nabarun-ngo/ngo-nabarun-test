@@ -294,7 +294,7 @@ public class DataUtils {
 		if (input == null || !input.contains("{") || context == null) {
 			return input;
 		}
-		Pattern pattern = Pattern.compile("\\{\\s*([^}]*?)\\s*\\}");
+		Pattern pattern = Pattern.compile("\\{\\s*([^{}]*?)\\s*\\}");
 		Matcher matcher = pattern.matcher(input);
 		StringBuilder sb = new StringBuilder();
 		while (matcher.find()) {

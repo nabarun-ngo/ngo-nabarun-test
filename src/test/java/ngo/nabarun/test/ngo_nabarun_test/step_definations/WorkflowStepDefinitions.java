@@ -42,6 +42,9 @@ public class WorkflowStepDefinitions {
 			email = DataUtils.resolveData(loginId, scenarioContext);
 		}
 		UserDBModel user = dataProvider.getUserByEmail(email);
+		if (user == null) {
+			throw new RuntimeException("Unable to find user with email " + email);
+		}
 		int count = 0;
 		int waitingTime = 0;
 		do {

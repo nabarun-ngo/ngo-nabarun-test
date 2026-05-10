@@ -106,7 +106,13 @@ public class TestHooks {
 		Page page = scenarioContext.getPage();
 		String scenarioName = ThreadContext.get("scenarioName");
 
-		// Capture and save screenshot on failure
+		logger.info("******************************************************************************************");
+		logger.info("Scenario Finished: " + scenario.getName());
+		logger.info("Scenario Status: " + scenario.getStatus());
+		logger.info("Total Duration: " + duration + "ms");
+		logger.info("******************************************************************************************");
+
+		// Capture and save screenshot on failure (UI tests only)
 		if (scenario.isFailed() && page != null) {
 			logger.error("Scenario FAILED. Capturing screenshot.");
 			byte[] screenshot = page.screenshot(new Page.ScreenshotOptions().setType(ScreenshotType.PNG));
@@ -115,28 +121,48 @@ public class TestHooks {
 			Files.write(Paths.get(LOGS_DIR, scenarioName + ".png"), screenshot);
 			// attach screenshot
 			scenario.attach(screenshot, "image/png", scenarioName + ".png");
-			logger.info("Attached to Cucumber report: " + scenarioName + ".png" + " (image/png)");
-			// attach log file
-			Path logPath = Paths.get(LOGS_DIR, scenarioName + ".log");
-			if (Files.exists(logPath)) {
+			logger.info("Attached screenshot to Cucumber report.");
+		}
+
+		// Always attach log files if they exist (UI and API tests)
+		Path logPath = Paths.get(LOGS_DIR, scenarioName + ".log");
+		if (Files.exists(logPath)) {
+			try {
 				byte[] log_content = Files.readAllBytes(logPath);
 				scenario.attach(log_content, "text/plain", scenarioName + ".log");
-				logger.info("Attached to Cucumber report: " + scenarioName + ".log" + " (text/plain)");
-			} else {
-				logger.error("Log file not found: " + logPath);
+				logger.info("Attached scenario log to Cucumber report: " + scenarioName + ".log");
+			} catch (IOException e) {
+				logger.error("Failed to read log file for attachment: " + logPath, e);
 			}
+
+			// Also attach general test.log if it exists and wasn't already attached as part of a directory
 			Path testLogPath = Paths.get(LOGS_DIR, "test.log");
 			if (Files.exists(testLogPath)) {
-				byte[] test_log_content = Files.readAllBytes(testLogPath);
-				scenario.attach(test_log_content, "text/plain", "test.log");
-				logger.info("Attached to Cucumber report: " + "test.log" + " (text/plain)");
+				try {
+					byte[] test_log_content = Files.readAllBytes(testLogPath);
+					scenario.attach(test_log_content, "text/plain", "test.log");
+					logger.info("Attached general test.log to Cucumber report.");
+				} catch (IOException e) {
+					logger.warn("Failed to read general test.log for attachment.");
+				}
+			}
+		} else {
+			logger.warn("Log file not found: " + logPath + ". Attaching entire log directory instead.");
+			try (java.util.stream.Stream<Path> paths = Files.list(Paths.get(LOGS_DIR))) {
+				paths.filter(Files::isRegularFile)
+						.forEach(path -> {
+							try {
+								byte[] content = Files.readAllBytes(path);
+								scenario.attach(content, "text/plain", path.getFileName().toString());
+							} catch (IOException e) {
+								logger.error("Failed to attach log file: " + path, e);
+							}
+						});
+			} catch (IOException e) {
+				logger.error("Failed to list logs in " + LOGS_DIR, e);
 			}
 		}
-		logger.info("******************************************************************************************");
-		logger.info("Scenario Finished: " + scenario.getName());
-		logger.info("Scenario Status: " + scenario.getStatus());
-		logger.info("Total Duration: " + duration + "ms");
-		logger.info("******************************************************************************************");
+
 		logger.info("Closing Playwright and cleaning up context.");
 		if (page != null) page.close();
 		if (context != null) context.close();

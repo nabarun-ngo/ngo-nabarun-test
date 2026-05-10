@@ -18,7 +18,7 @@
             <Routes pattern="$${ctx:scenarioName}">
                 <!-- This route is chosen when scenarioName is set in ThreadContext -->
                 <Route>
-                    <File name="FileLogger-${ctx:scenarioName}" fileName="target/logs/${ctx:scenarioName}.log">
+                    <File name="FileLogger-${ctx:scenarioName}" fileName="target/logs/${ctx:scenarioName}.log" immediateFlush="true">
                         <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level - %msg%n" />
                         <ThresholdFilter level="${logLevel}" onMatch="ACCEPT" onMismatch="DENY"/>
                     </File>
@@ -26,7 +26,7 @@
                 
                 <!-- Default route when scenarioName is not set -->
                 <Route key="$${ctx:scenarioName}">
-                    <File name="DefaultFileLogger" fileName="target/logs/test.log">
+                    <File name="DefaultFileLogger" fileName="target/logs/test.log" immediateFlush="true">
                         <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level - %msg%n" />
                         <ThresholdFilter level="${logLevel}" onMatch="ACCEPT" onMismatch="DENY"/>
                     </File>

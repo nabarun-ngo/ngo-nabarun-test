@@ -2,7 +2,6 @@ package ngo.nabarun.test.ngo_nabarun_test.hooks;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -25,6 +24,7 @@ import ngo.nabarun.test.ngo_nabarun_test.utils.DBUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import ngo.nabarun.test.ngo_nabarun_test.utils.MemoryAppender;
 
 public class TestHooks {
 	private static final Logger logger = LogManager.getLogger(TestHooks.class);
@@ -34,7 +34,7 @@ public class TestHooks {
 	private Playwright playwright;
 	private APIRequestContext requestContext;
 	private final ThreadLocal<Long> scenarioStartTime = new ThreadLocal<>();
-	private static final String LOGS_DIR = "target/logs";
+	private static final String SCREENSHOTS_DIR = "target/screenshots";
 
 	public TestHooks(ScenarioContext scenarioContext) {
 		this.scenarioContext = scenarioContext;
@@ -46,8 +46,13 @@ public class TestHooks {
 
 	@Before()
 	public void beforeScenario(Scenario scenario) {
-		String scenarioName = scenario.getName().replaceAll("[^a-zA-Z0-9-]", "_");
-		ThreadContext.put("scenarioName", scenarioName);
+		MemoryAppender.clear();
+		try {
+			Files.createDirectories(Paths.get(SCREENSHOTS_DIR));
+		} catch (IOException e) {
+			System.err.println(
+					"CRITICAL: Failed to create screenshot directory: " + SCREENSHOTS_DIR + " - " + e.getMessage());
+		}
 		scenarioStartTime.set(System.currentTimeMillis());
 		logger.info("******************************************************************************************");
 		logger.info("Scenario Started: " + scenario.getName());
@@ -112,65 +117,36 @@ public class TestHooks {
 		logger.info("Total Duration: " + duration + "ms");
 		logger.info("******************************************************************************************");
 
+		// Attach execution log captured by MemoryAppender
+		String executionLog = MemoryAppender.getAndClearLog();
+		if (!executionLog.isEmpty()) {
+			scenario.attach(executionLog.getBytes(), "text/plain", "execution.log");
+		}
+
 		// Capture and save screenshot on failure (UI tests only)
 		if (scenario.isFailed() && page != null) {
 			logger.error("Scenario FAILED. Capturing screenshot.");
 			byte[] screenshot = page.screenshot(new Page.ScreenshotOptions().setType(ScreenshotType.PNG));
 			// save screenshot
-			Files.createDirectories(Paths.get(LOGS_DIR));
-			Files.write(Paths.get(LOGS_DIR, scenarioName + ".png"), screenshot);
+			Files.createDirectories(Paths.get(SCREENSHOTS_DIR));
+			Files.write(Paths.get(SCREENSHOTS_DIR, scenarioName + ".png"), screenshot);
 			// attach screenshot
 			scenario.attach(screenshot, "image/png", scenarioName + ".png");
 			logger.info("Attached screenshot to Cucumber report.");
 		}
 
-		// Always attach log files if they exist (UI and API tests)
-		Path logPath = Paths.get(LOGS_DIR, scenarioName + ".log");
-		if (Files.exists(logPath)) {
-			try {
-				byte[] log_content = Files.readAllBytes(logPath);
-				scenario.attach(log_content, "text/plain", scenarioName + ".log");
-				logger.info("Attached scenario log to Cucumber report: " + scenarioName + ".log");
-			} catch (IOException e) {
-				logger.error("Failed to read log file for attachment: " + logPath, e);
-			}
-
-			// Also attach general test.log if it exists and wasn't already attached as part of a directory
-			Path testLogPath = Paths.get(LOGS_DIR, "test.log");
-			if (Files.exists(testLogPath)) {
-				try {
-					byte[] test_log_content = Files.readAllBytes(testLogPath);
-					scenario.attach(test_log_content, "text/plain", "test.log");
-					logger.info("Attached general test.log to Cucumber report.");
-				} catch (IOException e) {
-					logger.warn("Failed to read general test.log for attachment.");
-				}
-			}
-		} else {
-			logger.warn("Log file not found: " + logPath + ". Attaching entire log directory instead.");
-			try (java.util.stream.Stream<Path> paths = Files.list(Paths.get(LOGS_DIR))) {
-				paths.filter(Files::isRegularFile)
-						.forEach(path -> {
-							try {
-								byte[] content = Files.readAllBytes(path);
-								scenario.attach(content, "text/plain", path.getFileName().toString());
-							} catch (IOException e) {
-								logger.error("Failed to attach log file: " + path, e);
-							}
-						});
-			} catch (IOException e) {
-				logger.error("Failed to list logs in " + LOGS_DIR, e);
-			}
-		}
-
 		logger.info("Closing Playwright and cleaning up context.");
-		if (page != null) page.close();
-		if (context != null) context.close();
-		if (browser != null) browser.close();
-		if (requestContext != null) requestContext.dispose();
-		if (playwright != null) playwright.close();
+		if (page != null)
+			page.close();
+		if (context != null)
+			context.close();
+		if (browser != null)
+			browser.close();
+		if (requestContext != null)
+			requestContext.dispose();
+		if (playwright != null)
+			playwright.close();
 		scenarioStartTime.remove();
-		ThreadContext.remove("scenarioName");
 		ngo.nabarun.test.ngo_nabarun_test.utils.StepState.clear();
 	}
 

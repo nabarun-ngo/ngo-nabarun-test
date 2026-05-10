@@ -77,5 +77,5 @@ echo [INFO] Running Maven tests for %FILTER_TYPE%: "!FILTER_VALUE!"
 echo [INFO] Environment: !ENVIRONMENT!
 if not "!EXTRA_ARGS!" == "" echo [INFO] Additional Args:!EXTRA_ARGS!
 
-mvn clean test "-Dcucumber.filter.!FILTER_TYPE!=!FILTER_VALUE!" -DENVIRONMENT=!ENVIRONMENT! !EXTRA_ARGS!
+mvn clean test -q "-Dcucumber.filter.!FILTER_TYPE!=!FILTER_VALUE!" -DENVIRONMENT=!ENVIRONMENT! !EXTRA_ARGS!
 goto :eof

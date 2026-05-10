@@ -57,17 +57,18 @@ public class ApiStepDefinitions {
         String baseUrl = Configs.API_BASE_URL.endsWith("/") ? Configs.API_BASE_URL : Configs.API_BASE_URL + "/";
         String endpointPath = resolvedEndpoint.startsWith("/") ? resolvedEndpoint.substring(1) : resolvedEndpoint;
         String fullUrl = baseUrl + endpointPath;
+
         String resolvedPayload = DataUtils.resolveData(payload, scenarioContext);
 
         logger.info("Sending POST request to: " + fullUrl);
-        logger.debug("Request Payload: " + resolvedPayload);
+        logger.info("Request Payload: " + resolvedPayload);
 
         lastResponse = scenarioContext.getRequestContext().post(fullUrl, RequestOptions.create()
                 .setHeader("Content-Type", "application/json")
                 .setHeader("Authorization", "Bearer " + authToken)
                 .setData(resolvedPayload));
         logger.info("Response status: " + lastResponse.status());
-        logger.debug("Response body: " + lastResponse.text());
+        logger.info("Response body: " + lastResponse.text());
     }
 
     @When("I send a GET request to {string}")

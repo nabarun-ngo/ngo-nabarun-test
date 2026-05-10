@@ -10,11 +10,11 @@ Feature: API Tests for Donation
     Then I send a POST request to "/donation/create/guest" with payload:
       """
       {
-        "amount": "{DonationAmount}",
         "forEventId": null,
         "donorEmail": "{DonorEmail}",
         "donorName": "{DonorName}",
-        "donorNumber": "{DonorPhone}"
+        "donorNumber": "{DonorPhone}",
+        "amount": "{DonationAmount}"
       }
       """
     Then The API response status code should be 201

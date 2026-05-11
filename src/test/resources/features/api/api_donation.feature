@@ -189,7 +189,7 @@ Feature: API Tests for Donation
   Scenario: API_Create and Update Member Onetime Donation (With Event, Net Banking)
     Given I login with "cashier@nabarun.com" user using API
     ## 1. Search for Member to get donorId
-    Then I send a GET request to "/users?searchTerm=Member%20TestUser"
+    Then I send a GET request to "/users?firstName=Member&lastName=TestUser"
     Then The API response status code should be 200
     And I extract data from response using JSON token "responsePayload.content[0].id" and store it as "MemberId"
     ## 2. Initiate Member Onetime Donation

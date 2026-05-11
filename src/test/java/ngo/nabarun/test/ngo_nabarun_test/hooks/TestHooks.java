@@ -41,6 +41,11 @@ public class TestHooks {
 	public void beforeScenario(Scenario scenario) {
 		MemoryAppender.clear();
 		scenarioContext.reset();
+		scenarioStartTime.set(System.currentTimeMillis());
+		logger.info("******************************************************************************************");
+		logger.info("Scenario Started: " + scenario.getName());
+		logger.info("Scenario Tags: " + scenario.getSourceTagNames());
+		logger.info("******************************************************************************************");
 		playwright = Playwright.create();
 
 		if (scenario.getSourceTagNames().contains("@api")) {
@@ -77,12 +82,6 @@ public class TestHooks {
 			devToolsUtility.enableConsoleLogging(true);
 			devToolsUtility.enableNetworkLogging(true);
 		}
-		scenarioStartTime.set(System.currentTimeMillis());
-		logger.info("******************************************************************************************");
-		logger.info("Scenario Started: " + scenario.getName());
-		logger.info("Scenario Tags: " + scenario.getSourceTagNames());
-		logger.info("******************************************************************************************");
-
 	}
 
 	@After()

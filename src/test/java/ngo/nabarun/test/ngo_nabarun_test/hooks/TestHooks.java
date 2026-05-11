@@ -100,24 +100,24 @@ public class TestHooks {
 		// Attach execution log captured by MemoryAppender
 		String executionLog = MemoryAppender.getAndClearLog();
 		if (scenario.isFailed()) {
-			logger.error("Scenario FAILED. Attaching execution log.");
+			System.out.println("Scenario FAILED. Attaching execution log.");
 			scenario.attach(executionLog.getBytes(), "text/plain", "execution.log");
-			logger.info("Attached execution log to Cucumber report.");
+			System.out.println("Attached execution log to Cucumber report.");
 		}
 
 		// Capture and save screenshot on failure (UI tests only)
 		if (scenario.isFailed() && page != null) {
-			logger.error("Scenario FAILED. Capturing screenshot.");
+			System.out.println("Scenario FAILED. Capturing screenshot.");
 			byte[] screenshot = page.screenshot(new Page.ScreenshotOptions().setType(ScreenshotType.PNG));
 			// save screenshot
 			Files.createDirectories(Paths.get(SCREENSHOTS_DIR));
 			Files.write(Paths.get(SCREENSHOTS_DIR, scenarioName + ".png"), screenshot);
 			// attach screenshot
 			scenario.attach(screenshot, "image/png", scenarioName + ".png");
-			logger.info("Attached screenshot to Cucumber report.");
+			System.out.println("Attached screenshot to Cucumber report.");
 		}
 
-		logger.info("Closing Playwright and cleaning up context.");
+		System.out.println("Closing Playwright and cleaning up context.");
 		if (page != null)
 			page.close();
 		if (context != null)

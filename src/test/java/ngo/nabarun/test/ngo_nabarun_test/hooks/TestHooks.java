@@ -11,10 +11,7 @@ import com.microsoft.playwright.options.ScreenshotType;
 
 import io.cucumber.java.After;
 import io.cucumber.java.AfterAll;
-import io.cucumber.java.AfterStep;
 import io.cucumber.java.Before;
-import io.cucumber.java.BeforeAll;
-import io.cucumber.java.BeforeStep;
 import io.cucumber.java.Scenario;
 import ngo.nabarun.test.ngo_nabarun_test.configs.Configs;
 import ngo.nabarun.test.ngo_nabarun_test.helpers.ScenarioContext;
@@ -40,24 +37,9 @@ public class TestHooks {
 		this.scenarioContext = scenarioContext;
 	}
 
-	@BeforeAll()
-	public static void beforeTest() {
-	}
-
 	@Before()
 	public void beforeScenario(Scenario scenario) {
 		MemoryAppender.clear();
-		try {
-			Files.createDirectories(Paths.get(SCREENSHOTS_DIR));
-		} catch (IOException e) {
-			System.err.println(
-					"CRITICAL: Failed to create screenshot directory: " + SCREENSHOTS_DIR + " - " + e.getMessage());
-		}
-		scenarioStartTime.set(System.currentTimeMillis());
-		logger.info("******************************************************************************************");
-		logger.info("Scenario Started: " + scenario.getName());
-		logger.info("Scenario Tags: " + scenario.getSourceTagNames());
-		logger.info("******************************************************************************************");
 		scenarioContext.reset();
 		playwright = Playwright.create();
 
@@ -92,20 +74,18 @@ public class TestHooks {
 			scenarioContext.setPage(page);
 			ngo.nabarun.test.ngo_nabarun_test.utils.StepState.setPage(page);
 			DevToolsUtility devToolsUtility = new DevToolsUtility(scenarioContext);
-			devToolsUtility.enableConsoleLogging(false);
+			devToolsUtility.enableConsoleLogging(true);
 			devToolsUtility.enableNetworkLogging(true);
 		}
+		scenarioStartTime.set(System.currentTimeMillis());
+		logger.info("******************************************************************************************");
+		logger.info("Scenario Started: " + scenario.getName());
+		logger.info("Scenario Tags: " + scenario.getSourceTagNames());
+		logger.info("******************************************************************************************");
+
 	}
 
-	@BeforeStep
-	public void beforeStep(Scenario scenario) {
-	}
-
-	@AfterStep
-	public void afterStep(Scenario scenario) {
-	}
-
-	@After
+	@After()
 	public void afterScenario(Scenario scenario) throws InterruptedException, IOException {
 		long duration = System.currentTimeMillis() - scenarioStartTime.get();
 		Page page = scenarioContext.getPage();
@@ -119,8 +99,10 @@ public class TestHooks {
 
 		// Attach execution log captured by MemoryAppender
 		String executionLog = MemoryAppender.getAndClearLog();
-		if (!executionLog.isEmpty()) {
+		if (scenario.isFailed()) {
+			logger.error("Scenario FAILED. Attaching execution log.");
 			scenario.attach(executionLog.getBytes(), "text/plain", "execution.log");
+			logger.info("Attached execution log to Cucumber report.");
 		}
 
 		// Capture and save screenshot on failure (UI tests only)

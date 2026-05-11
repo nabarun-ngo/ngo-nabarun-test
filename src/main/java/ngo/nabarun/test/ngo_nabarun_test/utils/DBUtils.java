@@ -15,6 +15,10 @@ public class DBUtils {
 	private static HikariDataSource dataSource;
 
 	static {
+		initialize();
+	}
+
+	private static synchronized void initialize() {
 		HikariConfig config = new HikariConfig();
 		config.setJdbcUrl(Configs.DB_URL);
 		config.setDriverClassName("org.postgresql.Driver");
@@ -27,7 +31,7 @@ public class DBUtils {
 		config.setLeakDetectionThreshold(2000); // 2 seconds log warning if a connection is not closed
 
 		logger.info("Initializing HikariCP with URL: {}", Configs.DB_URL);
-		logger.info("Database Pool Settings: MaxPoolSize={}, MinIdle={}, ConnectionTimeout={}ms", 
+		logger.info("Database Pool Settings: MaxPoolSize={}, MinIdle={}, ConnectionTimeout={}ms",
 				config.getMaximumPoolSize(), config.getMinimumIdle(), config.getConnectionTimeout());
 
 		dataSource = new HikariDataSource(config);
@@ -35,19 +39,17 @@ public class DBUtils {
 		jdbi = Jdbi.create(dataSource)
 				.installPlugin(new SqlObjectPlugin())
 				.installPlugin(new PostgresPlugin());
-		
-		logger.info("JDBI instance created and plugins installed.");
 
-		// Adding a shutdown hook to close the datasource when the JVM exits
-		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			if (dataSource != null && !dataSource.isClosed()) {
-				dataSource.close();
-				logger.info("Database connection pool closed via shutdown hook.");
-			}
-		}));
+		logger.info("JDBI instance created and plugins installed.");
+		// NOTE: Shutdown hook intentionally removed. Cleanup is handled explicitly
+		// by @AfterAll in TestHooks to avoid double-close races with the JVM hook.
 	}
 
-	public static Jdbi getJdbi() {
+	public static synchronized Jdbi getJdbi() {
+		if (dataSource == null || dataSource.isClosed()) {
+			logger.warn("DataSource is closed or null. Reinitializing...");
+			initialize();
+		}
 		return jdbi;
 	}
 

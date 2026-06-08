@@ -73,6 +73,14 @@
 			<artifactId>junit-jupiter</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!--<dependency>
+			<groupId>io.cucumber</groupId>
+			<artifactId>cucumber-testng</artifactId>
+			<scope>compile</scope>
+		</dependency>-->
+
+
 		<dependency>
 			<groupId>io.cucumber</groupId>
 			<artifactId>cucumber-picocontainer</artifactId>
@@ -164,7 +172,7 @@
 			<version>1.18.42</version>
 			<scope>provided</scope>
 		</dependency>
-			<dependency>
+		<dependency>
 			<groupId>ngo.nabarun</groupId>
 			<artifactId>doppler-java-client</artifactId>
 			<version>1.1.2</version>

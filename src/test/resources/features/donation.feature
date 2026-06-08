@@ -113,7 +113,8 @@ Feature: Donation Management
     Then I click on "Back to Dashboard" link at "Accounts" page
     Then I logout from current session
 
-  @donation @regression @donation02
+  @donation @regression 
+  @donation02
   Scenario: Create and Update Guest Donation (With Event, Cash Payment, Status Transitions)
     ## 1. Authentication & Navigation to Donations
     Then I login with "cashier@nabarun.com" user using Password option

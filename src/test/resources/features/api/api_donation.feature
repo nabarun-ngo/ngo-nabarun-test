@@ -1,8 +1,8 @@
 Feature: API Tests for Donation
 
   @api @api_regression @api_donation @api_donation01
-  Scenario: API_Create and Update Guest Donation (No Event, UPI Payment)
-    Given I login with "cashier@nabarun.com" user using API
+  Scenario Outline: API_Create and Update Guest Donation (No Event, UPI Payment)
+    Given I login with "<LoginUser>" user using API
     Then I store "{RandomName} API" value as "DonorName" variable
     Then I store "{RandomEmail}" value as "DonorEmail" variable
     Then I store "9{RandomNumber:9}" value as "DonorPhone" variable
@@ -83,10 +83,14 @@ Feature: API Tests for Donation
       | responsePayload.content[0].txnType        | IN                      |
       | responsePayload.content[0].txnRefId       | {DonationId}            |
       | responsePayload.content[0].txnRefType     | DONATION                |
+    Examples:
+      | LoginUser                  |
+      | cashier@nabarun.com        |
+      | assistantcashier@nabarun.com |
 
   @api @api_regression @api_donation @api_donation02
-  Scenario: API_Create and Update Guest Donation (With Event, Cash Payment, Status Transitions)
-    Given I login with "cashier@nabarun.com" user using API
+  Scenario Outline: API_Create and Update Guest Donation (With Event, Cash Payment, Status Transitions)
+    Given I login with "<LoginUser>" user using API
     Then I store "{RandomName} API" value as "DonorName" variable
     Then I store "{RandomEmail}" value as "DonorEmail" variable
     Then I store "9{RandomNumber:9}" value as "DonorPhone" variable
@@ -184,10 +188,14 @@ Feature: API Tests for Donation
     And The API response should have the following attributes
       | Attribute              | Value     |
       | responsePayload.status | CANCELLED |
+    Examples:
+      | LoginUser                  |
+      | cashier@nabarun.com        |
+      | assistantcashier@nabarun.com |
 
   @api @api_regression @api_donation @api_donation03
-  Scenario: API_Create and Update Member Onetime Donation (With Event, Net Banking)
-    Given I login with "cashier@nabarun.com" user using API
+  Scenario Outline: API_Create and Update Member Onetime Donation (With Event, Net Banking)
+    Given I login with "<LoginUser>" user using API
     ## 1. Search for Member to get donorId
     Then I send a GET request to "/users?firstName=Member&lastName=TestUser"
     Then The API response status code should be 200
@@ -220,10 +228,14 @@ Feature: API Tests for Donation
     And The API response should have the following attributes
       | Attribute              | Value |
       | responsePayload.status | PAID  |
+    Examples:
+      | LoginUser                  |
+      | cashier@nabarun.com        |
+      | assistantcashier@nabarun.com |
 
   @api @api_regression @api_donation @api_donation04
-  Scenario: API_Create and Update Member Regular Donation (Full Status Flow, UPI)
-    Given I login with "cashier@nabarun.com" user using API
+  Scenario Outline: API_Create and Update Member Regular Donation (Full Status Flow, UPI)
+    Given I login with "<LoginUser>" user using API
     ## 1. Authentication & Pre-Cleanup (Using existing cleanup step)
     Then I check and delete regular donation raised for "Member TestUser" this month
     ## 2. Search for Member to get donorId
@@ -355,3 +367,7 @@ Feature: API Tests for Donation
     And The API response should have the following attributes
       | Attribute              | Value     |
       | responsePayload.status | CANCELLED |
+    Examples:
+      | LoginUser                    |
+      | cashier@nabarun.com          |
+      | assistantcashier@nabarun.com |

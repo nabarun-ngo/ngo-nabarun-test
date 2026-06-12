@@ -3,32 +3,69 @@
     <Properties>
         <!-- Reads LOG_LEVEL from Environment Variables, fallback to INFO if not set -->
         <Property name="logLevel">${env:LOG_LEVEL:-INFO}</Property>
+        <!-- Pattern shared by file appenders: includes class, line number, and full exception -->
+        <Property name="filePattern">%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level [%c{1.}:%L] - %msg%n%xEx</Property>
+        <!-- Lighter pattern for console -->
+        <Property name="consolePattern">%d{HH:mm:ss.SSS} [%t] %-5level [%c{1.}] - %msg%n</Property>
     </Properties>
 
     <Appenders>
-        <!-- Console Logging -->
+        <!-- Console: INFO+ so operators see progress during local runs; suppress noisy 3rd-party libs -->
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level - %msg%n" />
-            <!-- Keep console restricted to WARN or higher for cleaner output -->
-            <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="${consolePattern}" />
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
         </Console>
 
-        <!-- Overall Execution Log File -->
-        <File name="ExecutionFile" fileName="target/execution.log" immediateFlush="true">
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level - %msg%n" />
+        <!-- Overall suite-level execution log -->
+        <File name="ExecutionFile" fileName="target/execution.log" immediateFlush="true" append="true">
+            <PatternLayout pattern="${filePattern}" />
             <ThresholdFilter level="${logLevel}" onMatch="ACCEPT" onMismatch="DENY"/>
         </File>
 
-        <!-- Programmatic Memory Logging for Cucumber Reports -->
+        <!--
+            Per-scenario log files written in real time.
+            TestHooks sets ThreadContext key "scenarioName" before each scenario so every
+            log line is routed to target/scenario-logs/<scenarioName>.log while the scenario
+            runs.  This means partial logs are available even if the JVM crashes mid-test.
+        -->
+        <Routing name="ScenarioRouting">
+            <Routes pattern="${ctx:scenarioName:-suite}">
+                <Route>
+                    <File name="ScenarioFile-${ctx:scenarioName:-suite}"
+                          fileName="target/scenario-logs/${ctx:scenarioName:-suite}.log"
+                          immediateFlush="true"
+                          append="false">
+                        <PatternLayout pattern="${filePattern}" />
+                    </File>
+                </Route>
+            </Routes>
+        </Routing>
+
+        <!-- In-memory per-thread buffer used by TestHooks to attach logs to Cucumber/Allure reports -->
         <MemoryAppender name="MemoryAppender">
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level - %msg%n" />
+            <PatternLayout pattern="${filePattern}" />
         </MemoryAppender>
     </Appenders>
 
     <Loggers>
+        <!-- Suppress chatty third-party libraries -->
+        <Logger name="com.microsoft.playwright" level="WARN" additivity="false">
+            <AppenderRef ref="ExecutionFile"/>
+            <AppenderRef ref="ScenarioRouting"/>
+        </Logger>
+        <Logger name="com.zaxxer.hikari" level="WARN" additivity="false">
+            <AppenderRef ref="ExecutionFile"/>
+            <AppenderRef ref="ScenarioRouting"/>
+        </Logger>
+        <Logger name="org.jdbi" level="WARN" additivity="false">
+            <AppenderRef ref="ExecutionFile"/>
+            <AppenderRef ref="ScenarioRouting"/>
+        </Logger>
+
         <Root level="${logLevel}">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="ExecutionFile"/>
+            <AppenderRef ref="ScenarioRouting"/>
             <AppenderRef ref="MemoryAppender"/>
         </Root>
     </Loggers>

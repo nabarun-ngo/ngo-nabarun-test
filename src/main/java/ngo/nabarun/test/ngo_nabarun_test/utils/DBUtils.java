@@ -30,7 +30,7 @@ public class DBUtils {
 		config.setConnectionTimeout(30000); // 30 seconds
 		config.setLeakDetectionThreshold(2000); // 2 seconds log warning if a connection is not closed
 
-		logger.info("Initializing HikariCP with URL: {}", Configs.DB_URL);
+		logger.info("Initializing HikariCP with URL");
 		logger.info("Database Pool Settings: MaxPoolSize={}, MinIdle={}, ConnectionTimeout={}ms",
 				config.getMaximumPoolSize(), config.getMinimumIdle(), config.getConnectionTimeout());
 

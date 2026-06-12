@@ -29,7 +29,7 @@ public class ApiStepDefinitions {
     private static final Logger logger = LogManager.getLogger(ApiStepDefinitions.class);
     private final ScenarioContext scenarioContext;
     private APIResponse lastResponse;
-    private Map<String, String> tokenJar = new HashMap<>();
+    private final Map<String, String> tokenJar = new HashMap<>();
     private String authToken;
 
     public ApiStepDefinitions(ScenarioContext scenarioContext) {
@@ -39,7 +39,7 @@ public class ApiStepDefinitions {
     @Given("^I login with \"(.+)\" user using API$")
     public void i_performed_login_with_an_user_having_role(String email) throws Auth0Exception {
         if (!tokenJar.containsKey(email)) {
-            logger.info("Logging in with user: " + email);
+            logger.info("Logging in with user: {}", email);
             AuthAPI auth = Auth0Client.authAPI();
             Response<TokenHolder> token = auth.login(email, Configs.TEST_DEFAULTPASSWORD.toCharArray())
                     .setAudience("https://nabarun.resourceserver.api")
@@ -59,8 +59,8 @@ public class ApiStepDefinitions {
 
         String resolvedPayload = DataUtils.resolveData(payload, scenarioContext);
 
-        logger.info("Sending POST request to: " + fullUrl);
-        logger.info("Request Payload: " + resolvedPayload);
+        logger.info("Sending {} request to: {}", method, fullUrl);
+        logger.info("Request Payload: {}", resolvedPayload);
         RequestOptions requestOptions = RequestOptions.create()
                 .setHeader("Content-Type", "application/json")
                 .setHeader("Authorization", "Bearer " + authToken)
@@ -78,8 +78,8 @@ public class ApiStepDefinitions {
             default:
                 throw new IllegalArgumentException("Unsupported HTTP method: " + method);
         }
-        logger.info("Response status: " + lastResponse.status());
-        logger.info("Response body: " + lastResponse.text());
+        logger.info("Response status: {}", lastResponse.status());
+        logger.info("Response body: {}", lastResponse.text());
     }
 
     @When("^I send a (GET|DELETE) request to \"(.+)\"$")
@@ -89,7 +89,7 @@ public class ApiStepDefinitions {
         String endpointPath = resolvedEndpoint.startsWith("/") ? resolvedEndpoint.substring(1) : resolvedEndpoint;
         String fullUrl = baseUrl + endpointPath;
 
-        logger.info("Sending GET request to: " + fullUrl);
+        logger.info("Sending {} request to: {}",method, fullUrl);
         RequestOptions requestOptions = RequestOptions.create()
                 .setHeader("Authorization", "Bearer " + authToken);
         switch (method.toUpperCase()) {
@@ -102,8 +102,8 @@ public class ApiStepDefinitions {
             default:
                 throw new IllegalArgumentException("Unsupported HTTP method: " + method);
         }
-        logger.info("Response status: " + lastResponse.status());
-        logger.debug("Response body: " + lastResponse.text());
+        logger.info("Response status: {}" ,lastResponse.status());
+        logger.debug("Response body: {}", lastResponse.text());
     }
 
     @When("I extract data from response using JSON token {string} and store it as {string}")
@@ -113,10 +113,9 @@ public class ApiStepDefinitions {
         try {
             String value = DataUtils.extractValueByPath(responseBody, jsonPath);
             scenarioContext.setCustomValue(variableName, value);
-            logger.info("Extracted value '" + value + "' from path '" + jsonPath + "' and stored as variable '"
-                    + variableName + "'");
+            logger.info("Extracted value '{}' from path '{}' and stored as variable '{}'", value, jsonPath, variableName);
         } catch (Exception e) {
-            logger.error("Failed to extract data from response. Error: " + e.getMessage());
+            logger.error("Failed to extract data from response. Error: {}", e.getMessage());
             fail("Failed to extract data from response using JSONPath '" + jsonPath + "'. Response: " + responseBody
                     + ". Error: " + e.getMessage());
         }

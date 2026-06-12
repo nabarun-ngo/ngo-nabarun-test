@@ -24,24 +24,30 @@ public class ConfigManager {
 
 	private static final Map<String, Object> configMap = new java.util.HashMap<>();
 	static {
-		// Load .env file if exists to system properties
+		// Load .env file if exists for system properties
+		// e.g. ENVIRONMENT, CONFIG_SOURCE, DOPPLER_PROJECT_NAME, DOPPLER_SERVICE_TOKEN
 		java.io.File envFile = new java.io.File(".env");
 		if (envFile.exists()) {
 			try (InputStream envStream = new java.io.FileInputStream(envFile)) {
 				java.util.Properties props = new java.util.Properties();
 				props.load(envStream);
 				for (String name : props.stringPropertyNames()) {
-					System.setProperty(name, props.getProperty(name));
+					if(System.getProperty(name) != null){
+						logger.info("Property '{}' already exists.",name);
+					}else{
+						System.setProperty(name, props.getProperty(name));
+						logger.info("Property '{}' loaded from .env file.",name);
+					}
 				}
 				logger.info("Loaded variables from .env file");
 			} catch (IOException e) {
-				logger.warn("Found .env but failed to read it: " + e.getMessage());
+                logger.error("Found .env but failed to read it: {}", e.getMessage());
 			}
 		}
-
-		String config_env = CommonUtils.getEnvProperty(ENVIRONMENT, "dev");
-		String config_source = CommonUtils.getEnvProperty(CONFIG_SOURCE,
-				config_env.equalsIgnoreCase("dev") ? "file" : "doppler");
+		String DEFAULT_ENVIRONMENT= "dev";
+		String config_env = CommonUtils.getEnvProperty(ENVIRONMENT, DEFAULT_ENVIRONMENT);
+		String DEFAULT_CONFIG_SOURCE=config_env.equalsIgnoreCase("dev") ? "file" : "doppler";
+		String config_source = CommonUtils.getEnvProperty(CONFIG_SOURCE,DEFAULT_CONFIG_SOURCE);
 
 		if (config_source.equalsIgnoreCase("doppler")) {
 			String projectName = CommonUtils.getEnvProperty(DOPPLER_PROJECT_NAME);
@@ -83,7 +89,7 @@ public class ConfigManager {
 					});
 			configMap.putAll(newConfig);
 		} catch (IOException e) {
-			logger.error("Failed to load configuration from file: " + path, e);
+            logger.error("Failed to load configuration from file: {}", path, e);
 			if (required)
 				throw new RuntimeException("Failed to load configuration", e);
 		}
@@ -100,36 +106,30 @@ public class ConfigManager {
 		return value.toString();
 	}
 
+	/**
+	 * First checks environment variables, then falls back to configMap loaded from Doppler or files.
+	 * This allows environment variables to override any config source, which is useful for CI/CD pipelines or local
+	 */
 	static String get(String key) {
-		Object value = configMap.get(key);
-		if (value == null) {
-			value = CommonUtils.getEnvProperty(key);
-		}
-		if (value == null) {
-			throw new IllegalArgumentException("Key not found in configuration: " + key);
-		}
-		return value.toString();
+		Object value = getRaw(key) ;
+		return value == null ? null : value.toString();
 	}
 
 	static <T> T get(String key, Class<T> type, T defaultValue) {
-		Object value = configMap.get(key);
-		if (value == null) {
-			value = CommonUtils.getEnvProperty(key);
-		}
-		if (value == null) {
-			return defaultValue;
-		}
-		return type.cast(value);
+		Object value = getRaw(key);
+		return value == null ? defaultValue : type.cast(value);
 	}
 
 	static <T> T get(String key, Class<T> type) {
-		Object value = configMap.get(key);
-		if (value == null) {
-			value = CommonUtils.getEnvProperty(key);
-		}
+		Object value = getRaw(key);
 		if (value == null) {
 			throw new IllegalArgumentException("Key not found in configuration: " + key);
 		}
 		return type.cast(value);
+	}
+
+	private static Object getRaw(String key) {
+		Object value = CommonUtils.getEnvProperty(key);
+		return value == null ? configMap.get(key) : value;
 	}
 }

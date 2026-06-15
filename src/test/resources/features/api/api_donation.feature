@@ -7,6 +7,7 @@ Feature: API Tests for Donation
     Then I store "{RandomEmail}" value as "DonorEmail" variable
     Then I store "9{RandomNumber:9}" value as "DonorPhone" variable
     Then I store "{RandomInt:100,999}" value as "DonationAmount" variable
+    Then I store "{SystemDate [yyyy-MM-dd]}" value as "PaidOn" variable
     Then I send a POST request to "/donation/create/guest" with payload:
       """
       {
@@ -23,7 +24,7 @@ Feature: API Tests for Donation
       """
       {
         "status": "PAID",
-        "paidOn": "{SystemDate}",
+        "paidOn": "{PaidOn}",
         "paidToAccountId": "ACC_TREASURER_PRINCIPAL",
         "paymentMethod": "UPI",
         "paidUsingUPI": "GPAY",
@@ -95,7 +96,7 @@ Feature: API Tests for Donation
     Then I store "{RandomEmail}" value as "DonorEmail" variable
     Then I store "9{RandomNumber:9}" value as "DonorPhone" variable
     Then I store "{RandomInt:100,999}" value as "DonationAmount" variable
-    Then I store "{SystemDate [dd/MM/yyyy]}" value as "PaidOn" variable
+    Then I store "{SystemDate [yyyy-MM-dd]}" value as "PaidOn" variable
     ## 1. Create Guest Donation (Linked to Project Event) - Status: RAISED
     Then I send a POST request to "/donation/create/guest" with payload:
       """
@@ -218,7 +219,7 @@ Feature: API Tests for Donation
       """
       {
         "status": "PAID",
-        "paidOn": "{SystemDate [dd/MM/yyyy]}",
+        "paidOn": "{SystemDate [yyyy-MM-dd]}",
         "paidToAccountId": "ACC_TREASURER_PRINCIPAL",
         "paymentMethod": "NETBANKING",
         "remarks": "Net Banking test via API"

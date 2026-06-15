@@ -7,12 +7,11 @@ public class Configs {
 	private static final List<String> TRUE_MATRIX = Arrays.asList("Y", "y", "true", "TRUE", "yes", "YES", "1");
 
 	public static final String ROOT_URL = ConfigManager.get("ROOT_URL");
-	public static final String API_BASE_URL = ConfigManager.get("API_BASE_URL", "");
+	public static final String API_BASE_URL = ConfigManager.get("API_BASE_URL");
 	public static final String APP_URL = ConfigManager.get("APP_URL");
 	public static final String BROWSER = ConfigManager.get("TEST_BROWSER", "chrome");
-	public static final Integer IMPLICIT_WAIT = Integer.parseInt(ConfigManager.get("TEST_IMPLICIT_WAIT", "10")) * 1000;
-	public static final Integer GLOBAL_EXPLICIT_WAIT = Integer
-			.parseInt(ConfigManager.get("TEST_GLOBAL_EXPLICIT_WAIT", "30")) * 1000;
+	public static final Integer IMPLICIT_WAIT = ConfigManager.get("TEST_IMPLICIT_WAIT",Integer.class, 10) * 1000;
+	public static final Integer GLOBAL_EXPLICIT_WAIT = ConfigManager.get("TEST_GLOBAL_EXPLICIT_WAIT",Integer.class,30) * 1000;
 	public static final String TEST_DEFAULTPASSWORD = ConfigManager.get("TEST_DEFAULTPASSWORD");
 	public static final String DB_URL = ConfigManager.get("POSTGRES_URI");
 	public static final boolean IS_HEADLESS = TRUE_MATRIX.contains(ConfigManager.get("HEADLESS", "false"));

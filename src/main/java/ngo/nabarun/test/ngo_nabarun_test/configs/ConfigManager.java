@@ -69,9 +69,7 @@ public class ConfigManager {
 			}
 		} else {
 			// 2. Load environment specific config (overrides common)
-			String configFilePath = "test_config/test-config-" + config_env + ".json";
 			loadConfigFile("test_config/test-config.json", false);
-			loadConfigFile(configFilePath, true);
 		}
 	}
 
@@ -117,7 +115,7 @@ public class ConfigManager {
 
 	static <T> T get(String key, Class<T> type, T defaultValue) {
 		Object value = getRaw(key);
-		return value == null ? defaultValue : type.cast(value);
+		return value == null ? defaultValue : CommonUtils.getObjectMapper().convertValue(value, type);
 	}
 
 	static <T> T get(String key, Class<T> type) {
@@ -125,7 +123,7 @@ public class ConfigManager {
 		if (value == null) {
 			throw new IllegalArgumentException("Key not found in configuration: " + key);
 		}
-		return type.cast(value);
+		return CommonUtils.getObjectMapper().convertValue(value, type);
 	}
 
 	private static Object getRaw(String key) {

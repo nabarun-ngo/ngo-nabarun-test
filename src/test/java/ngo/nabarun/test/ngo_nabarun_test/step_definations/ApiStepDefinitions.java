@@ -52,6 +52,9 @@ public class ApiStepDefinitions {
 
     @When("^I send a (POST|PUT|PATCH) request to \"(.+)\" with payload:$")
     public void i_send_a_post_request_to_with_payload(String method, String endpoint, String payload) {
+        if(scenarioContext.getRequestContext() == null){
+            throw new IllegalStateException("Request context is not initialized. Ensure scenario is tagged with @api.");
+        }
         String resolvedEndpoint = DataUtils.resolveData(endpoint, scenarioContext);
         String baseUrl = Configs.API_BASE_URL.endsWith("/") ? Configs.API_BASE_URL : Configs.API_BASE_URL + "/";
         String endpointPath = resolvedEndpoint.startsWith("/") ? resolvedEndpoint.substring(1) : resolvedEndpoint;

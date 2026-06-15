@@ -7,26 +7,28 @@ import ngo.nabarun.test.ngo_nabarun_test.utils.DataUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Step definitions for asserting database state after API operations.
- *
+ * <p>
  * Steps use JDBI mapToMap() so they work against any table without a
  * dedicated DAO. Column names are matched case-sensitively against the
  * quoted PostgreSQL column names returned by JDBI.
- *
+ * <p>
  * Supported steps:
- *   Then The database table "<table>" record with id "<id>" should have:
- *        | Field  | Value |
- *        | status | PAID  |
- *
- *   Then The database table "<table>" should contain at least <n> records
- *
- *   Then The database table "<table>" record with id "<id>" should not exist
+ * Then The database table "<table>" record with id "<id>" should have:
+ * | Field  | Value |
+ * | status | PAID  |
+ * <p>
+ * Then The database table "<table>" should contain at least <n> records
+ * <p>
+ * Then The database table "<table>" record with id "<id>" should not exist
  */
 public class DbStepDefinitions {
 
@@ -51,21 +53,22 @@ public class DbStepDefinitions {
      *   | currency    | INR         |
      * </pre>
      */
-    @Then("The database table {string} record with id {string} should have:")
-    public void dbRecordShouldHave(String table, String idExpression, List<Map<String, String>> fields) {
+    @Then("The database table {string} record with {string} equals {string} should have:")
+    public void dbRecordShouldHave(String tableName, String idFieldName, String idExpression, List<Map<String, String>> fields) {
         String id = DataUtils.resolveData(idExpression, scenarioContext);
-        logger.info("[DB ASSERT] Querying table='{}' id='{}'", table, id);
+        logger.info("[DB ASSERT] Querying table='{}' {}='{}'", tableName,idFieldName, id);
 
-        Map<String, Object> row = DBUtils.getJdbi().withHandle(handle ->
-                handle.createQuery("SELECT * FROM public.\"" + table + "\" WHERE id = :id")
-                        .bind("id", id)
-                        .mapToMap()
-                        .findOne()
-                        .orElse(null)
-        );
+        Map<String, Object> row = DBUtils.getJdbi().withHandle(handle -> {
+            String sql = MessageFormat.format("SELECT * FROM public.{0} WHERE {1} = :id", tableName, idFieldName);
+            return Objects.requireNonNull(handle.createQuery(sql)
+                    .bind("id", id)
+                    .mapToMap()
+                    .findOne()
+                    .orElse(null));
+        });
 
         assertNotNull(row,
-                "[DB ASSERT] No record found in table '" + table + "' with id '" + id + "'");
+                "[DB ASSERT] No record found in table '" + tableName + "' with "+idFieldName+" '" + id + "'");
         logger.info("[DB ASSERT] Record found: {}", row);
 
         for (Map<String, String> field : fields) {
@@ -74,10 +77,10 @@ public class DbStepDefinitions {
             Object actualRaw = row.get(column);
             String actualValue = actualRaw == null ? null : actualRaw.toString();
 
-            logger.info("[DB ASSERT] table='{}' id='{}' column='{}' expected='{}' actual='{}'",
-                    table, id, column, expectedValue, actualValue);
+            logger.info("[DB ASSERT] table='{}' {}='{}' column='{}' expected='{}' actual='{}'",
+                    tableName,idFieldName, id, column, expectedValue, actualValue);
             assertEquals(expectedValue, actualValue,
-                    "[DB ASSERT] Mismatch in table '" + table + "' id='" + id + "' column='" + column + "'");
+                    "[DB ASSERT] Mismatch in table '" + tableName + "' "+idFieldName+"='" + id + "' column='" + column + "'");
         }
     }
 

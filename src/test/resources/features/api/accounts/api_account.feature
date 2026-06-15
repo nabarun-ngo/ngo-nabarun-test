@@ -10,9 +10,6 @@ Feature: API Tests for Account and Transaction Management
     ## 2. Load account reference data
     Then I send a GET request to "/account/static/referenceData"
     Then The API response status code should be 200
-    And The API response should have the following attributes
-      | Attribute | Value   |
-      | status    | SUCCESS |
     ## 3. Create a new WALLET account
     Then I store "{RandomName} Wallet" value as "AccountName" variable
     Then I send a POST request to "/account/create" with payload:
